@@ -1,7 +1,9 @@
-// src/app/core/interfaces/user-profile.interface.ts
 export interface UserProfile {
   uid: string;
   email: string;
-  role: 'admin' | 'user' | 'Programador';
+  // Respetamos tus nombres exactos
+  role: 'admin' | 'user' | 'Programador'; 
   displayName?: string;
+  // Opcional: Agrega photoURL si quieres que se vea la foto de Google, si no, bórralo
+  photoURL?: string; 
 }
