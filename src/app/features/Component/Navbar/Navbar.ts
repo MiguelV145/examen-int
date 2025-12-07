@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, ],
   templateUrl: './Navbar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
