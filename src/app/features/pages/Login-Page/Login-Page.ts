@@ -90,15 +90,20 @@ export class LoginPage {
         return 'Error de autenticación. Intenta nuevamente.';
     } 
   } 
+ 
   onGoogleLogin() {
     this.loading.set(true);
     this.errorMessage.set(null);
 
     this.authService.loginWithGoogle().subscribe({
-      next: () => {
-        // No necesitamos navegar aquí manualmente.
-        // El AuthService ya redirige según el rol (Admin/Programador/User)
+      next: (result) => {
+        // Quitamos la suposición de que el servicio redirige.
+        // Lo hacemos nosotros manualmente para asegurar que funcione.
+        console.log('Login con Google exitoso', result);
         this.loading.set(false);
+        
+        // AGREGAR ESTA LÍNEA:
+        this.router.navigate(['/home']); 
       },
       error: (err) => {
         console.error('Error Google:', err);
@@ -107,7 +112,6 @@ export class LoginPage {
       }
     });
   }
-
 
   // Getters para validación en el template
   get email() {
