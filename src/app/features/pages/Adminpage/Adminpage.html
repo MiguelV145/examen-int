@@ -6,16 +6,15 @@
       <p class="text-base-content/60 mt-1">Administración de usuarios y roles</p>
     </div>
     
-    <div class="flex items-center  justify-center gap-3 bg-base-100 px-4 py-2 rounded-lg shadow-sm">
-      <div class="avatar placeholder flex item-center justify-center">
+    <div class="flex items-center gap-3 bg-base-100 px-4 py-2 rounded-lg shadow-sm">
+      <div class="avatar placeholder">
         @if (authService.currentUser()?.photoURL) {
           <div class="w-10 rounded-full">
             <img [src]="authService.currentUser()?.photoURL" />
           </div>
         } @else {
-          <div class="bg-neutral text-neutral-content w-12 h-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2
-            flex items-center justify-center">
-            <span class="text-lg font-bold flex items-center justify-center">
+          <div class="bg-neutral text-neutral-content w-10 rounded-full">
+            <span class="text-lg font-bold">
               {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
             </span>
           </div>

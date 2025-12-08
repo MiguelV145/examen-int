@@ -93,6 +93,12 @@ private auth = inject(Auth);
     return this.currentUser() !== null;
   }
 
+<<<<<<< HEAD
+=======
+
+  // ==========================================
+
+>>>>>>> 6341ba675edc68203b8fe504b77bcecf8d022b7c
   private async _handleUserLogin(firebaseUser: User): Promise<void> {
     const userRef = doc(this.firestore, `users/${firebaseUser.uid}`);
     const userSnap = await getDoc(userRef);
