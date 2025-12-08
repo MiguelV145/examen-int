@@ -12,37 +12,42 @@ import { AsyncPipe, CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Adminpage { 
-  private firestore = inject(Firestore);
+private firestore = inject(Firestore);
   public authService = inject(AuthService);
 
+  // Observable de usuarios
   users$: Observable<UserProfile[]>;
 
   constructor() {
     const usersCollection = collection(this.firestore, 'users');
+    // { idField: 'uid' } es necesario para obtener el ID del documento
     this.users$ = collectionData(usersCollection, { idField: 'uid' }) as Observable<UserProfile[]>;
   }
 
-  // ... (El resto de tu código toggleRole sigue igual) ...
   async toggleRole(user: UserProfile) {
-    // ... tu lógica aquí ...
-     const currentUser = this.authService.currentUser();
+    // 1. SEGURIDAD: No editarse a uno mismo
+    const currentUser = this.authService.currentUser();
     if (user.uid === currentUser?.uid) {
       alert('No puedes cambiar tu propio rol.');
       return;
     }
 
+    // 2. SEGURIDAD: No tocar a otros admins
     if (user.role === 'admin') {
       alert('No puedes modificar a otro Administrador.');
       return;
     }
 
+    // 3. LOGICA: Alternar rol
     const isProgrammer = user.role === 'Programador';
     const newRole = isProgrammer ? 'user' : 'Programador';
-    const actionText = isProgrammer ? 'Quitar permisos de' : 'Dar permisos de';
+    const actionText = isProgrammer ? 'QUITAR permisos de' : 'DAR permisos de';
 
+    // 4. CONFIRMACION
     const confirmMessage = `¿Estás seguro de ${actionText} Programador a ${user.displayName || user.email}?`;
     if (!confirm(confirmMessage)) return;
 
+    // 5. ACTUALIZAR
     try {
       const userRef = doc(this.firestore, 'users', user.uid);
       await updateDoc(userRef, { role: newRole });

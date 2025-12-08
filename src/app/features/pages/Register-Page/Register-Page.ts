@@ -13,27 +13,15 @@ import { Router, RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPage {
-
 private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  // Signals para la UI
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
   registerForm: FormGroup;
-
-  // Signal para disparar el registro
-  private registerTrigger = signal<{ email: string; password: string } | null>(null);
-
-  // rxResource para manejar el proceso de registro (Angular 20+)
-  registerResource = rxResource({
-    params: () => this.registerTrigger(),
-    stream: ({ params }) => {
-      if (!params) return of(null);
-      return this.authService.register(params.email, params.password);
-    }
-  });
-
   formUtils = FormUtils;
 
   constructor() {
@@ -44,16 +32,9 @@ private fb = inject(FormBuilder);
     }, {
       validators: this.passwordMatchValidator
     });
-
-    // Effect para navegar cuando el registro sea exitoso
-    effect(() => {
-      if (this.registerResource.hasValue() && this.registerResource.value()) {
-        console.log('Registro exitoso, navegando a /home');
-        this.router.navigate(['/home']);
-      }
-    });
   }
 
+  // Validador personalizado para comparar contraseñas
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
@@ -62,52 +43,51 @@ private fb = inject(FormBuilder);
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    return null;
+    return null; // Si coinciden o están vacíos, no hay error a nivel de grupo
   }
 
   onSubmit() {
-  if (this.registerForm.invalid) {
-    this.registerForm.markAllAsTouched();
-    return;
-  }
-
-  this.loading.set(true);
-  this.errorMessage.set(null);
-
-  const { email, password } = this.registerForm.value;
-
-  this.authService.register(email, password).subscribe({
-    next: () => {
-      this.loading.set(false);
-      this.router.navigate(['/home']);
-    },
-    error: (error) => {
-      this.loading.set(false);
-      this.errorMessage.set(this.getErrorMessage(error.code));
+    // 1. Si el formulario es inválido, marcamos todo como tocado para mostrar errores
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
     }
-  });
-}
-getErrorMessage(code: string): string {
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    const { email, password } = this.registerForm.value;
+
+    // 2. Llamamos al servicio.
+    // NOTA: El AuthService que configuramos antes YA crea el documento en Firestore
+    // y maneja la redirección. Aquí solo manejamos el estado de carga y errores.
+    this.authService.register(email, password).subscribe({
+      next: () => {
+        this.loading.set(false);
+        // La redirección ya la hace el servicio, pero por seguridad podemos dejarla aquí también
+        // o simplemente confiar en el servicio.
+        console.log('Registro completado.');
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(this.getErrorMessage(error.code));
+      }
+    });
+  }
+
+  getErrorMessage(code: string): string {
     const errorMessages: { [key: string]: string } = {
-      'auth/email-already-in-use': 'Este correo ya está registrado',
-      'auth/invalid-email': 'El correo electrónico no es válido',
-      'auth/operation-not-allowed': 'Operación no permitida',
-      'auth/weak-password': 'La contraseña es muy débil'
+      'auth/email-already-in-use': 'Este correo ya está registrado.',
+      'auth/invalid-email': 'El correo electrónico no es válido.',
+      'auth/operation-not-allowed': 'Operación no permitida.',
+      'auth/weak-password': 'La contraseña es muy débil.',
+      'auth/network-request-failed': 'Error de conexión. Revisa tu internet.'
     };
-    return errorMessages[code] || 'Error al registrar usuario';
+    return errorMessages[code] || 'Error desconocido al registrar usuario.';
   }
 
-  get email() {
-    return this.registerForm.get('email');
-  }
-
-  get password() {
-    return this.registerForm.get('password');
-  }
-
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword');
-  }
+  // Getters para usar en el HTML de forma limpia
+  get email() { return this.registerForm.get('email'); }
+  get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 }
-
-

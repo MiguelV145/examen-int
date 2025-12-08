@@ -7,41 +7,49 @@
   </div>
 
   <div class="flex gap-2 items-center">
-    
+
     @if (authService.currentUser()) {
+      
       <nav class="hidden md:flex gap-2 mr-2">
-        <a routerLink="/home" routerLinkActive="text-primary" class="btn btn-ghost btn-sm">Inicio</a>
+        <a routerLink="/home" class="btn btn-ghost btn-sm">Inicio</a>
       </nav>
 
       <div class="dropdown dropdown-end">
         
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring ring-primary ring-offset-base-100 ring-offset-2">
-          <div class="w-10 rounded-full">
-            <img 
-              [src]="authService.currentUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + authService.currentUser()?.displayName" 
-              alt="Avatar" />
-          </div>
+          
+          @if (authService.currentUser()?.photoURL) {
+            <div class="w-10 rounded-full">
+              <img [src]="" alt="Perfil" />
+            </div>
+          } 
+          @else {
+            <div class="w-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
+              <span class="text-xl font-bold">
+                {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
+              </span>
+            </div>
+          }
+
         </div>
 
         <ul
           tabindex="-1"
           class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow border border-base-200">
           
-          <li class="menu-title px-4 py-2 text-primary font-bold">
-            {{ authService.currentUser()?.displayName }}
+          <li class="menu-title px-4 py-2 text-primary font-bold border-b border-base-200 mb-2">
+            {{ authService.currentUser()?.displayName || authService.currentUser()?.email }}
           </li>
           
-          <div class="divider my-0"></div>
-
           <li>
             <a routerLink="/panel" class="justify-between">
               Mi Panel
-              <span class="badge badge-sm badge-outline">Ver</span>
+              <span class="badge badge-sm badge-primary">Nuevo</span>
             </a>
           </li>
           
           <li><a routerLink="/admin">Administración</a></li>
-
+          
           <div class="divider my-0"></div>
 
           <li>
@@ -53,9 +61,16 @@
       </div>
 
     } @else {
-      <a routerLink="/login" class="btn btn-primary btn-sm">
-        Iniciar Sesión
-      </a>
+      
+      <div class="flex gap-2">
+        <a routerLink="/login" class="btn btn-primary btn-sm">
+          Iniciar Sesión
+        </a>
+        <a routerLink="/register" class="btn btn-ghost btn-sm hidden sm:inline-flex">
+          Registrarse
+        </a>
+      </div>
+
     }
 
   </div>
