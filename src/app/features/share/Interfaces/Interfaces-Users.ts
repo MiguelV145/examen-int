@@ -6,4 +6,6 @@ export interface UserProfile {
   displayName?: string;
   // Opcional: Agrega photoURL si quieres que se vea la foto de Google, si no, bórralo
   photoURL?: string; 
+  specialty?: string;   
+  escription?: string; 
 }
