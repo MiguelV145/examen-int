@@ -78,18 +78,17 @@ export class LoginPage {
 
 
   
- private getErrorMessage(code: string): string {
-    switch (code) {
-      case 'auth/user-not-found':
-        return 'Usuario no encontrado.';
-      case 'auth/wrong-password':
-        return 'Contraseña incorrecta.';
-      case 'auth/too-many-requests':
-        return 'Demasiados intentos fallidos. Intenta más tarde.';
-      default:
-        return 'Error de autenticación. Intenta nuevamente.';
-    } 
-  } 
+getErrorMessage(code: string): string {
+    const messages: { [key: string]: string } = {
+      'auth/user-not-found': 'Usuario no encontrado.',
+      'auth/wrong-password': 'La contraseña es incorrecta.',
+      'auth/invalid-email': 'El correo no es válido.',
+      'auth/too-many-requests': 'Demasiados intentos. Espera un poco.',
+      'permission-denied': 'Error de Permisos: Revisa las reglas de Firestore.' // <--- Nuevo
+    };
+    // CAMBIO: Si no encuentra el mensaje, mostramos el código técnico
+    return messages[code] || `Error desconocido: ${code}`;
+  }
  
   onGoogleLogin() {
     this.loading.set(true);

@@ -7,7 +7,6 @@
     </div>
     
     <div class="flex items-center gap-3 bg-base-100 px-4 py-2 rounded-lg shadow-sm">
-      
       <div class="avatar placeholder">
         @if (authService.currentUser()?.photoURL) {
           <div class="w-10 rounded-full">
@@ -21,7 +20,6 @@
           </div>
         }
       </div>
-
       <div>
         <p class="font-bold text-sm">{{ authService.currentUser()?.displayName || 'Admin' }}</p>
         <span class="badge badge-primary badge-xs">Administrador</span>
@@ -50,7 +48,6 @@
                 
                 <td class="pl-6">
                   <div class="flex items-center gap-4">
-                    
                     <div class="avatar placeholder">
                       @if (user.photoURL) {
                         <div class="w-12 h-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
@@ -64,7 +61,6 @@
                         </div>
                       }
                     </div>
-
                     <div>
                       <div class="font-bold text-lg">{{ user.displayName || 'Sin Nombre' }}</div>
                       <div class="text-sm opacity-60">{{ user.email }}</div>
@@ -75,44 +71,50 @@
                 <td>
                   @switch (user.role) {
                     @case ('admin') {
-                      <div class="badge badge-error gap-2 text-white p-3 font-semibold">
-                        🛡️ Admin
-                      </div>
+                      <div class="badge badge-error gap-2 text-white p-3 font-semibold">🛡️ Admin</div>
                     }
                     @case ('Programador') {
-                      <div class="badge badge-success gap-2 text-white p-3 font-semibold">
-                        💻 Programador
-                      </div>
+                      <div class="badge badge-success gap-2 text-white p-3 font-semibold">💻 Programador</div>
                     }
                     @default {
-                      <div class="badge badge-ghost gap-2 p-3 font-semibold">
-                        👤 Usuario
-                      </div>
+                      <div class="badge badge-ghost gap-2 p-3 font-semibold">👤 Usuario</div>
                     }
                   }
                 </td>
 
                 <td>
                   <span class="flex items-center gap-2 text-sm text-success font-medium">
-                    <span class="w-2 h-2 rounded-full bg-success"></span>
-                    Activo
+                    <span class="w-2 h-2 rounded-full bg-success"></span> Activo
                   </span>
                 </td>
 
                 <td class="text-right pr-6">
                   @if (user.role !== 'admin') {
-                    <button 
-                      (click)="toggleRole(user)"
-                      class="btn btn-sm"
-                      [class.btn-outline]="user.role === 'Programador'"
-                      [class.btn-primary]="user.role !== 'Programador'">
-                      
-                      @if (user.role === 'Programador') {
-                        Degradar
-                      } @else {
-                        Ascender
-                      }
-                    </button>
+                    
+                    <div class="flex justify-end gap-2">
+                      <button 
+                        (click)="toggleRole(user)"
+                        class="btn btn-sm"
+                        [class.btn-outline]="user.role === 'Programador'"
+                        [class.btn-primary]="user.role !== 'Programador'">
+                        
+                        @if (user.role === 'Programador') {
+                          ⬇️ Degradar
+                        } @else {
+                          ⬆️ Ascender
+                        }
+                      </button>
+
+                      <button 
+                        (click)="deleteUser(user)" 
+                        class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10"
+                        title="Eliminar usuario">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+
                   } @else {
                     <span class="text-xs text-base-content/40 italic mr-2">Sin acciones</span>
                   }

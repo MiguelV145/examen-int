@@ -1,44 +1,45 @@
-// firestore.rules
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Colección de usuarios
-    match /users/{userId} {
-      // Usuarios pueden leer su propio perfil
-      allow read: if request.auth != null && request.auth.uid == userId;
-      
-      // Solo admins pueden actualizar roles
-      allow update: if request.auth != null && 
-                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      
-      // El sistema crea perfiles al registrarse
-      allow create: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-   match /databases/{database}/documents {
+
+    // --- FUNCIONES DE AYUDA (Para no repetir código) ---
     
-    // Reglas para la colección de favoritos
-    match /favorites/{favoriteId} {
-      // Permitir lectura solo si el usuario está autenticado y es el dueño
-      allow read: if request.auth != null && 
-                     resource.data.userId == request.auth.uid;
+    // Verifica si el usuario conectado es el dueño del documento
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Verifica si el usuario conectado tiene el rol 'admin' en la base de datos
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // =========================================================
+    // COLECCIÓN DE USUARIOS (Vital para tu Login y Admin)
+    // =========================================================
+    match /users/{userId} {
       
-      // Permitir crear solo si el usuario está autenticado y el userId coincide
-      allow create: if request.auth != null && 
-                       request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.nombre is string &&
-                       request.resource.data.customName is string &&
-                       request.resource.data.image is string;
+      // 1. LEER: Permitimos a TODOS (público) leer. 
+      // Necesario para:
+      // - Que cualquiera vea los portafolios en el Home.
+      // - Que el Admin pueda listar todos los usuarios en la tabla.
+      // - Que el AuthService pueda buscar invitaciones por email.
+      allow read: if true;
+
+      // 2. CREAR: 
+      // - Un usuario normal puede crearse a sí mismo (Registro).
+      // - El Admin puede crear invitaciones (por email).
+      allow create: if isOwner(userId) || isAdmin() || (request.auth != null); 
+
+      // 3. ACTUALIZAR: 
+      // - El dueño puede editar su perfil (foto, nombre, especialidad).
+      // - El Admin puede editar roles.
+      allow update: if isOwner(userId) || isAdmin();
       
-      // Permitir actualizar solo si es el dueño
-      allow update: if request.auth != null && 
-                       resource.data.userId == request.auth.uid;
-      
-      // Permitir eliminar solo si es el dueño
-      allow delete: if request.auth != null && 
-                       resource.data.userId == request.auth.uid;
+      // 4. BORRAR: 
+      // - Solo el Admin puede eliminar usuarios.
+      allow delete: if isAdmin();
     }
   }
 }
-
- 

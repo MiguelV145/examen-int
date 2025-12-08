@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
-private auth = inject(Auth);
+  private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
 
@@ -23,7 +23,7 @@ private auth = inject(Auth);
     });
   }
 
-  // ... (Tus métodos register, login, loginWithGoogle y logout están perfectos, déjalos igual) ...
+  // --- REGISTRO ---
   register(email: string, password: string): Observable<void> {
     return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(async (credential) => {
@@ -35,17 +35,21 @@ private auth = inject(Auth);
           photoURL: ''
         };
         await setDoc(doc(this.firestore, 'users', credential.user.uid), newUser);
-        this.router.navigate(['/']);
+        
+        // CAMBIO: Redirigir siempre a /home
+        this.router.navigate(['/home']);
       })
     );
   }
 
+  // --- LOGIN EMAIL ---
   login(email: string, password: string): Observable<void> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(result => this._handleUserLogin(result.user))
     );
   }
 
+  // --- LOGIN GOOGLE ---
   loginWithGoogle(): Observable<void> {
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
@@ -53,6 +57,7 @@ private auth = inject(Auth);
     );
   }
 
+  // --- LOGOUT ---
   logout(): Observable<void> {
     return from(signOut(this.auth)).pipe(
       switchMap(() => {
@@ -67,7 +72,7 @@ private auth = inject(Auth);
   }
 
   // ==========================================
-  // LÓGICA PRIVADA MEJORADA
+  // LÓGICA PRIVADA
   // ==========================================
 
   private async _handleUserLogin(firebaseUser: User): Promise<void> {
@@ -75,23 +80,19 @@ private auth = inject(Auth);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      // --- USUARIO YA REGISTRADO ---
+      // Usuario ya existe: Actualizamos datos básicos y redirigimos
       const userData = userSnap.data() as UserProfile;
       
-      // MEJORA 1: Actualizar datos por si cambió su foto o nombre en Google
-      // Esto asegura que tu base de datos siempre tenga la info fresca
       await updateDoc(userRef, {
         photoURL: firebaseUser.photoURL || userData.photoURL,
         displayName: firebaseUser.displayName || userData.displayName,
-        email: firebaseUser.email // Por si acaso
+        email: firebaseUser.email
       });
 
-      this._redirectByRole(userData.role);
+      // Redirigimos (ya no importa el rol)
+      this._redirectALwaysToHome();
     } else {
-      // --- USUARIO NUEVO ---
-
-      // Buscamos si existe invitación por correo
-      // (Documento creado por el Admin donde el ID es el email)
+      // Usuario Nuevo: Verificamos invitaciones
       const inviteRef = doc(this.firestore, `users/${firebaseUser.email}`);
       const inviteSnap = await getDoc(inviteRef);
 
@@ -101,12 +102,7 @@ private auth = inject(Auth);
         const inviteData = inviteSnap.data();
         if (inviteData && inviteData['role'] === 'Programador') {
           assignedRole = 'Programador';
-          
-          // MEJORA 2 (CRÍTICA): BORRAR LA INVITACIÓN
-          // Si no la borras, en la tabla de admin saldrá este usuario DUPLICADO:
-          // 1. Como "juan@gmail.com" (la invitación)
-          // 2. Como "uid_xyz123" (el usuario real)
-          await deleteDoc(inviteRef); 
+          await deleteDoc(inviteRef); // Borramos invitación
         }
       }
 
@@ -119,21 +115,12 @@ private auth = inject(Auth);
       };
 
       await setDoc(userRef, newUser);
-      this._redirectByRole(assignedRole);
+      this._redirectALwaysToHome();
     }
   }
 
-  private _redirectByRole(role: string) {
-    switch (role) {
-      case 'admin':
-        this.router.navigate(['/admin']);
-        break;
-      case 'Programador':
-        this.router.navigate(['/panel']);
-        break;
-      default:
-        this.router.navigate(['/']);
-        break;
-    }
+  // CAMBIO PRINCIPAL: Esta función ahora ignora el rol
+  private _redirectALwaysToHome() {
+    this.router.navigate(['/home']);
   }
 }
