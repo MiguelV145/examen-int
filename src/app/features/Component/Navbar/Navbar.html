@@ -20,7 +20,7 @@
           
           @if (authService.currentUser()?.photoURL) {
             <div class="w-10 rounded-full">
-              <img [src]="" alt="Perfil" />
+              <img [src]="authService.currentUser()?.photoURL" alt="Perfil" />
             </div>
           } 
           @else {
@@ -40,15 +40,29 @@
           <li class="menu-title px-4 py-2 text-primary font-bold border-b border-base-200 mb-2">
             {{ authService.currentUser()?.displayName || authService.currentUser()?.email }}
           </li>
-          
+
           <li>
-            <a routerLink="/panel" class="justify-between">
-              Mi Panel
-              <span class="badge badge-sm badge-primary">Nuevo</span>
+            <a routerLink="/home" routerLinkActive="bg-primary text-primary-content">
+               Home
             </a>
           </li>
           
-          <li><a routerLink="/admin">Administración</a></li>
+          @if (authService.hasRole('Programador') || authService.hasRole('admin')) {
+             <li>
+              <a routerLink="/panel" class="justify-between" routerLinkActive="bg-primary text-primary-content">
+                Mi Panel
+                <span class="badge badge-sm badge-secondary">Dev</span>
+              </a>
+            </li>
+          }
+          
+          @if (authService.hasRole('admin')) {
+            <li>
+              <a routerLink="/admin" routerLinkActive="bg-primary text-primary-content">
+                 Panel Admin
+              </a>
+            </li>
+          }
           
           <div class="divider my-0"></div>
 
