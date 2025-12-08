@@ -71,8 +71,7 @@ export class AuthService {
     return this.currentUser() !== null;
   }
 
-  // ==========================================
-  // LÓGICA PRIVADA
+
   // ==========================================
 
   private async _handleUserLogin(firebaseUser: User): Promise<void> {
