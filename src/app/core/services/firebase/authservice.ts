@@ -14,15 +14,18 @@ private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
 
+  // Usuario técnico de Firebase Auth
   currentUser = signal<User | null>(null);
-  // 1. NUEVA SEÑAL PARA EL ROL
+  
+  // 1. NUEVO: Perfil completo de base de datos (aquí vive tu foto personalizada)
+  currentProfile = signal<UserProfile | null>(null);
+  
+  // Rol del usuario
   currentRole = signal<string | null>(null);
 
   user$ = user(this.auth);
 
   constructor() {
-    // 2. MODIFICAMOS EL CONSTRUCTOR
-    // Cuando detectamos un usuario, vamos a buscar su rol a la base de datos automáticamente
     this.user$.pipe(
       switchMap(user => {
         if (user) {
@@ -36,20 +39,22 @@ private auth = inject(Auth);
       })
     ).subscribe((data: any) => {
       if (data) {
-        // Si encontramos datos, guardamos el rol
         this.currentRole.set(data.role);
+        // 2. NUEVO: Guardamos el perfil completo en la señal
+        this.currentProfile.set(data as UserProfile);
       } else {
         this.currentRole.set(null);
+        this.currentProfile.set(null);
       }
     });
   }
 
-  // 3. NUEVA FUNCIÓN PARA USAR EN EL HTML
   hasRole(role: string): boolean {
     return this.currentRole() === role;
   }
 
-  // --- REGISTRO, LOGIN Y DEMÁS (IGUAL QUE ANTES) ---
+  // --- MÉTODOS PÚBLICOS ---
+
   register(email: string, password: string): Observable<void> {
     return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(async (credential) => {
@@ -82,7 +87,8 @@ private auth = inject(Auth);
   logout(): Observable<void> {
     return from(signOut(this.auth)).pipe(
       switchMap(() => {
-        this.currentRole.set(null); // Limpiamos el rol al salir
+        this.currentRole.set(null);
+        this.currentProfile.set(null); // Limpiamos perfil
         this.router.navigate(['/login']);
         return of(undefined);
       })
@@ -93,19 +99,28 @@ private auth = inject(Auth);
     return this.currentUser() !== null;
   }
 
+  // --- LÓGICA PRIVADA ---
+
   private async _handleUserLogin(firebaseUser: User): Promise<void> {
     const userRef = doc(this.firestore, `users/${firebaseUser.uid}`);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
       const userData = userSnap.data() as UserProfile;
+      
+      // 3. CORRECCIÓN VITAL:
+      // Si userData.photoURL tiene algo (tu foto personalizada), ÚSALA.
+      // Si está vacía, usa la de Google (firebaseUser.photoURL).
+      const finalPhoto = userData.photoURL || firebaseUser.photoURL || '';
+
       await updateDoc(userRef, {
-        photoURL: firebaseUser.photoURL || userData.photoURL,
-        displayName: firebaseUser.displayName || userData.displayName,
+        photoURL: finalPhoto, // Guardamos la foto correcta
+        displayName: userData.displayName || firebaseUser.displayName,
         email: firebaseUser.email
       });
       this.router.navigate(['/home']);
     } else {
+      // --- USUARIO NUEVO ---
       const inviteRef = doc(this.firestore, `users/${firebaseUser.email}`);
       const inviteSnap = await getDoc(inviteRef);
       let assignedRole: 'user' | 'Programador' = 'user';

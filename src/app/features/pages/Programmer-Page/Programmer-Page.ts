@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { doc, docData, Firestore, updateDoc } from '@angular/fire/firestore';
+import { collection, collectionData, doc, docData, Firestore, query, updateDoc, where } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { catchError, finalize, from, Observable, of, take, tap } from 'rxjs';
-import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
+import { Asesoria, UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -13,73 +13,91 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgrammerPage implements OnInit {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService); // Se mantiene privado
+ private fb = inject(FormBuilder);
+  public authService = inject(AuthService); // Público para usarlo en el HTML
   private firestore = inject(Firestore);
-  skills = signal<string[]>([]);
 
+  // --- SIGNALS PARA LA UI ---
   loading = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  
+  // Para las etiquetas de habilidades (Tags)
+  skills = signal<string[]>([]);
+  
+  // Para la vista previa de la imagen local
   previewUrl = signal<string | null>(null);
-  selectedFile: File | null = null;
+  
+  // Acceso rápido al usuario para el HTML
+  user = this.authService.currentUser;
 
-  // --- SOLUCIÓN DEL ERROR ---
-  // Creamos una propiedad pública que el HTML sí puede ver
-  public user = this.authService.currentUser;
-
-  // En Programmer-Page.ts
-
+  // --- FORMULARIO ---
   profileForm = this.fb.group({
-    displayName: ['', [Validators.required, Validators.minLength(3)]], 
+    displayName: ['', [Validators.required, Validators.minLength(3)]],
     specialty: ['', [Validators.required, Validators.minLength(3)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
-    photoURL: ['']
+    photoURL: [''] // Mantiene la URL de la base de datos
   });
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit() {
     this.loadCurrentData();
   }
 
-  // Carga los datos iniciales
+  // 1. CARGAR DATOS
   loadCurrentData() {
-    const currentUser = this.user(); // Usamos la señal pública
-
-    if (currentUser) {
+    const user = this.authService.currentUser();
+    if (user) {
       this.loading.set(true);
-      const docRef = doc(this.firestore, 'users', currentUser.uid);
-
+      const docRef = doc(this.firestore, 'users', user.uid);
+      
       docData(docRef).pipe(
         take(1),
-        tap(() => this.loading.set(false)),
-        catchError(err => {
-          console.error(err);
-          this.loading.set(false);
-          return of(null);
-        })
+        tap(() => this.loading.set(false))
       ).subscribe((data: any) => {
         if (data) {
           const profile = data as UserProfile;
+          
+          // Llenar formulario
           this.profileForm.patchValue({
+            displayName: profile.displayName || '',
             specialty: profile.specialty || '',
             description: profile.description || '',
             photoURL: profile.photoURL || ''
           });
+
+          // Llenar skills si existen (asegurando que sea array)
+          // Nota: Necesitas agregar 'skills?: string[]' a tu interfaz UserProfile si no está
+          if (profile['skills'] && Array.isArray(profile['skills'])) {
+            this.skills.set(profile['skills']);
+          }
         }
       });
     }
   }
 
-  // Previsualizar archivo local
-  onFileSelected(event: Event) {
+  // 2. LOGICA DE SKILLS (Enter para agregar, Click para borrar)
+  addSkill(event: any) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.selectedFile = file;
+    const value = input.value.trim();
 
-      // Crear URL temporal para ver la imagen
+    if (value && !this.skills().includes(value)) {
+      this.skills.update(skills => [...skills, value]);
+      input.value = ''; // Limpiar input
+    }
+  }
+
+  removeSkill(skillToRemove: string) {
+    this.skills.update(skills => skills.filter(skill => skill !== skillToRemove));
+  }
+
+  // 3. LOGICA DE FOTO (Vista previa local)
+  // NOTA: Para subir la foto real a internet necesitas configurar Firebase Storage.
+  // Por ahora, esto solo muestra la vista previa local.
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.previewUrl.set(e.target?.result as string);
@@ -88,59 +106,43 @@ export class ProgrammerPage implements OnInit {
     }
   }
 
+  // 4. GUARDAR PERFIL
   saveProfile() {
-    // ... validaciones previas ...
-
-    const dataToUpdate = {
-      displayName: this.profileForm.value.displayName,
-      specialty: this.profileForm.value.specialty,
-      description: this.profileForm.value.description,
-      photoURL: this.profileForm.value.photoURL,
-      
-      // AGREGAR ESTO: Guardamos el array de la signal en Firestore
-      skills: this.skills() 
-    };
-    const currentUser = this.user();
-    if (!currentUser) return;
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      return;
+    }
+    
+    const user = this.authService.currentUser();
+    if (!user) return;
 
     this.loading.set(true);
     this.successMessage.set('');
-    this.errorMessage.set('');
+    
+    const docRef = doc(this.firestore, 'users', user.uid);
+    
+    const dataToUpdate: any = {
+      displayName: this.profileForm.value.displayName,
+      specialty: this.profileForm.value.specialty,
+      description: this.profileForm.value.description,
+      skills: this.skills() // Guardamos el array de skills
+    };
 
-    const docRef = doc(this.firestore, 'users', currentUser.uid);
-
-    // NOTA: Aquí deberías subir la imagen a Storage si 'this.selectedFile' existe.
-    // Por ahora, guardamos los datos de texto.
-   
+    // Si tuviéramos Firebase Storage, aquí subiríamos la foto.
+    // Como estamos usando solo texto por ahora, mantenemos la photoURL existente
+    // o podríamos guardar la previewUrl si es pequeña (Base64), pero no es recomendable para producción.
 
     from(updateDoc(docRef, dataToUpdate)).pipe(
       tap(() => {
-        this.successMessage.set('¡Perfil actualizado correctamente!');
+        this.successMessage.set('¡Perfil actualizado con éxito!');
         setTimeout(() => this.successMessage.set(''), 3000);
       }),
       catchError((error) => {
         console.error(error);
-        this.errorMessage.set('Error al guardar los cambios.');
+        this.errorMessage.set('Error al guardar.');
         return of(null);
       }),
-      finalize(() => {
-        this.loading.set(false);
-      })
+      finalize(() => this.loading.set(false))
     ).subscribe();
-  }
-
-  addSkill(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value.trim();
-
-    if (value && !this.skills().includes(value)) {
-      this.skills.update(current => [...current, value]);
-      input.value = ''; // Limpiar input
-    }
-  }
-
-  // 3. FUNCIÓN PARA ELIMINAR SKILL
-  removeSkill(skillToRemove: string) {
-    this.skills.update(current => current.filter(skill => skill !== skillToRemove));
   }
 }
