@@ -1,0 +1,96 @@
+<div class="min-h-screen bg-base-200 p-4 flex justify-center items-start pt-10">
+  
+  <div class="card w-full max-w-2xl bg-base-100 shadow-xl">
+    <div class="card-body">
+      
+      <h2 class="card-title text-2xl font-bold text-primary mb-6">
+        Editar Perfil de Programador
+      </h2>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text font-semibold">Especialidad</span>
+            <span class="label-text-alt opacity-60">Ej: Fullstack Developer</span>
+          </label>
+          <input 
+            type="text" 
+            formControlName="specialty"
+            placeholder="Tu título profesional" 
+            class="input input-bordered w-full" 
+            [class.input-error]="profileForm.get('specialty')?.invalid && profileForm.get('specialty')?.touched"
+          />
+          @if(profileForm.get('specialty')?.invalid && profileForm.get('specialty')?.touched) {
+            <span class="text-error text-xs mt-1">La especialidad es obligatoria.</span>
+          }
+        </div>
+
+        <div class="form-control mb-4">
+          <label class="label">
+            <span class="label-text font-semibold">Descripción Profesional</span>
+          </label>
+          <textarea 
+            formControlName="description"
+            class="textarea textarea-bordered h-24" 
+            placeholder="Cuéntanos sobre tu experiencia y habilidades..."
+            [class.textarea-error]="profileForm.get('description')?.invalid && profileForm.get('description')?.touched"
+          ></textarea>
+          @if(profileForm.get('description')?.invalid && profileForm.get('description')?.touched) {
+            <span class="text-error text-xs mt-1">Describe brevemente tu perfil.</span>
+          }
+        </div>
+
+        <div class="form-control mb-6">
+          <label class="label">
+            <span class="label-text font-semibold">URL de Foto (Opcional)</span>
+          </label>
+          <div class="flex gap-4">
+            <input 
+              type="text" 
+              formControlName="photoURL"
+              placeholder="https://ejemplo.com/foto.jpg" 
+              class="input input-bordered w-full" 
+            />
+            @if(profileForm.get('photoURL')?.value) {
+              <div class="avatar">
+                <div class="w-12 h-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img [src]="profileForm.get('photoURL')?.value" alt="Preview" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (successMessage()) {
+          <div role="alert" class="alert alert-success mb-4 p-2 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div role="alert" class="alert alert-error mb-4 p-2 text-sm">
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <div class="card-actions justify-end">
+          <button 
+            type="submit" 
+            class="btn btn-primary w-full md:w-auto"
+            [disabled]="loading()">
+            
+            @if(loading()) {
+              <span class="loading loading-spinner"></span>
+              Guardando...
+            } @else {
+              Guardar Cambios
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
