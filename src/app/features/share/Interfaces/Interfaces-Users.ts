@@ -4,12 +4,15 @@ export interface UserProfile {
   role: 'admin' | 'user' | 'Programador';
   displayName?: string;
   photoURL?: string;
-  specialty?: string;   
+  specialty?: string;    
   description?: string; 
-  photoFile?: File;
-
+  
+  // AGREGA ESTA LÍNEA AQUÍ:
+  skills?: string[]; 
+  
+  // Opcional: Para manejo interno de subida de archivos (no se guarda en Firestore tal cual)
+  photoFile?: File; 
 }
-
 
 export interface Proyecto {
   id?: string;
