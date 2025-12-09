@@ -2,55 +2,44 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { ToastrService } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, ],
+  imports: [CommonModule, RouterLink, RouterLinkActive ],
   templateUrl: './Navbar.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Navbar { 
-  public authService = inject(AuthService);
+ public authService = inject(AuthService);
+  private router = inject(Router);
+  private toastr = inject(ToastrService); // Mantenemos tu Toastr
 
+  // Signal para estado de carga al salir
+  loggingOut = signal(false);
+
+  /**
+   * Cierra la sesión del usuario
+   * (Simplificado para funcionar directo desde el botón del menú)
+   */
   logout() {
-    this.authService.logout().subscribe(() => {
-      console.log('Sesión cerrada');
-    });
-    
-  }
-private router = inject(Router);
-private toastr = inject(ToastrService);
-
- // Signal que se actualiza automáticamente cuando cambia el usuario
-
-currentUser = this.authService.currentUser; 
-
-  /**
-   * Navega a la página de login
-   */
-  navigateToLogin() {
-    this.router.navigate(['/login']);
+    // Si quisieras confirmación, podrías usar un confirm() nativo rápido
+    // o simplemente cerrar sesión directo como es estándar en menús dropdown.
+    if(confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+      this.performLogout();
+    }
   }
 
-  /**
-   * Verifica si el usuario está autenticado
-   */
-  isAuthenticated(): boolean {
-    return this.authService.isAuthenticated();
-  }
-
-
-confirmLogout() {
-    const modal = document.getElementById('logout_modal') as HTMLDialogElement;
-    modal?.close();
-    
+  // Lógica real de cierre de sesión
+  private performLogout() {
     this.loggingOut.set(true);
     
     this.authService.logout().subscribe({
       next: () => {
         this.loggingOut.set(false);
-        this.toastr.success('Sesión cerrada correctamente', 'Hasta pronto!');
+        this.toastr.success('Has cerrado sesión correctamente', '¡Hasta pronto!');
+        // El servicio ya redirige, pero esto no hace daño
         this.router.navigate(['/login']);
       },
       error: (error) => {
@@ -61,19 +50,12 @@ confirmLogout() {
     });
   }
 
+  // Métodos auxiliares (si los necesitas en otro lado)
+  navigateToLogin() {
+    this.router.navigate(['/login']);
+  }
 
-  loggingOut = signal(false); // Agregar
-  /**
-   * Cierra la sesión del usuario
-   */
-
-
-  openLogoutModal() {
-  const modal = document.getElementById('logout_modal') as HTMLDialogElement;
-  modal?.showModal();
-}
-
-
-
-
+  isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
+  }
 }
