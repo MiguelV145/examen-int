@@ -49,7 +49,7 @@
           @if (password?.invalid && password?.touched) {
             <div class="label pb-0">
               @if (password?.hasError('required')) {
-                <span class="label-text-alt text-error">La contraseña es obligatoria.</span>
+                <span class="label-text-alt text-error">Contraseña obligatoria.</span>
               }
               @if (password?.hasError('minlength')) {
                 <span class="label-text-alt text-error">Mínimo 6 caracteres.</span>

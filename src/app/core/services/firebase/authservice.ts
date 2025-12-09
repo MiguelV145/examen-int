@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Auth, user, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, User, createUserWithEmailAndPassword } from '@angular/fire/auth';
 import { Observable, from, of, switchMap } from 'rxjs';
 import { UserProfile } from '../../../features/share/Interfaces/Interfaces-Users';
-import { deleteDoc, doc, Firestore, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
+import { deleteDoc, doc, docData, Firestore, getDoc, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 
 
@@ -10,20 +10,46 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
-  private auth = inject(Auth);
+private auth = inject(Auth);
   private firestore = inject(Firestore);
   private router = inject(Router);
 
   currentUser = signal<User | null>(null);
+  // 1. NUEVA SEÑAL PARA EL ROL
+  currentRole = signal<string | null>(null);
+
   user$ = user(this.auth);
 
   constructor() {
-    this.user$.subscribe(user => {
-      this.currentUser.set(user);
+    // 2. MODIFICAMOS EL CONSTRUCTOR
+    // Cuando detectamos un usuario, vamos a buscar su rol a la base de datos automáticamente
+    this.user$.pipe(
+      switchMap(user => {
+        if (user) {
+          this.currentUser.set(user);
+          // Escuchamos el documento del usuario en tiempo real
+          return docData(doc(this.firestore, 'users', user.uid));
+        } else {
+          this.currentUser.set(null);
+          return of(null);
+        }
+      })
+    ).subscribe((data: any) => {
+      if (data) {
+        // Si encontramos datos, guardamos el rol
+        this.currentRole.set(data.role);
+      } else {
+        this.currentRole.set(null);
+      }
     });
   }
 
-  // --- REGISTRO ---
+  // 3. NUEVA FUNCIÓN PARA USAR EN EL HTML
+  hasRole(role: string): boolean {
+    return this.currentRole() === role;
+  }
+
+  // --- REGISTRO, LOGIN Y DEMÁS (IGUAL QUE ANTES) ---
   register(email: string, password: string): Observable<void> {
     return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(async (credential) => {
@@ -35,21 +61,17 @@ export class AuthService {
           photoURL: ''
         };
         await setDoc(doc(this.firestore, 'users', credential.user.uid), newUser);
-        
-        // CAMBIO: Redirigir siempre a /home
         this.router.navigate(['/home']);
       })
     );
   }
 
-  // --- LOGIN EMAIL ---
   login(email: string, password: string): Observable<void> {
     return from(signInWithEmailAndPassword(this.auth, email, password)).pipe(
       switchMap(result => this._handleUserLogin(result.user))
     );
   }
 
-  // --- LOGIN GOOGLE ---
   loginWithGoogle(): Observable<void> {
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
@@ -57,10 +79,10 @@ export class AuthService {
     );
   }
 
-  // --- LOGOUT ---
   logout(): Observable<void> {
     return from(signOut(this.auth)).pipe(
       switchMap(() => {
+        this.currentRole.set(null); // Limpiamos el rol al salir
         this.router.navigate(['/login']);
         return of(undefined);
       })
@@ -71,37 +93,28 @@ export class AuthService {
     return this.currentUser() !== null;
   }
 
-
-  // ==========================================
-
   private async _handleUserLogin(firebaseUser: User): Promise<void> {
     const userRef = doc(this.firestore, `users/${firebaseUser.uid}`);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      // Usuario ya existe: Actualizamos datos básicos y redirigimos
       const userData = userSnap.data() as UserProfile;
-      
       await updateDoc(userRef, {
         photoURL: firebaseUser.photoURL || userData.photoURL,
         displayName: firebaseUser.displayName || userData.displayName,
         email: firebaseUser.email
       });
-
-      // Redirigimos (ya no importa el rol)
-      this._redirectALwaysToHome();
+      this.router.navigate(['/home']);
     } else {
-      // Usuario Nuevo: Verificamos invitaciones
       const inviteRef = doc(this.firestore, `users/${firebaseUser.email}`);
       const inviteSnap = await getDoc(inviteRef);
-
       let assignedRole: 'user' | 'Programador' = 'user';
 
       if (inviteSnap.exists()) {
         const inviteData = inviteSnap.data();
         if (inviteData && inviteData['role'] === 'Programador') {
           assignedRole = 'Programador';
-          await deleteDoc(inviteRef); // Borramos invitación
+          await deleteDoc(inviteRef);
         }
       }
 
@@ -112,14 +125,8 @@ export class AuthService {
         photoURL: firebaseUser.photoURL || '',
         role: assignedRole
       };
-
       await setDoc(userRef, newUser);
-      this._redirectALwaysToHome();
+      this.router.navigate(['/home']);
     }
-  }
-
-  // CAMBIO PRINCIPAL: Esta función ahora ignora el rol
-  private _redirectALwaysToHome() {
-    this.router.navigate(['/home']);
   }
 }

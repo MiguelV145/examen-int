@@ -17,26 +17,15 @@ import { BrowserModule } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
-  private fb = inject(FormBuilder);
+private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-   loading = signal(false);
+  
+  // Signals para controlar la pantalla
+  loading = signal(false);
   errorMessage = signal<string | null>(null);
 
   loginForm: FormGroup;
-
-  // Signal para disparar el login
-  private loginTrigger = signal<{ email: string; password: string } | null>(null);
-
-  // rxResource para manejar el proceso de login (Angular 20+)
-  loginResource = rxResource({
-    params: () => this.loginTrigger(),
-    stream: ({ params }) => {
-      if (!params) return of(null);
-      return this.authService.login(params.email, params.password);
-    }
-  });
-  
   formUtils = FormUtils;
 
   constructor() {
@@ -44,83 +33,64 @@ export class LoginPage {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
 
-    // Effect para navegar cuando el login sea exitoso
-    effect(() => {
-      if (this.loginResource.hasValue() && this.loginResource.value()) {
-        console.log('Login exitoso, navegando a /home');
+  // --- LOGIN CON CORREO ---
+  onSubmit() {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: () => {
+        this.loading.set(false);
+        // Redirección exitosa
         this.router.navigate(['/home']);
+      },
+      // CORRECCIÓN: Agregamos el tipo ': any' para que no marque error rojo
+      error: (error: any) => {
+        this.loading.set(false);
+        this.errorMessage.set(this.getErrorMessage(error.code));
       }
     });
   }
 
-  onSubmit() {
-  if (this.loginForm.invalid) {
-    this.loginForm.markAllAsTouched();
-    return;
-  }
-
-  this.loading.set(true);
-  this.errorMessage.set(null);
-
-  const { email, password } = this.loginForm.value;
-
-  this.authService.login(email, password).subscribe({
-    next: () => {
-      this.loading.set(false);
-      // Cambio: Navegar a /home en lugar de /simpsons
-      this.router.navigate(['/home']);
-    },
-    error: (error) => {
-      this.loading.set(false);
-      this.errorMessage.set(this.getErrorMessage(error.code));
-    }
-  });
-}
-  // Computed signal para el estado de carga
-
-
-  
-getErrorMessage(code: string): string {
-    const messages: { [key: string]: string } = {
-      'auth/user-not-found': 'Usuario no encontrado.',
-      'auth/wrong-password': 'La contraseña es incorrecta.',
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/too-many-requests': 'Demasiados intentos. Espera un poco.',
-      'permission-denied': 'Error de Permisos: Revisa las reglas de Firestore.' // <--- Nuevo
-    };
-    // CAMBIO: Si no encuentra el mensaje, mostramos el código técnico
-    return messages[code] || `Error desconocido: ${code}`;
-  }
- 
+  // --- LOGIN CON GOOGLE ---
   onGoogleLogin() {
     this.loading.set(true);
     this.errorMessage.set(null);
 
     this.authService.loginWithGoogle().subscribe({
-      next: (result) => {
-        // Quitamos la suposición de que el servicio redirige.
-        // Lo hacemos nosotros manualmente para asegurar que funcione.
-        console.log('Login con Google exitoso', result);
-        this.loading.set(false);
-        
-        // AGREGAR ESTA LÍNEA:
-        this.router.navigate(['/home']); 
+      next: () => {
+        // Redirección iniciada...
       },
-      error: (err) => {
+      // CORRECCIÓN: Agregamos el tipo ': any' aquí también
+      error: (err: any) => {
         console.error('Error Google:', err);
         this.loading.set(false);
-        this.errorMessage.set('Error al iniciar con Google. Intenta de nuevo.');
+        this.errorMessage.set('No se pudo conectar con Google.');
       }
     });
   }
 
-  // Getters para validación en el template
-  get email() {
-    return this.loginForm.get('email');
+  // Traducción de errores
+  getErrorMessage(code: string): string {
+    const messages: { [key: string]: string } = {
+      'auth/user-not-found': 'Usuario no encontrado.',
+      'auth/wrong-password': 'La contraseña es incorrecta.',
+      'auth/invalid-email': 'El correo no es válido.',
+      'auth/popup-closed-by-user': 'Cancelaste el inicio de sesión.',
+      'permission-denied': 'Permisos insuficientes.'
+    };
+    return messages[code] || `Error: ${code}`;
   }
 
-  get password() {
-    return this.loginForm.get('password');
-  }
+  get email() { return this.loginForm.get('email'); }
+  get password() { return this.loginForm.get('password'); }
 }

@@ -16,11 +16,11 @@ import { BrowserModule } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPage {
-private fb = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Signals para la UI
+  // Signals para la interfaz
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -37,20 +37,18 @@ private fb = inject(FormBuilder);
     });
   }
 
-  // Validador personalizado para comparar contraseñas
+  // Validador de contraseñas
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
-
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    return null; // Si coinciden o están vacíos, no hay error a nivel de grupo
+    return null;
   }
 
   onSubmit() {
-    // 1. Si el formulario es inválido, marcamos todo como tocado para mostrar errores
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -61,15 +59,11 @@ private fb = inject(FormBuilder);
 
     const { email, password } = this.registerForm.value;
 
-    // 2. Llamamos al servicio.
-    // NOTA: El AuthService que configuramos antes YA crea el documento en Firestore
-    // y maneja la redirección. Aquí solo manejamos el estado de carga y errores.
     this.authService.register(email, password).subscribe({
       next: () => {
         this.loading.set(false);
-        // La redirección ya la hace el servicio, pero por seguridad podemos dejarla aquí también
-        // o simplemente confiar en el servicio.
-        console.log('Registro completado.');
+        // Redirigimos al Home
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         this.loading.set(false);
@@ -82,14 +76,13 @@ private fb = inject(FormBuilder);
     const errorMessages: { [key: string]: string } = {
       'auth/email-already-in-use': 'Este correo ya está registrado.',
       'auth/invalid-email': 'El correo electrónico no es válido.',
-      'auth/operation-not-allowed': 'Operación no permitida.',
-      'auth/weak-password': 'La contraseña es muy débil.',
-      'auth/network-request-failed': 'Error de conexión. Revisa tu internet.'
+      'auth/weak-password': 'La contraseña es muy débil (mínimo 6 caracteres).',
+      'auth/network-request-failed': 'Error de conexión.'
     };
-    return errorMessages[code] || 'Error desconocido al registrar usuario.';
+    return errorMessages[code] || 'Error desconocido al registrar.';
   }
 
-  // Getters para usar en el HTML de forma limpia
+  // Getters para el HTML
   get email() { return this.registerForm.get('email'); }
   get password() { return this.registerForm.get('password'); }
   get confirmPassword() { return this.registerForm.get('confirmPassword'); }
