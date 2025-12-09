@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { FormUtils } from '../../share/Formutils/Formutils';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
+import { BrowserModule } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-tregister-page',
-  imports: [ReactiveFormsModule,RouterLink],
+  imports: [RouterLink,    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule],
   templateUrl: './Register-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

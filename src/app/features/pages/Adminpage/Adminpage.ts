@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { collection, collectionData, deleteDoc, doc, Firestore, updateDoc } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/firebase/authservice';
-import { from, Observable } from 'rxjs';
+import {  Observable } from 'rxjs';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { AsyncPipe, CommonModule } from '@angular/common';
 
