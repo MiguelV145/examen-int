@@ -1,16 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component,  inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import {  Router} from '@angular/router';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { FormUtils } from '../../share/Formutils/Formutils';
-import { of } from 'rxjs';
-import { BrowserModule } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-login-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule,    BrowserModule,
+  imports: [CommonModule, ReactiveFormsModule, 
     FormsModule,
     ReactiveFormsModule],
   templateUrl: './Login-Page.html',

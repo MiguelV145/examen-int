@@ -1,0 +1,50 @@
+<div class="p-6">
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Mis Proyectos</h1>
+
+    <button (click)="crearProyecto()" class="btn btn-primary">
+      ➕ Nuevo Proyecto
+    </button>
+  </div>
+
+  <!-- Sección de Proyectos Académicos -->
+  <h2 class="text-xl font-semibold mb-3">📘 Proyectos Académicos</h2>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+    @for (proj of proyectos(); track proj.id) {
+      @if (proj.tipo === 'academico') {
+        <div class="card bg-base-100 shadow-md p-4 border border-base-300">
+          <h3 class="font-bold text-lg">{{ proj.title }}</h3>
+          <p class="text-sm opacity-70">{{ proj.description }}</p>
+
+          <div class="mt-3">
+            <div class="badge badge-info">{{ proj.participacion }}</div>
+          </div>
+
+          <button class="btn btn-sm btn-outline mt-4" (click)="editarProyecto(proj.id!)">✏️ Editar</button>
+          <button class="btn btn-sm btn-ghost text-error" (click)="eliminarProyecto(proj.id!)">🗑 Borrar</button>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Sección de Proyectos Laborales -->
+  <h2 class="text-xl font-semibold mb-3">💼 Proyectos Laborales</h2>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+    @for (proj of proyectos(); track proj.id) {
+      @if (proj.tipo === 'laboral') {
+        <div class="card bg-base-100 shadow-md p-4 border border-base-300">
+          <h3 class="font-bold text-lg">{{ proj.title }}</h3>
+          <p class="text-sm opacity-70">{{ proj.description }}</p>
+
+          <div class="mt-3">
+            <div class="badge badge-info">{{ proj.participacion }}</div>
+          </div>
+
+          <button class="btn btn-sm btn-outline mt-4" (click)="editarProyecto(proj.id!)">✏️ Editar</button>
+          <button class="btn btn-sm btn-ghost text-error" (click)="eliminarProyecto(proj.id!)">🗑 Borrar</button>
+        </div>
+      }
+    }
+  </div>
+</div>

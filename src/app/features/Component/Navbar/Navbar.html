@@ -13,7 +13,7 @@
       <nav class="hidden md:flex gap-2 mr-2">
         <a routerLink="/home" class="btn btn-ghost btn-sm">Inicio</a>
 
-        <a routerLink="/programmers" class="btn btn-ghost btn-sm"></a>
+        <a routerLink="/programmers" class="btn btn-ghost btn-sm">detalle programador </a>
       </nav>
 
       <div class="dropdown dropdown-end">
@@ -34,6 +34,27 @@
           }
 
         </div>
+        @if (authService.hasRole('Programador') || authService.hasRole('admin')) {
+              <li>
+                <a 
+                  routerLink="/panel" 
+                  class="justify-between" 
+                  routerLinkActive="bg-primary text-primary-content">
+                  Mi Panel
+                  <span class="badge badge-sm badge-secondary">Dev</span>
+                </a>
+              </li>
+
+          <!-- 🔥 AGREGA TU OPCIÓN DE PORTAFOLIO AQUÍ -->
+          <li>
+            <a routerLink="/programmer/portafolio" 
+              routerLinkActive="bg-primary text-primary-content">
+              Mi Portafolio
+            </a>
+          </li>
+        }
+
+        
         
 
         <ul
