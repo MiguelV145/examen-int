@@ -13,7 +13,7 @@ export const routes: Routes = [
     {
         path: 'login',
         loadComponent:()=>import('./features/pages/Login-Page/Login-Page').then(m => m.LoginPage),
-         canActivate: [authGuard]
+         canActivate: [publicGuard]
         
     },
     {
