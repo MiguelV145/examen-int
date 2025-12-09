@@ -1,7 +1,6 @@
-<div class="min-h-screen bg-base-200 p-4 lg:p-10 font-sans">
+<div class="min-h-screen bg-base-200 p-4 lg:p-10 font-sans relative">
   
   <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 animate-fade-in-down">
-    
     <div class="text-center md:text-left">
       <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
         Panel de Control
@@ -9,164 +8,310 @@
       <p class="text-base-content/60 mt-2 font-medium">Administración de usuarios y roles del sistema</p>
     </div>
     
-    <div class="flex items-center gap-4 bg-base-100/80 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg border border-base-200">
-      <div class="avatar placeholder ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full">
-        @if (authService.currentUser()?.photoURL) {
-          <div class="w-12 rounded-full">
-            <img [src]="authService.currentUser()?.photoURL" alt="Admin Avatar" />
-          </div>
-        } @else {
-          <div class="bg-gradient-to-br from-primary to-secondary text-primary-content w-12 rounded-full flex items-center justify-center">
-            <span class="text-xl font-bold">
-              {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
-            </span>
-          </div>
-        }
-      </div>
-      <div>
-        <p class="font-bold text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
-        <div class="badge badge-primary badge-sm font-mono mt-1">SUPER ADMIN</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card bg-base-100 shadow-2xl overflow-hidden border border-base-200 rounded-3xl">
-    <div class="overflow-x-auto">
-      
-      <table class="table w-full align-middle">
-        <thead class="bg-base-200/50 text-base-content/70 uppercase text-xs font-bold tracking-wider">
-          <tr>
-            <th class="py-5 pl-8">Usuario</th>
-            <th class="text-center">Rol</th>
-            <th class="text-center">Estado</th>
-            <th class="text-right pr-8">Acciones</th>
-          </tr>
-        </thead>
-        
-        <tbody>
-          @if (users$ | async; as users) {
-            
-            @for (user of users; track user.uid) {
-              <tr class="hover:bg-base-200/40 transition-colors border-b border-base-100 last:border-none group">
-                
-                <td class="pl-8 py-4">
-                  <div class="flex items-center gap-4">
-                    <div class="avatar placeholder justify-center flex ">
-                      @if (user.photoURL) {
-                        <div class="w-12 h-12 rounded-full shadow-md">
-                          <img [src]="user.photoURL" alt="Avatar" class="object-cover" />
-                        </div>
-                      } @else {
-                        <div class="bg-amber-500/10 text-amber-600 w-12 h-12 rounded-full flex items-center justify-center">
-                          <span class="text-lg font-bold uppercase">
-                            {{ user.email.charAt(0) }}
-                          </span>
-                        </div>
-                      }
-                    </div>
-                    <div>
-                      <div class="font-bold text-base group-hover:text-primary transition-colors">
-                        {{ user.displayName || 'Usuario sin nombre' }}
-                      </div>
-                      <div class="text-sm opacity-50 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        {{ user.email }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                <td class="text-center">
-                  @switch (user.role) {
-                    @case ('admin') {
-                      <div class="badge badge-error gap-2 py-3 px-4 font-semibold shadow-sm text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                        Admin
-                      </div>
-                    }
-                    @case ('Programador') {
-                      <div class="badge badge-secondary gap-2 py-3 px-4 font-semibold shadow-sm text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                        Programador
-                      </div>
-                    }
-                    @default {
-                      <div class="badge badge-ghost gap-2 py-3 px-4 font-medium opacity-70">
-                        Usuario
-                      </div>
-                    }
-                  }
-                </td>
-
-                <td class="text-center">
-                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success/10 text-success text-sm font-semibold border border-success/20">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-                    </span>
-                    Activo
-                  </div>
-                </td>
-
-                <td class="text-right pr-8">
-                  @if (user.role !== 'admin') {
-                    
-                    <div class="flex justify-end items-center gap-2 opacity-100 transition-opacity">
-                      
-                      <button 
-                        (click)="toggleRole(user)"
-                        class="btn btn-sm btn-circle btn-ghost tooltip tooltip-left transition-transform hover:scale-110"
-                        [class.text-secondary]="user.role !== 'Programador'"
-                        [class.text-warning]="user.role === 'Programador'"
-                        [attr.data-tip]="user.role === 'Programador' ? 'Degradar a Usuario' : 'Ascender a Programador'">
-                        
-                        @if (user.role === 'Programador') {
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                          </svg>
-                        } @else {
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                          </svg>
-                        }
-                      </button>
-
-                      <button 
-                        (click)="deleteUser(user)" 
-                        class="btn btn-sm btn-circle btn-ghost text-error hover:bg-error/10 hover:text-red-600 transition-colors tooltip tooltip-bottom"
-                        data-tip="Eliminar usuario">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-
-                  } @else {
-                    <span class="badge badge-ghost badge-sm opacity-50 select-none">Protegido</span>
-                  }
-                </td>
-
-              </tr>
-            }
-
+    <div class="flex flex-col md:flex-row items-center gap-4">
+      <div class="flex items-center gap-4 bg-base-100/80 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg border border-base-200">
+        <div class="avatar placeholder ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full">
+          @if (authService.currentUser()?.photoURL) {
+            <div class="w-12 rounded-full">
+              <img [src]="authService.currentUser()?.photoURL" alt="Admin Avatar" />
+            </div>
           } @else {
-            <tr>
-              <td colspan="4" class="py-20 text-center">
-                <span class="loading loading-dots loading-lg text-primary"></span>
-                <p class="mt-2 text-sm text-base-content/50 animate-pulse">Cargando usuarios...</p>
-              </td>
-            </tr>
+            <div class="bg-gradient-to-br from-primary to-secondary text-primary-content w-12 rounded-full flex items-center justify-center">
+              <span class="text-xl font-bold">
+                {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
+              </span>
+            </div>
           }
-        </tbody>
-      </table>
-      
+        </div>
+        <div>
+          <p class="font-bold text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
+          <div class="badge badge-primary badge-sm font-mono mt-1">SUPER ADMIN</div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <div role="tablist" class="tabs tabs-boxed bg-base-100 shadow-md p-2 mb-6 max-w-md mx-auto md:mx-0">
+    <a role="tab" class="tab transition-all duration-300 font-bold" 
+       [class.tab-active]="activeTab() === 'users'" 
+       [class.bg-primary]="activeTab() === 'users'"
+       [class.text-primary-content]="activeTab() === 'users'"
+       (click)="switchTab('users')">
+       👥 Usuarios
+    </a>
+    <a role="tab" class="tab transition-all duration-300 font-bold" 
+       [class.tab-active]="activeTab() === 'asesorias'" 
+       [class.bg-primary]="activeTab() === 'asesorias'"
+       [class.text-primary-content]="activeTab() === 'asesorias'"
+       (click)="switchTab('asesorias')">
+       📅 Asesorías
+    </a>
+  </div>
+
+  @if (activeTab() === 'users') {
+    <div class="card bg-base-100 shadow-2xl overflow-hidden border border-base-200 rounded-3xl animate-fade-in">
+      
+      <div class="p-4 border-b border-base-200 flex justify-end bg-base-200/30">
+        <button (click)="openModal()" class="btn btn-primary btn-sm gap-2 shadow-md hover:shadow-lg transition-shadow">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+          Nuevo Usuario
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table w-full align-middle">
+          <thead class="bg-base-200/50 text-base-content/70 uppercase text-xs font-bold tracking-wider">
+            <tr>
+              <th class="pl-8 py-4">Usuario</th>
+              <th class="text-center">Rol</th>
+              <th class="text-center">Horario</th>
+              <th class="text-right pr-8">Acciones</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            @if (users$ | async; as users) {
+              @for (user of users; track user.uid) {
+                <tr class="hover:bg-base-200/40 border-b border-base-100 last:border-none group transition-colors">
+                  
+                  <td class="pl-8 py-4">
+                    <div class="flex items-center gap-4">
+                      <div class="avatar placeholder">
+                        @if (user.photoURL) {
+                          <div class="w-10 h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img [src]="user.photoURL" />
+                          </div>
+                        } @else {
+                          <div class="bg-amber-600/10 text-amber-500  ring ring-primary ring-offset-base-100 ring-offset-2 w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                            {{ user.email.charAt(0).toUpperCase() }}
+                          </div>
+                        }
+                      </div>
+                      <div>
+                        <div class="font-bold group-hover:text-primary transition-colors">{{ user.displayName || 'Sin nombre' }}</div>
+                        <div class="text-xs opacity-50">{{ user.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    @switch (user.role) {
+                      @case ('admin') { <div class="badge badge-error text-white font-bold shadow-sm">Admin</div> }
+                      @case ('Programador') { <div class="badge badge-secondary text-white font-bold shadow-sm">Dev</div> }
+                      @default { <div class="badge badge-ghost font-medium">User</div> }
+                    }
+                  </td>
+
+                  <td class="text-center">
+                    @if (user.role === 'Programador') {
+                      <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border-base-300 hover:border-primary hover:text-primary transition-all group/btn">
+                        @if (user.availability) {
+                          <span class="text-success font-semibold flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span> Configurado
+                          </span>
+                        } @else {
+                          <span class="text-warning font-semibold">Sin Horario</span>
+                        }
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </button>
+                    } @else {
+                      <span class="text-xs opacity-30">-</span>
+                    }
+                  </td>
+
+                  <td class="text-right pr-8">
+                    @if (user.role !== 'admin') {
+                      <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button (click)="toggleRole(user)" class="btn btn-sm btn-circle btn-ghost tooltip tooltip-left" [attr.data-tip]="user.role === 'Programador' ? 'Degradar' : 'Ascender'">
+                          @if(user.role === 'Programador') {⬇️} @else {⬆️}
+                        </button>
+                        <button (click)="deleteUser(user)" class="btn btn-sm btn-circle btn-ghost text-error tooltip tooltip-left" data-tip="Eliminar">🗑️</button>
+                      </div>
+                    } @else {
+                      <span class="text-xs opacity-40 italic select-none">Protegido</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (activeTab() === 'asesorias') {
+    <div class="card bg-base-100 shadow-2xl overflow-hidden border border-base-200 rounded-3xl animate-fade-in">
+      <div class="overflow-x-auto">
+        <table class="table w-full align-middle">
+          <thead class="bg-base-200/50 text-base-content/70 uppercase text-xs font-bold tracking-wider">
+            <tr>
+              <th class="pl-8 py-4">Cliente</th>
+              <th>Programador</th>
+              <th>Fecha/Hora</th>
+              <th class="text-center">Estado</th>
+              <th class="text-right pr-8">Gestión</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (asesorias$ | async; as asesorias) {
+              @for (cita of asesorias; track cita.id) {
+                <tr class="hover:bg-base-200/40 border-b border-base-100 last:border-none transition-colors">
+                  
+                  <td class="pl-8 py-4 font-bold text-base-content">{{ cita.clientName }}</td>
+                  <td class="font-medium text-primary">{{ cita.programmerName }}</td>
+                  <td>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-sm">{{ cita.date }}</span>
+                      <span class="text-xs opacity-60">{{ cita.time }}</span>
+                    </div>
+                  </td>
+                  
+                  <td class="text-center">
+                    @switch (cita.status) {
+                      @case ('pendiente') { <div class="badge badge-warning gap-1 animate-pulse">⏳ Pendiente</div> }
+                      @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold shadow-sm">✅ Aprobada</div> }
+                      @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold shadow-sm">❌ Rechazada</div> }
+                    }
+                  </td>
+
+                  <td class="text-right pr-8">
+                    @if (cita.status === 'pendiente') {
+                      <div class="join shadow-sm">
+                        <button (click)="updateAsesoriaStatus(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:scale-105 transition-transform">Aprobar</button>
+                        <button (click)="updateAsesoriaStatus(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:scale-105 transition-transform">Rechazar</button>
+                      </div>
+                    } @else {
+                      <span class="text-xs opacity-50 italic">Finalizada</span>
+                    }
+                  </td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium">No hay solicitudes de asesoría pendientes.</td></tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (showModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+      
+      <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 scale-100 animate-pop-up">
+        <div class="card-body">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="card-title text-2xl font-bold">Registrar Nuevo Usuario</h2>
+            <button class="btn btn-sm btn-circle btn-ghost" (click)="closeModal()">✕</button>
+          </div>
+          
+          <form [formGroup]="createUserForm" (ngSubmit)="createUser()">
+            
+            <div class="form-control w-full mb-3">
+              <label class="label"><span class="label-text font-semibold">Nombre Completo</span></label>
+              <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered w-full focus:input-primary" />
+            </div>
+
+            <div class="form-control w-full mb-3">
+              <label class="label"><span class="label-text font-semibold">Correo Electrónico</span></label>
+              <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered w-full focus:input-primary" />
+            </div>
+
+            <div class="form-control w-full mb-3">
+              <label class="label"><span class="label-text font-semibold">Contraseña</span></label>
+              <input type="password" formControlName="password" placeholder="******" class="input input-bordered w-full focus:input-primary" />
+            </div>
+
+            <div class="form-control w-full mb-6">
+              <label class="label"><span class="label-text font-semibold">Rol Inicial</span></label>
+              <select formControlName="role" class="select select-bordered w-full focus:select-primary">
+                <option value="user">Usuario (Visitante)</option>
+                <option value="Programador">Programador (Perfil Público)</option>
+              </select>
+            </div>
+
+            <div class="card-actions justify-end gap-3">
+              <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-6" [disabled]="loading() || createUserForm.invalid">
+                @if (loading()) { <span class="loading loading-spinner"></span> }
+                Crear Cuenta
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showAvailabilityModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 scale-100 animate-pop-up">
+        <div class="card-body">
+          
+          <div class="flex items-center gap-3 mb-4 border-b border-base-200 pb-4">
+            <div class="bg-primary/10 p-3 rounded-full text-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="card-title text-xl font-bold">Gestionar Horario</h2>
+              <p class="text-xs opacity-60 font-medium">Programador: {{ selectedProgrammer()?.displayName }}</p>
+            </div>
+          </div>
+          
+          <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()">
+            
+            <div class="form-control w-full mb-4">
+              <label class="label"><span class="label-text font-semibold">Días Laborales</span></label>
+              <select formControlName="dias" class="select select-bordered w-full focus:select-primary">
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Lunes a Viernes">Lunes a Viernes</option>
+                <option value="Lunes a Sábado">Lunes a Sábado</option>
+                <option value="Fines de Semana">Fines de Semana</option>
+                <option value="Todos los días">Todos los días</option>
+              </select>
+            </div>
+
+            <div class="form-control w-full mb-6">
+              <label class="label"><span class="label-text font-semibold">Franja Horaria</span></label>
+              
+              <div class="flex items-center gap-2">
+                <select formControlName="startHour" class="select select-bordered flex-1 text-center focus:select-primary">
+                  @for (hour of availableHours; track hour) {
+                    <option [value]="hour">{{ hour }}</option>
+                  }
+                </select>
+                
+                <span class="font-bold text-base-content/50 text-sm">A</span>
+                
+                <select formControlName="endHour" class="select select-bordered flex-1 text-center focus:select-primary">
+                  @for (hour of availableHours; track hour) {
+                    <option [value]="hour">{{ hour }}</option>
+                  }
+                </select>
+              </div>
+              
+              <label class="label">
+                <span class="label-text-alt text-base-content/50">Selecciona hora de inicio y fin</span>
+              </label>
+            </div>
+
+            <div class="card-actions justify-end gap-3 mt-2">
+              <button type="button" class="btn btn-ghost" (click)="closeAvailabilityModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-6" [disabled]="loading() || availabilityForm.invalid">
+                @if (loading()) { <span class="loading loading-spinner"></span> }
+                Guardar Horario
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>

@@ -26,3 +26,30 @@ export interface Proyecto {
   demoURL?: string;
   photoURL?: string;
 }
+
+
+export interface Availability {
+  dias: string;   
+  horas: string;  
+}
+
+export interface UserProfile {
+  specialty?: string;
+  description?: string;
+  photoURL?: string;
+  // NUEVO CAMPO:
+  availability?: Availability; 
+}
+
+export interface Asesoria {
+  id?: string;
+  programmerId: string;
+  programmerName: string;
+  clientId: string;     
+  clientName: string;   
+  date: string;         
+  time: string;         
+  comment: string;      
+  status: 'pendiente' | 'aprobada' | 'rechazada';
+  responseMsg?: string; 
+}
