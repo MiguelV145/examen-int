@@ -18,6 +18,8 @@ export class Navbar {
 
   // Signal para estado de carga al salir
   loggingOut = signal(false);
+  
+
 
   /**
    * Cierra la sesión del usuario

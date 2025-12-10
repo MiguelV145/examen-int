@@ -1,26 +1,25 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common'; // <--- ESTO ES LO CORRECTO
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { FormUtils } from '../../share/Formutils/Formutils';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { of } from 'rxjs';
-import { Router, RouterLink } from '@angular/router';
-import { BrowserModule } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-tregister-page',
-  imports: [RouterLink,    BrowserModule,
-    FormsModule,
-    ReactiveFormsModule],
+  selector: 'app-register-page',
+  standalone: true,
+  // 👇 AQUÍ ESTABA EL ERROR: Usamos CommonModule, NUNCA BrowserModule
+  imports: [CommonModule, ReactiveFormsModule, RouterLink], 
   templateUrl: './Register-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPage {
+  
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Signals para la interfaz
+  // Signals
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -37,7 +36,6 @@ export class RegisterPage {
     });
   }
 
-  // Validador de contraseñas
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
@@ -48,6 +46,7 @@ export class RegisterPage {
     return null;
   }
 
+  // ESTA ES LA FUNCIÓN QUE LLAMA EL BOTÓN
   onSubmit() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -62,10 +61,9 @@ export class RegisterPage {
     this.authService.register(email, password).subscribe({
       next: () => {
         this.loading.set(false);
-        // Redirigimos al Home
         this.router.navigate(['/home']);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error.code));
       }
@@ -73,13 +71,13 @@ export class RegisterPage {
   }
 
   getErrorMessage(code: string): string {
-    const errorMessages: { [key: string]: string } = {
-      'auth/email-already-in-use': 'Este correo ya está registrado.',
-      'auth/invalid-email': 'El correo electrónico no es válido.',
-      'auth/weak-password': 'La contraseña es muy débil (mínimo 6 caracteres).',
+    const messages: { [key: string]: string } = {
+      'auth/email-already-in-use': 'El correo ya está registrado.',
+      'auth/invalid-email': 'Correo inválido.',
+      'auth/weak-password': 'Contraseña muy débil.',
       'auth/network-request-failed': 'Error de conexión.'
     };
-    return errorMessages[code] || 'Error desconocido al registrar.';
+    return messages[code] || 'Error al registrarse.';
   }
 
   // Getters para el HTML
