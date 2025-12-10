@@ -2,35 +2,39 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- FUNCIONES DE AYUDA ---
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
     
     function isAdmin() {
-      // Verifica si el usuario que pide datos tiene rol 'admin' en su documento de usuario
       return request.auth != null && 
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // --- REGLAS DE USUARIOS (Ya las tenías) ---
     match /users/{userId} {
-      // 1. TODO EL MUNDO puede ver los perfiles (público)
       allow read: if true;
-
-      // 2. CREAR: Cualquiera autenticado puede registrarse
       allow create: if request.auth != null;
-
-      // 3. EDITAR: El dueño de la cuenta o un Admin
       allow update: if isOwner(userId) || isAdmin();
-      
-      // 4. ELIMINAR: Solo el Admin
       allow delete: if isAdmin();
     }
 
+    match /asesorias/{citaId} {
+      allow read, create, update: if request.auth != null;
+    }
 
-    match /asesorias/{document=**} {
-      allow read, write: if true; 
+    match /projects/{projectId} {
+      allow read: if true;
+
+      allow create: if request.auth != null && 
+                       request.resource.data.programmerId == request.auth.uid;
+
+      allow delete: if request.auth != null && 
+                       resource.data.programmerId == request.auth.uid;
+
+      allow update: if request.auth != null && (
+        resource.data.programmerId == request.auth.uid || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+      );
     }
   }
 }

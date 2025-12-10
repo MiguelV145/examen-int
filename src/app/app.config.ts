@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
 
   providers: [
     
-     provideRouter(routes),
+    provideRouter(routes),
     provideHttpClient(withFetch()), // habilita HttpClient usando la API Fetch
     provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),

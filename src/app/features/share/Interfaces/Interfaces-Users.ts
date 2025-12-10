@@ -6,27 +6,23 @@ export interface UserProfile {
   photoURL?: string;
   specialty?: string;    
   description?: string; 
-  
-  // AGREGA ESTA LÍNEA AQUÍ:
   skills?: string[]; 
-  
-  // Opcional: Para manejo interno de subida de archivos (no se guarda en Firestore tal cual)
-  photoFile?: File; 
+   photoFile?: File; 
 }
 
-export interface Proyecto {
+
+export interface Project {
   id?: string;
-  uid: string; 
-  tipo: 'academico' | 'laboral';
+  programmerId: string; // Para vincularlo al dueño
   title: string;
   description: string;
-  participacion: 'frontend' | 'backend' | 'database' | 'fullstack';
-  tecnologias: string[];
-  repoURL?: string;
-  demoURL?: string;
-  photoURL?: string;
+  category: 'Academico' | 'Laboral'; 
+  role: string; // Frontend, Backend, Fullstack, BD
+  technologies: string[]; 
+  repoUrl?: string;
+  demoUrl?: string;
+  likes?: string[];//
 }
-
 
 export interface Availability {
   dias: string;   

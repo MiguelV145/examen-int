@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Firestore, collection, query, where, collectionData, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, collectionData, addDoc, updateDoc, arrayRemove, arrayUnion, doc } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/firebase/authservice';
-import { Observable } from 'rxjs';
-import { UserProfile, Asesoria } from '../../share/Interfaces/Interfaces-Users';
+import { map, Observable } from 'rxjs';
+import { UserProfile, Asesoria, Project } from '../../share/Interfaces/Interfaces-Users';
 import emailjs from '@emailjs/browser';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule,RouterLink],
   templateUrl: './Home-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,8 +20,9 @@ export class HomePage {
 private firestore = inject(Firestore);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
-
+  
   programmers$: Observable<UserProfile[]>;
+  featuredProjects$: Observable<Project[]>;
   selectedProg: UserProfile | null = null;
   loadingBooking = signal(false);
 
@@ -33,9 +35,27 @@ private firestore = inject(Firestore);
   });
 
   constructor() {
+    
     const usersRef = collection(this.firestore, 'users');
     const q = query(usersRef, where('role', '==', 'Programador'));
     this.programmers$ = collectionData(q, { idField: 'uid' }) as Observable<UserProfile[]>;
+    const projectsRef = collection(this.firestore, 'projects');
+    this.featuredProjects$ = collectionData(projectsRef, { idField: 'id' }).pipe(
+      map((projects: any[]) => {
+        return projects
+          // PASO 1: FILTRAR
+          // Solo dejamos pasar los proyectos que tengan el array 'likes' Y que tenga más de 0 elementos
+          .filter(p => p.likes && p.likes.length > 0)
+          
+          // PASO 2: ORDENAR
+          // Los ordenamos del que tiene más likes al que tiene menos
+          .sort((a, b) => b.likes.length - a.likes.length)
+          
+          // PASO 3: CORTAR
+          // Solo mostramos los 3 mejores (o los que quieras)
+          .slice(0, 3);
+      })
+    ) as Observable<Project[]>;
   }
 
   // Abrir Modal
@@ -116,4 +136,48 @@ private firestore = inject(Firestore);
       this.loadingBooking.set(false);
     }
   }
+
+  async toggleLike(project: Project) {
+    const user = this.authService.currentUser();
+    
+    if (!user) {
+      alert('Debes iniciar sesión para destacar proyectos ⭐');
+      return;
+    }
+
+    if (!project.id) return;
+
+    const projectRef = doc(this.firestore, 'projects', project.id);
+    const myUid = user.uid;
+
+    // Verificar si ya di like
+    const hasLiked = project.likes?.includes(myUid);
+
+    try {
+      if (hasLiked) {
+        // QUITAR ESTRELLA -> Desaparece del Home si baja en ranking
+        await updateDoc(projectRef, {
+          likes: arrayRemove(myUid)
+        });
+      } else {
+        // DAR ESTRELLA -> Aparece en el Home (si entra al top)
+        await updateDoc(projectRef, {
+          likes: arrayUnion(myUid)
+        });
+      }
+    } catch (error) {
+      console.error("Error al dar estrella:", error);
+    }
+  }
+
+  isLikedByMe(project: Project): boolean {
+    const user = this.authService.currentUser();
+    if (!user || !project.likes) return false;
+    return project.likes.includes(user.uid);
+  }
+  
+
+
+
+  
 }
