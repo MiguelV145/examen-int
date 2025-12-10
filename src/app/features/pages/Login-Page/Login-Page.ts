@@ -1,24 +1,23 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component,  inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import {  Router} from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/firebase/authservice';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
   selector: 'app-login-page',
-  imports: [CommonModule, ReactiveFormsModule, 
-    FormsModule,
-    ReactiveFormsModule],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './Login-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
-private fb = inject(FormBuilder);
+  
+  private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
   
-  // Signals para controlar la pantalla
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -32,7 +31,7 @@ private fb = inject(FormBuilder);
     });
   }
 
-  // --- LOGIN CON CORREO ---
+  // --- LOGIN CORREO ---
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -41,16 +40,14 @@ private fb = inject(FormBuilder);
 
     this.loading.set(true);
     this.errorMessage.set(null);
-
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
       next: () => {
         this.loading.set(false);
-        // Redirección exitosa
         this.router.navigate(['/home']);
       },
-      // CORRECCIÓN: Agregamos el tipo ': any' para que no marque error rojo
+      // SOLUCIÓN: Usamos (error: any) para evitar la línea roja
       error: (error: any) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error.code));
@@ -58,32 +55,31 @@ private fb = inject(FormBuilder);
     });
   }
 
-  // --- LOGIN CON GOOGLE ---
+  // --- LOGIN GOOGLE ---
   onGoogleLogin() {
     this.loading.set(true);
     this.errorMessage.set(null);
 
     this.authService.loginWithGoogle().subscribe({
       next: () => {
-        // Redirección iniciada...
+        this.loading.set(false);
+        this.router.navigate(['/home']);
       },
-      // CORRECCIÓN: Agregamos el tipo ': any' aquí también
+      // SOLUCIÓN: Usamos (err: any) para evitar la línea roja
       error: (err: any) => {
         console.error('Error Google:', err);
         this.loading.set(false);
-        this.errorMessage.set('No se pudo conectar con Google.');
+        this.errorMessage.set('Error con Google: ' + (err.code || err.message));
       }
     });
   }
 
-  // Traducción de errores
   getErrorMessage(code: string): string {
     const messages: { [key: string]: string } = {
       'auth/user-not-found': 'Usuario no encontrado.',
-      'auth/wrong-password': 'La contraseña es incorrecta.',
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/popup-closed-by-user': 'Cancelaste el inicio de sesión.',
-      'permission-denied': 'Permisos insuficientes.'
+      'auth/wrong-password': 'Contraseña incorrecta.',
+      'auth/invalid-email': 'Correo inválido.',
+      'auth/popup-closed-by-user': 'Inicio de sesión cancelado.'
     };
     return messages[code] || `Error: ${code}`;
   }

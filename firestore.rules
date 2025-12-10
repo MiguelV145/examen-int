@@ -8,27 +8,29 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      // Verifica si el usuario que pide datos tiene rol 'admin' en su documento
+      // Verifica si el usuario que pide datos tiene rol 'admin' en su documento de usuario
       return request.auth != null && 
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // --- REGLAS DE USUARIOS ---
+    // --- REGLAS DE USUARIOS (Ya las tenías) ---
     match /users/{userId} {
-      // 1. TODO EL MUNDO puede ver los perfiles (para que el público vea portafolios)
+      // 1. TODO EL MUNDO puede ver los perfiles (público)
       allow read: if true;
 
-      // 2. CREAR: Cualquiera puede registrarse.
+      // 2. CREAR: Cualquiera autenticado puede registrarse
       allow create: if request.auth != null;
 
-      // 3. EDITAR:
-      // - El Programador/Usuario edita SU propio perfil.
-      // - El Administrador puede editar CUALQUIER perfil (para ascender/degradar/banear).
+      // 3. EDITAR: El dueño de la cuenta o un Admin
       allow update: if isOwner(userId) || isAdmin();
       
-      // 4. ELIMINAR:
-      // - Solo el Administrador puede borrar cuentas completamente.
+      // 4. ELIMINAR: Solo el Admin
       allow delete: if isAdmin();
+    }
+
+
+    match /asesorias/{document=**} {
+      allow read, write: if true; 
     }
   }
 }
