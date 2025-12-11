@@ -8,43 +8,33 @@
       <p class="text-gray-400 mt-2 font-medium text-lg">Administración integral del sistema</p>
     </div>
     
-    <div class="flex flex-col md:flex-row items-center gap-4">
-      <div class="flex items-center gap-4 bg-[#1e293b]/60 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white/10 hover:border-primary/30 transition-colors duration-300">
-        <div class="avatar placeholder">
-          <div class="w-12 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-[#0f172a]">
-            @if (authService.currentUser()?.photoURL) {
-              <img [src]="authService.currentUser()?.photoURL" alt="Admin Avatar" />
-            } @else {
-              <div class="bg-gradient-to-br from-primary to-secondary text-white w-full h-full flex items-center justify-center">
-                <span class="text-xl font-bold">
-                  {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
-                </span>
-              </div>
-            }
-          </div>
+    <div class="flex items-center gap-4 bg-[#1e293b]/60 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white/10 hover:border-primary/30 transition-colors duration-300">
+      <div class="avatar placeholder">
+        <div class="w-12 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-[#0f172a]">
+          @if (authService.currentUser()?.photoURL) {
+            <img [src]="authService.currentUser()?.photoURL" alt="Admin" />
+          } @else {
+            <div class="bg-gradient-to-br from-primary to-secondary text-white w-full h-full flex items-center justify-center">
+              <span class="text-xl font-bold">{{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}</span>
+            </div>
+          }
         </div>
-        <div class="text-left">
-          <p class="font-bold text-white text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
-          <div class="badge badge-primary badge-xs font-bold shadow-lg shadow-primary/20">SUPER ADMIN</div>
-        </div>
+      </div>
+      <div class="text-left">
+        <p class="font-bold text-white text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
+        <div class="badge badge-primary badge-xs font-bold shadow-lg shadow-primary/20">SUPER ADMIN</div>
       </div>
     </div>
   </div>
 
   <div role="tablist" class="flex p-1 gap-1 bg-black/20 backdrop-blur-sm rounded-xl mb-8 max-w-md mx-auto md:mx-0 border border-white/5">
     <button role="tab" class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 flex justify-center items-center gap-2" 
-       [class.bg-primary]="activeTab() === 'users'"
-       [class.text-white]="activeTab() === 'users'"
-       [class.shadow-lg]="activeTab() === 'users'"
-       [class.text-gray-400]="activeTab() !== 'users'"
+       [class.bg-primary]="activeTab() === 'users'" [class.text-white]="activeTab() === 'users'" [class.shadow-lg]="activeTab() === 'users'" [class.text-gray-400]="activeTab() !== 'users'"
        (click)="switchTab('users')">
        <span>👥</span> Usuarios
     </button>
     <button role="tab" class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 flex justify-center items-center gap-2" 
-       [class.bg-secondary]="activeTab() === 'asesorias'"
-       [class.text-white]="activeTab() === 'asesorias'"
-       [class.shadow-lg]="activeTab() === 'asesorias'"
-       [class.text-gray-400]="activeTab() !== 'asesorias'"
+       [class.bg-secondary]="activeTab() === 'asesorias'" [class.text-white]="activeTab() === 'asesorias'" [class.shadow-lg]="activeTab() === 'asesorias'" [class.text-gray-400]="activeTab() !== 'asesorias'"
        (click)="switchTab('asesorias')">
        <span>📅</span> Asesorías
     </button>
@@ -54,7 +44,7 @@
     <div class="card bg-[#1e293b]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in">
       <div class="p-5 border-b border-white/5 flex justify-between items-center bg-white/5">
         <h3 class="font-bold text-white text-lg">Listado de Usuarios</h3>
-        <button (click)="openModal()" class="btn btn-primary btn-sm gap-2 border-0 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 transition-all text-white">
+        <button (click)="openCreateModal()" class="btn btn-primary btn-sm gap-2 border-0 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 transition-all text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
           Nuevo Usuario
         </button>
@@ -108,8 +98,8 @@
                   <td class="text-right pr-8">
                     @if (user.role !== 'admin') {
                       <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10">@if(user.role === 'Programador') {⬇️} @else {⬆️}</button>
-                        <button (click)="deleteUser(user)" class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10">🗑️</button>
+                        <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10" title="Cambiar Rol">@if(user.role === 'Programador') {⬇️} @else {⬆️}</button>
+                        <button (click)="deleteUser(user)" class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10" title="Eliminar">🗑️</button>
                       </div>
                     }
                   </td>
@@ -127,7 +117,6 @@
        <div class="p-5 border-b border-white/5 bg-white/5">
         <h3 class="font-bold text-white text-lg">Supervisión de Asesorías</h3>
       </div>
-
       <div class="overflow-x-auto">
         <table class="table w-full align-middle">
           <thead class="bg-[#0f172a]/50 text-gray-400 uppercase text-xs font-bold tracking-wider">
@@ -136,48 +125,35 @@
               <th>Programador</th>
               <th>Fecha/Hora</th>
               <th class="text-center">Estado</th>
-              <th class="pr-8">Justificación / Respuesta</th>
+              <th class="pr-8">Respuesta</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5">
             @if (asesorias$ | async; as asesorias) {
               @for (cita of asesorias; track cita.id) {
                 <tr class="hover:bg-white/5 transition-colors">
-                  
                   <td class="pl-8 py-4 font-bold text-white">{{ cita.clientName }}</td>
-                  
                   <td class="font-medium text-primary">{{ cita.programmerName }}</td>
-                  
                   <td>
                     <div class="flex flex-col">
                       <span class="font-bold text-gray-300 text-sm">{{ cita.date }}</span>
                       <span class="text-xs text-gray-500">{{ cita.time }}</span>
                     </div>
                   </td>
-                  
                   <td class="text-center">
-                    @switch (cita.status) {
-                      @case ('pendiente') { <div class="badge badge-warning text-warning-content gap-1 font-bold">⏳ Pendiente</div> }
-                      @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold bg-green-500/20 border-green-500/30">✅ Aprobada</div> }
-                      @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold bg-red-500/20 border-red-500/30">❌ Rechazada</div> }
-                    }
-                  </td>
-
-                  <td class="pr-8">
-                    @if (cita.responseMsg) {
-                      <div class="text-sm italic opacity-80 bg-white/5 p-2 rounded border border-white/5 max-w-xs break-words">
-                        "{{ cita.responseMsg }}"
-                      </div>
+                    @if (cita.status === 'pendiente') {
+                        <div class="join shadow-sm border border-white/10">
+                          <button (click)="updateAsesoriaStatus(cita, 'aprobada')" class="btn btn-xs join-item btn-success text-white border-none hover:brightness-110">✔</button>
+                          <button (click)="updateAsesoriaStatus(cita, 'rechazada')" class="btn btn-xs join-item btn-error text-white border-none hover:brightness-110">✖</button>
+                        </div>
                     } @else {
-                      <span class="text-xs opacity-30 italic">Esperando respuesta...</span>
+                        <span class="badge text-white font-bold" [class.badge-success]="cita.status==='aprobada'" [class.badge-error]="cita.status==='rechazada'">{{ cita.status }}</span>
                     }
                   </td>
-
+                  <td class="pr-8 text-sm italic opacity-80">{{ cita.responseMsg || '--' }}</td>
                 </tr>
               }
-              @empty {
-                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium text-gray-400">No hay solicitudes registradas.</td></tr>
-              }
+              @empty { <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium text-gray-400">No hay solicitudes registradas.</td></tr> }
             }
           </tbody>
         </table>
@@ -185,28 +161,35 @@
     </div>
   }
 
-  @if (showModal()) {
+  @if (showCreateModal()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
       <div class="card w-full max-w-md bg-[#1e293b] text-white shadow-2xl border border-white/10 scale-100 animate-pop-up rounded-2xl">
         <div class="card-body p-6">
           <div class="flex justify-between items-center mb-6 pb-2 border-b border-white/5">
             <h2 class="card-title text-2xl font-bold text-white">Registrar Usuario</h2>
-            <button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white" (click)="closeModal()">✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white" (click)="closeCreateModal()">✕</button>
           </div>
           
           <form [formGroup]="createUserForm" (ngSubmit)="createUser()" class="space-y-4">
+            
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Nombre Completo</span></label>
-              <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
+              <input type="text" formControlName="displayName" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary" [class.input-error]="formUtils.isValidField(createUserForm, 'displayName')"/>
+              @if(formUtils.isValidField(createUserForm, 'displayName')) { <span class="text-error text-xs mt-1">{{ formUtils.getFieldError(createUserForm, 'displayName') }}</span> }
             </div>
+
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Correo Electrónico</span></label>
-              <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
+              <input type="email" formControlName="email" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary" [class.input-error]="formUtils.isValidField(createUserForm, 'email')"/>
+              @if(formUtils.isValidField(createUserForm, 'email')) { <span class="text-error text-xs mt-1">{{ formUtils.getFieldError(createUserForm, 'email') }}</span> }
             </div>
+
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Contraseña</span></label>
-              <input type="password" formControlName="password" placeholder="******" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
+              <input type="password" formControlName="password" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary" [class.input-error]="formUtils.isValidField(createUserForm, 'password')"/>
+              @if(formUtils.isValidField(createUserForm, 'password')) { <span class="text-error text-xs mt-1">{{ formUtils.getFieldError(createUserForm, 'password') }}</span> }
             </div>
+
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Rol Inicial</span></label>
               <select formControlName="role" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary">
@@ -214,16 +197,58 @@
                 <option value="Programador">Programador (Perfil Público)</option>
               </select>
             </div>
+
             <div class="card-actions justify-end gap-3 mt-4">
-              <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" (click)="closeModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-6 border-0 bg-gradient-to-r from-primary to-blue-600 shadow-lg shadow-primary/20" [disabled]="loading() || createUserForm.invalid">
-                @if (loading()) { <span class="loading loading-spinner"></span> }
-                Crear Cuenta
+              <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" (click)="closeCreateModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-6 border-0 bg-gradient-to-r from-primary to-blue-600 shadow-lg shadow-primary/20" [disabled]="loading()">
+                @if (loading()) { <span class="loading loading-spinner"></span> } Crear Cuenta
               </button>
             </div>
           </form>
         </div>
       </div>
+    </div>
+  }
+
+  @if (showAvailabilityModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
+        <div class="card w-full max-w-sm bg-[#1e293b] text-white shadow-2xl border border-white/10 scale-100 animate-pop-up rounded-2xl">
+            <div class="card-body p-6">
+                <div class="text-center mb-6">
+                    <div class="inline-flex p-3 rounded-full bg-secondary/10 text-secondary mb-2 text-2xl">⏰</div>
+                    <h3 class="font-bold text-xl">Configurar Horario</h3>
+                    <p class="text-xs text-gray-500">Define cuándo trabaja {{ selectedProgrammer()?.displayName }}</p>
+                </div>
+                
+                <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()" class="space-y-4">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Días</span></label>
+                        <select formControlName="dias" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full">
+                            <option value="Lunes a Viernes">Lunes a Viernes</option>
+                            <option value="Lunes a Sábado">Lunes a Sábado</option>
+                            <option value="Todos los días">Todos los días</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 bg-[#0f172a] p-3 rounded-xl border border-white/5">
+                        <div class="form-control w-1/2">
+                            <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Desde</span></label>
+                            <input type="time" formControlName="startHour" class="input input-sm bg-transparent text-center text-white font-bold focus:outline-none" />
+                        </div>
+                        <div class="divider divider-horizontal mx-0 px-0 opacity-20"></div>
+                        <div class="form-control w-1/2">
+                            <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Hasta</span></label>
+                            <input type="time" formControlName="endHour" class="input input-sm bg-transparent text-center text-white font-bold focus:outline-none" />
+                        </div>
+                    </div>
+                    <div class="modal-action justify-center w-full pt-2">
+                        <button type="submit" class="btn btn-secondary btn-block shadow-lg shadow-secondary/20" [disabled]="loading()">
+                            @if (loading()) { <span class="loading loading-spinner"></span> } Guardar Horario
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-xs btn-ghost w-full mt-2 text-gray-500" (click)="closeAvailabilityModal()">Cancelar</button>
+                </form>
+            </div>
+        </div>
     </div>
   }
 

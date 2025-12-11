@@ -1,218 +1,213 @@
-  import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-  import { CommonModule, AsyncPipe } from '@angular/common';
-  import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-  import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
 
-  // Firebase
-  import { 
-    collection, collectionData, deleteDoc, doc, Firestore, 
-    setDoc, updateDoc 
-  } from '@angular/fire/firestore';
-  import { deleteApp, initializeApp } from '@angular/fire/app';
-  import { createUserWithEmailAndPassword, getAuth, updateProfile } from '@angular/fire/auth';
+// Firebase Imports
+import { collection, collectionData, deleteDoc, doc, Firestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import { deleteApp, initializeApp } from '@angular/fire/app';
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from '@angular/fire/auth';
 
-  // Proyecto
-  import { AuthService } from '../../../core/services/firebase/authservice';
-  import { Asesoria, Availability, UserProfile } from '../../share/Interfaces/Interfaces-Users';
-  import { environment } from '../../../../environments/environment';
+// Tus servicios e interfaces
+import { AuthService } from '../../../core/services/firebase/authservice';
+import { Asesoria, Availability, UserProfile } from '../../share/Interfaces/Interfaces-Users';
+// Ajusta esta ruta a donde tengas tu environment.ts
+import { environment } from '../../../../environments/environment'; 
+import { FormUtils } from '../../share/Formutils/Formutils';
 
-  @Component({
-    selector: 'app-adminpage',
-    standalone: true,
-    imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
-    templateUrl: './Adminpage.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  })
-  export class Adminpage { 
-    
-    private firestore = inject(Firestore);
-    public authService = inject(AuthService);
-    private fb = inject(FormBuilder);
+@Component({
+  selector: 'app-adminpage',
+  standalone: true,
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
+  templateUrl: './Adminpage.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Adminpage { 
+  
+  private firestore = inject(Firestore);
+  public authService = inject(AuthService);
+  private fb = inject(FormBuilder);
 
-    // Observables
-    users$: Observable<UserProfile[]>;
-    asesorias$: Observable<Asesoria[]>;
+  // Observables de datos
+  users$: Observable<UserProfile[]>;
+  asesorias$: Observable<Asesoria[]>;
 
-    // Señales de Estado
-    loading = signal(false);
-    showModal = signal(false);            // Modal Crear Usuario
-    showAvailabilityModal = signal(false); // Modal Horarios (¡ESTA ES LA QUE TE FALLABA!)
-    activeTab = signal<'users' | 'asesorias'>('users');
-    
-    selectedProgrammer = signal<UserProfile | null>(null);
+  // Estado UI
+  loading = signal(false);
+  showCreateModal = signal(false);
+  showAvailabilityModal = signal(false);
+  activeTab = signal<'users' | 'asesorias'>('users');
+  
+  selectedProgrammer = signal<UserProfile | null>(null);
+  formUtils = FormUtils; // Exponer al HTML
 
-    // Lista de horas para el HTML
-    availableHours = [
-      '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-      '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM', 
-      '07:00 PM', '08:00 PM'
-    ];
+  // --- FORMULARIOS ---
+  createUserForm = this.fb.group({
+    displayName: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    role: ['user', Validators.required]
+  });
 
-    // Formularios
-    createUserForm = this.fb.group({
-      displayName: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['user']
-    });
+  availabilityForm = this.fb.group({
+    dias: ['', Validators.required],
+    startHour: ['09:00', Validators.required], // Formato HH:mm
+    endHour: ['17:00', Validators.required]
+  });
 
-    availabilityForm = this.fb.group({
-      dias: ['', Validators.required],
-      startHour: ['09:00 AM', Validators.required],
-      endHour: ['05:00 PM', Validators.required]
-    });
+  constructor() {
+    const usersRef = collection(this.firestore, 'users');
+    this.users$ = collectionData(usersRef, { idField: 'uid' }) as Observable<UserProfile[]>;
 
-    constructor() {
-      const usersRef = collection(this.firestore, 'users');
-      this.users$ = collectionData(usersRef, { idField: 'uid' }) as Observable<UserProfile[]>;
+    const asesoriasRef = collection(this.firestore, 'asesorias');
+    this.asesorias$ = collectionData(asesoriasRef, { idField: 'id' }) as Observable<Asesoria[]>;
+  }
 
-      const asesoriasRef = collection(this.firestore, 'asesorias');
-      this.asesorias$ = collectionData(asesoriasRef, { idField: 'id' }) as Observable<Asesoria[]>;
+  // --- NAVEGACIÓN ---
+  switchTab(tab: 'users' | 'asesorias') {
+    this.activeTab.set(tab);
+  }
+
+  // --- CREAR USUARIO (Modal) ---
+  openCreateModal() {
+    this.createUserForm.reset({ role: 'user' });
+    this.showCreateModal.set(true);
+  }
+
+  closeCreateModal() {
+    this.showCreateModal.set(false);
+  }
+
+  async createUser() {
+    if (this.createUserForm.invalid) {
+      this.createUserForm.markAllAsTouched();
+      return;
     }
 
-    // --- NAVEGACIÓN ---
-    switchTab(tab: 'users' | 'asesorias') {
-      this.activeTab.set(tab);
-    }
+    this.loading.set(true);
+    const { email, password, displayName, role } = this.createUserForm.value;
 
-    // --- MODAL USUARIO ---
-    openModal() {
-      this.showModal.set(true);
-    }
+    // Inicializamos una app secundaria para no desloguear al admin
+    // IMPORTANTE: Asegúrate de que environment.firebaseConfig exista. Si se llama 'firebase', cámbialo aquí.
+    const secondaryApp = initializeApp(environment.firebaseConfig, 'Secondary'); 
+    const secondaryAuth = getAuth(secondaryApp);
 
-    closeModal() {
-      this.showModal.set(false);
-      this.createUserForm.reset({ role: 'user' });
-    }
+    try {
+      if(email && password) {
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const newUser = userCredential.user;
 
-    async createUser() {
-      if (this.createUserForm.invalid) {
-        this.createUserForm.markAllAsTouched();
-        return;
-      }
+        await updateProfile(newUser, { displayName: displayName });
 
-      this.loading.set(true);
-      const { email, password, displayName, role } = this.createUserForm.value;
-
-      // 👇 AQUÍ ESTABA EL ERROR. CAMBIA 'environment.firebase' POR 'environment.firebaseConfig'
-      const secondaryApp = initializeApp(environment.firebaseConfig, 'Secondary'); 
-      
-      const secondaryAuth = getAuth(secondaryApp);
-
-      try {
-        if(email && password) {
-          // ... (el resto de la lógica sigue igual)
-          const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-          const newUser = userCredential.user;
-
-          await updateProfile(newUser, { displayName: displayName });
-
-          const userDocRef = doc(this.firestore, `users/${newUser.uid}`);
-          await setDoc(userDocRef, {
-            uid: newUser.uid,
-            email: email,
-            displayName: displayName,
-            role: role,
-            photoURL: null,
-            createdAt: new Date().toISOString()
-          });
-
-          alert(`Usuario ${displayName} creado.`);
-          this.closeModal();
-        }
-      } catch (error: any) {
-        console.error(error);
-        alert('Error: ' + error.message);
-      } finally {
-        this.loading.set(false);
-        await deleteApp(secondaryApp);
-      }
-    }
-
-    // --- GESTIÓN ROLES ---
-    async toggleRole(user: UserProfile) {
-      if (user.uid === this.authService.currentUser()?.uid) return alert('No puedes cambiar tu propio rol.');
-      if (user.role === 'admin') return alert('No puedes modificar a otro Admin.');
-
-      const newRole = user.role === 'Programador' ? 'user' : 'Programador';
-      if (!confirm(`¿Cambiar rol de ${user.displayName}?`)) return;
-
-      try {
-        await updateDoc(doc(this.firestore, 'users', user.uid), { role: newRole });
-      } catch (e) { console.error(e); }
-    }
-
-    async deleteUser(user: UserProfile) {
-      if (user.uid === this.authService.currentUser()?.uid) return alert('No puedes eliminarte.');
-      if (user.role === 'admin') return alert('No puedes borrar Admins.');
-      if (!confirm(`¿Eliminar a ${user.email}?`)) return;
-
-      try {
-        await deleteDoc(doc(this.firestore, 'users', user.uid));
-      } catch (e) { console.error(e); }
-    }
-
-    // --- MODAL HORARIOS (ESTAS SON LAS FUNCIONES QUE TE FALTABAN) ---
-    
-    openAvailabilityModal(user: UserProfile) {
-      if (user.role !== 'Programador') return;
-      
-      this.selectedProgrammer.set(user); // Guarda al usuario seleccionado
-
-      // Separa las horas si ya existen (ej: "09:00 AM - 05:00 PM")
-      const hours = user.availability?.horas || '';
-      const [start, end] = hours.includes(' - ') ? hours.split(' - ') : ['09:00 AM', '05:00 PM'];
-
-      this.availabilityForm.patchValue({
-        dias: user.availability?.dias || '',
-        startHour: start.trim(),
-        endHour: end.trim()
-      });
-      
-      this.showAvailabilityModal.set(true); // Abre el modal
-    }
-
-    closeAvailabilityModal() {
-      this.showAvailabilityModal.set(false); // Cierra el modal
-      this.selectedProgrammer.set(null);
-    }
-
-    async saveAvailability() {
-      const user = this.selectedProgrammer();
-      if (!user || this.availabilityForm.invalid) return;
-
-      this.loading.set(true);
-      try {
-        const { dias, startHour, endHour } = this.availabilityForm.value;
-        
-        const newAvailability: Availability = {
-          dias: dias!,
-          horas: `${startHour} - ${endHour}`
-        };
-        
-        await updateDoc(doc(this.firestore, 'users', user.uid), { availability: newAvailability });
-        
-        alert('Horario actualizado.');
-        this.closeAvailabilityModal();
-        
-      } catch (e) { 
-        console.error(e);
-        alert('Error al guardar.');
-      } finally { 
-        this.loading.set(false); 
-      }
-    }
-
-    // --- GESTIÓN ASESORÍAS ---
-    async updateAsesoriaStatus(asesoria: Asesoria, newStatus: 'aprobada' | 'rechazada') {
-      if (!asesoria.id) return;
-      if (!confirm(`¿${newStatus === 'aprobada' ? 'Aprobar' : 'Rechazar'} cita?`)) return;
-
-      try {
-        await updateDoc(doc(this.firestore, 'asesorias', asesoria.id), { 
-          status: newStatus,
-          responseMsg: newStatus === 'aprobada' ? 'Confirmada por Admin.' : 'Cancelada por Admin.'
+        const userDocRef = doc(this.firestore, `users/${newUser.uid}`);
+        await setDoc(userDocRef, {
+          uid: newUser.uid,
+          email: email,
+          displayName: displayName,
+          role: role,
+          photoURL: null,
+          createdAt: new Date().toISOString()
         });
-      } catch (e) { console.error(e); }
+
+        alert(`✅ Usuario ${displayName} creado exitosamente.`);
+        this.closeCreateModal();
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert('Error: ' + error.message);
+    } finally {
+      this.loading.set(false);
+      await deleteApp(secondaryApp);
     }
   }
+
+  // --- GESTIÓN USUARIOS ---
+  async toggleRole(user: UserProfile) {
+    if (user.uid === this.authService.currentUser()?.uid) return alert('⛔ No puedes cambiar tu propio rol.');
+    if (user.role === 'admin') return alert('⛔ No puedes modificar a otro Admin.');
+
+    const newRole = user.role === 'Programador' ? 'user' : 'Programador';
+    if (!confirm(`¿Cambiar rol de ${user.displayName} a ${newRole}?`)) return;
+
+    try {
+      await updateDoc(doc(this.firestore, 'users', user.uid), { role: newRole });
+    } catch (e) { console.error(e); }
+  }
+
+  async deleteUser(user: UserProfile) {
+    if (user.uid === this.authService.currentUser()?.uid) return alert('⛔ No puedes eliminarte.');
+    if (user.role === 'admin') return alert('⛔ No puedes borrar Admins.');
+    if (!confirm(`¿Eliminar a ${user.email} permanentemente?`)) return;
+
+    try {
+      await deleteDoc(doc(this.firestore, 'users', user.uid));
+    } catch (e) { console.error(e); }
+  }
+
+  // --- HORARIOS (Modal) ---
+  openAvailabilityModal(user: UserProfile) {
+    if (user.role !== 'Programador') return;
+    
+    this.selectedProgrammer.set(user);
+    
+    // Parsear horario existente si lo hay
+    const hours = user.availability?.horas || '';
+    // Intentamos separar "09:00 - 17:00"
+    const [start, end] = hours.includes(' - ') ? hours.split(' - ') : ['09:00', '17:00'];
+
+    this.availabilityForm.patchValue({
+      dias: user.availability?.dias || 'Lunes a Viernes',
+      startHour: start.trim(),
+      endHour: end.trim()
+    });
+    
+    this.showAvailabilityModal.set(true);
+  }
+
+  closeAvailabilityModal() {
+    this.showAvailabilityModal.set(false);
+    this.selectedProgrammer.set(null);
+  }
+
+  async saveAvailability() {
+    const user = this.selectedProgrammer();
+    if (!user || this.availabilityForm.invalid) {
+        this.availabilityForm.markAllAsTouched();
+        return;
+    }
+
+    this.loading.set(true);
+    try {
+      const { dias, startHour, endHour } = this.availabilityForm.value;
+      
+      const newAvailability: Availability = {
+        dias: dias!,
+        horas: `${startHour} - ${endHour}`
+      };
+      
+      await updateDoc(doc(this.firestore, 'users', user.uid), { availability: newAvailability });
+      
+      alert('✅ Horario actualizado.');
+      this.closeAvailabilityModal();
+      
+    } catch (e) { 
+      console.error(e);
+      alert('Error al guardar.');
+    } finally { 
+      this.loading.set(false); 
+    }
+  }
+
+  // --- GESTIÓN ASESORÍAS ---
+  async updateAsesoriaStatus(asesoria: Asesoria, newStatus: 'aprobada' | 'rechazada') {
+    if (!asesoria.id) return;
+    if (!confirm(`¿${newStatus === 'aprobada' ? 'Aprobar' : 'Rechazar'} cita de ${asesoria.clientName}?`)) return;
+
+    try {
+      await updateDoc(doc(this.firestore, 'asesorias', asesoria.id), { 
+        status: newStatus,
+        responseMsg: newStatus === 'aprobada' ? 'Confirmada por Admin.' : 'Cancelada por Admin.'
+      });
+    } catch (e) { console.error(e); }
+  }
+}
