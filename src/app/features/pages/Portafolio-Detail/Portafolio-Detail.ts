@@ -1,22 +1,26 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
-import { ActivatedRoute} from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+// Firebase
 import { Firestore, doc, docData, collection, query, where, collectionData, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, orderBy } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/firebase/authservice';
+// RxJS
 import { Observable, of, switchMap } from 'rxjs';
 import { UserProfile, Project, Asesoria } from '../../share/Interfaces/Interfaces-Users';
-import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
+// EmailJS
+import emailjs from '@emailjs/browser';
 
 @Component({
   selector: 'app-portfolio-detail',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, ],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule],
   templateUrl: './Portafolio-Detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortfolioDetail implements OnInit {
-private route = inject(ActivatedRoute);
+  
+  private route = inject(ActivatedRoute);
   private firestore = inject(Firestore);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
@@ -24,26 +28,25 @@ private route = inject(ActivatedRoute);
   // Observables
   profile$: Observable<UserProfile | undefined> | null = null;
   projects$: Observable<Project[]> | null = null;
-  
-  // 🔔 NOTIFICACIONES INTELIGENTES
-  notifications$: Observable<Asesoria[]>;
+  notifications$: Observable<Asesoria[]>; // Notificaciones inteligentes
 
   visitedProfileId: string = '';
   targetProfile: UserProfile | null = null;
-
+  
   // Estados
   isEditing = signal(false);
   currentProjectId = signal<string | null>(null);
   loading = signal(false);
   loadingBooking = signal(false);
 
-  // Formularios
+  // 1. Formulario de Horario
   availabilityForm = this.fb.group({
     startHour: ['09:00', Validators.required],
     endHour: ['18:00', Validators.required],
     days: ['Lunes a Viernes', Validators.required]
   });
 
+  // 2. Formulario de Proyectos
   projectForm = this.fb.group({
     title: ['', Validators.required],
     description: ['', Validators.required],
@@ -54,6 +57,7 @@ private route = inject(ActivatedRoute);
     demoUrl: ['']
   });
 
+  // 3. Formulario de Contacto
   bookingForm = this.fb.group({
     date: ['', Validators.required],
     time: ['', Validators.required],
@@ -62,24 +66,25 @@ private route = inject(ActivatedRoute);
   });
 
   constructor() {
-    // LOGICA DE NOTIFICACIONES:
-    // Si soy Dueño -> Veo quién me escribe (ProgrammerId == Yo)
-    // Si soy Cliente -> Veo a quién le escribí (ClientId == Yo)
+    // Lógica de Notificaciones:
+    // Si soy el DUEÑO del perfil -> Veo solicitudes RECIBIDAS (programmerId == yo)
+    // Si soy un CLIENTE -> Veo solicitudes ENVIADAS (clientId == yo)
     this.notifications$ = this.authService.user$.pipe(
       switchMap(user => {
-        if (!user) return of([]); 
+        if (!user) return of([]);
         
-        const profileIdFromUrl = this.route.snapshot.paramMap.get('id'); 
-        const isOwner = user.uid === profileIdFromUrl;
+        // Obtenemos el ID del perfil que estamos visitando desde la URL
+        const profileIdFromUrl = this.route.snapshot.paramMap.get('id');
+        const isOwnerOfPage = user.uid === profileIdFromUrl;
 
         const citasRef = collection(this.firestore, 'asesorias');
         let qCitas;
 
-        if (isOwner) {
-          // VISTA PROGRAMADOR (Recibidos)
+        if (isOwnerOfPage) {
+          // Soy el dueño: muéstrame quién me quiere contactar
           qCitas = query(citasRef, where('programmerId', '==', user.uid), orderBy('date', 'desc'));
         } else {
-          // VISTA CLIENTE (Enviados)
+          // Soy cliente: muéstrame mis solicitudes enviadas
           qCitas = query(citasRef, where('clientId', '==', user.uid), orderBy('date', 'desc'));
         }
 
@@ -89,8 +94,10 @@ private route = inject(ActivatedRoute);
   }
 
   ngOnInit() {
-    emailjs.init("rjFCNeLrN83tOInc19"); // Tu Public Key
-    
+    // 1. Inicializar EmailJS con tu Public Key (IMAGEN: image_18cdf8.png)
+    emailjs.init("rjFCNeLrN83tOInc19");
+
+    // 2. Cargar Perfil y Proyectos
     this.visitedProfileId = this.route.snapshot.paramMap.get('id') || '';
     if (this.visitedProfileId) {
       const userDoc = doc(this.firestore, 'users', this.visitedProfileId);
@@ -107,24 +114,27 @@ private route = inject(ActivatedRoute);
     return currentUser?.uid === this.visitedProfileId;
   }
 
-  // --- 🔥 FUNCIÓN NUEVA: PROGRAMADOR RESPONDE SOLICITUD ---
+  // --- 🔥 GESTIÓN DE SOLICITUDES (RESPONDER) ---
   async respondToRequest(cita: Asesoria, status: 'aprobada' | 'rechazada') {
     if (!cita.id) return;
     
-    const confirmMsg = status === 'aprobada' ? '¿Aceptar esta asesoría?' : '¿Rechazar esta solicitud?';
-    if (!confirm(confirmMsg)) return;
+    let mensaje = '';
+
+    if (status === 'aprobada') {
+      if (!confirm('¿Aceptar esta asesoría?')) return;
+      mensaje = '¡Hola! He aceptado tu solicitud. Pronto te enviaré los detalles de la reunión.';
+    } else {
+      const motivo = prompt('Por favor, escribe el motivo del rechazo:');
+      if (!motivo) return; // Cancelar si no escribe nada
+      mensaje = motivo;
+    }
 
     try {
       const citaRef = doc(this.firestore, 'asesorias', cita.id);
-      
       await updateDoc(citaRef, {
         status: status,
-        // Mensaje automático que verá el cliente
-        responseMsg: status === 'aprobada' 
-          ? `¡Hola! He aceptado tu solicitud. Te enviaré detalles pronto.`
-          : 'Lo siento, no tengo disponibilidad en ese horario.'
+        responseMsg: mensaje
       });
-
       alert(`Solicitud ${status} correctamente.`);
     } catch (error) {
       console.error(error);
@@ -132,8 +142,7 @@ private route = inject(ActivatedRoute);
     }
   }
 
-  // --- (Resto del código igual) ---
-
+  // --- MODALES ---
   openMyRequestsModal() {
     if (!this.authService.currentUser()) return;
     const modal = document.getElementById('my_requests_modal') as HTMLDialogElement;
@@ -174,24 +183,35 @@ private route = inject(ActivatedRoute);
   }
 
   openBookingModal(profile: UserProfile) {
-    if (!this.authService.currentUser()) { alert('⚠️ Inicia sesión para contactar.'); return; }
-    if (!this.isAvailableNow(profile)) { 
-      if(!confirm(`⛔ El programador no está disponible ahora (${profile.availability?.horas}). ¿Deseas agendar igual?`)) return; 
+    if (!this.authService.currentUser()) {
+      alert('⚠️ Inicia sesión para contactar.');
+      return;
     }
+    
+    // Validación de Horario antes de abrir
+    if (!this.isAvailableNow(profile)) {
+      alert(`⛔ El programador no está disponible en este momento.\nHorario: ${profile.availability?.horas}`);
+      return; 
+    }
+
     this.targetProfile = profile;
     this.bookingForm.reset();
     const modal = document.getElementById('booking_modal') as HTMLDialogElement;
     if(modal) modal.showModal();
   }
 
+  // --- LÓGICA DE HORARIO ---
   isAvailableNow(profile: UserProfile): boolean {
     if (!profile.availability?.horas) return true; 
     const now = new Date();
     const currentVal = now.getHours() * 60 + now.getMinutes();
+    
     const [startStr, endStr] = profile.availability.horas.split(' - ');
     if (!startStr || !endStr) return true;
+
     const startVal = this.timeStringToMinutes(startStr);
     const endVal = this.timeStringToMinutes(endStr);
+
     return currentVal >= startVal && currentVal < endVal;
   }
 
@@ -202,54 +222,117 @@ private route = inject(ActivatedRoute);
 
   async saveAvailability() {
     if (this.availabilityForm.invalid || !this.isOwner()) return;
+    
     this.loading.set(true);
     const { startHour, endHour, days } = this.availabilityForm.value;
+    
     try {
       const userRef = doc(this.firestore, 'users', this.visitedProfileId);
-      await updateDoc(userRef, { availability: { horas: `${startHour} - ${endHour}`, dias: days } });
+      await updateDoc(userRef, {
+        availability: {
+          horas: `${startHour} - ${endHour}`,
+          dias: days
+        }
+      });
       alert('✅ Horario actualizado.');
       (document.getElementById('availability_modal') as HTMLDialogElement).close();
-    } catch (error) { alert('Error al guardar.'); } finally { this.loading.set(false); }
+    } catch (error) {
+      console.error(error);
+      alert('Error al guardar.');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
+  // --- ENVÍO DE CORREO Y CITA (EMAILJS) ---
   async submitBooking() {
-    if (this.bookingForm.invalid) { this.bookingForm.markAllAsTouched(); return; }
+    if (this.bookingForm.invalid) {
+      this.bookingForm.markAllAsTouched();
+      return;
+    }
+    
     const currentUser = this.authService.currentUser();
     if (!currentUser || !this.targetProfile) return;
+
+    // Doble chequeo de horario
+    if (!this.isAvailableNow(this.targetProfile)) {
+      alert('Estás fuera del horario de atención.');
+      return;
+    }
+
     this.loadingBooking.set(true);
     const formVal = this.bookingForm.value;
+
     try {
+      // 1. Guardar en Base de Datos (Para Admin y Notificaciones)
       await addDoc(collection(this.firestore, 'asesorias'), {
         programmerId: this.targetProfile.uid,
-        programmerName: this.targetProfile.displayName,
+        programmerName: this.targetProfile.displayName || 'Programador',
         clientId: currentUser.uid,
-        clientName: currentUser.displayName,
-        date: formVal.date!, time: formVal.time!, comment: `[${formVal.subject}] ${formVal.comment}`,
-        status: 'pendiente' // <--- INICIA PENDIENTE
+        clientName: currentUser.displayName || currentUser.email,
+        date: formVal.date!,
+        time: formVal.time!,
+        comment: `[${formVal.subject}] ${formVal.comment}`,
+        status: 'pendiente' // <--- Inicia pendiente
       });
+
+      // 2. Enviar Correo con EmailJS
       if (this.targetProfile.email) {
+        
+        // Variables EXACTAS de tu plantilla (IMAGEN: image_1927f1.png y image_1859f4.png)
         const templateParams = {
-          to_email: this.targetProfile.email, to_name: this.targetProfile.displayName, from_name: currentUser.displayName,
-          subject: formVal.subject, message: formVal.comment, date_time: `${formVal.date} - ${formVal.time}`,
-          name: currentUser.displayName, email: currentUser.email, title: formVal.subject
+          to_email: this.targetProfile.email,       // Destinatario
+          to_name: this.targetProfile.displayName,  
+          from_name: currentUser.displayName || 'Usuario',
+          
+          title: formVal.subject,                   // Asunto ({{title}})
+          message: formVal.comment,                 // Mensaje ({{message}})
+          date_time: `${formVal.date} - ${formVal.time}`,
+          
+          name: currentUser.displayName || currentUser.email, // ({{name}})
+          email: currentUser.email                  // ({{email}}) Reply-To
         };
-        await emailjs.send('service_y02aan7', 'template_faf7lba', templateParams, 'rjFCNeLrN83tOInc19');
+
+        await emailjs.send(
+          'service_y02aan7',   // Service ID
+          'template_faf7lba',  // Template ID
+          templateParams,
+          'rjFCNeLrN83tOInc19' // Public Key (Por seguridad la pasamos aquí también)
+        );
       }
+      
       alert('✅ Solicitud enviada con éxito.');
-      (document.getElementById('booking_modal') as HTMLDialogElement).close();
-    } catch (error) { alert('Error al enviar.'); } finally { this.loadingBooking.set(false); }
+      const modal = document.getElementById('booking_modal') as HTMLDialogElement;
+      if(modal) modal.close();
+      
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert('Error al enviar: ' + (error.text || error.message || 'Desconocido'));
+    } finally {
+      this.loadingBooking.set(false);
+    }
   }
 
+  // --- GESTIÓN DE PROYECTOS ---
   async saveProject() {
     if (this.projectForm.invalid || !this.isOwner()) return;
     this.loading.set(true);
     const val = this.projectForm.value;
-    const data: any = { programmerId: this.visitedProfileId, title: val.title, description: val.description, category: val.category, role: val.role, technologies: (val.technologies || '').split(',').map((t: string) => t.trim()), repoUrl: val.repoUrl || '', demoUrl: val.demoUrl || '' };
+    const data: any = {
+        programmerId: this.visitedProfileId, title: val.title, description: val.description,
+        category: val.category, role: val.role, 
+        technologies: (val.technologies || '').split(',').map((t: string) => t.trim()),
+        repoUrl: val.repoUrl || '', demoUrl: val.demoUrl || ''
+    };
     try {
-        if (this.isEditing() && this.currentProjectId()) await updateDoc(doc(this.firestore, 'projects', this.currentProjectId()!), data);
-        else await addDoc(collection(this.firestore, 'projects'), data);
+        if (this.isEditing() && this.currentProjectId()) {
+            await updateDoc(doc(this.firestore, 'projects', this.currentProjectId()!), data);
+        } else {
+            await addDoc(collection(this.firestore, 'projects'), data);
+        }
         (document.getElementById('project_modal') as HTMLDialogElement).close();
-    } catch (e: any) { alert(e.message); } finally { this.loading.set(false); }
+    } catch (e: any) { alert(e.message); } 
+    finally { this.loading.set(false); }
   }
 
   async toggleLike(project: Project) {
@@ -261,7 +344,12 @@ private route = inject(ActivatedRoute);
     liked ? await updateDoc(ref, { likes: arrayRemove(user.uid) }) : await updateDoc(ref, { likes: arrayUnion(user.uid) });
   }
 
-  isLikedByMe(project: Project): boolean { return project.likes?.includes(this.authService.currentUser()?.uid || '') || false; }
-  async deleteProject(id: string) { if (!this.isOwner() || !confirm('¿Borrar?')) return; await deleteDoc(doc(this.firestore, 'projects', id)); }
-
+  isLikedByMe(project: Project): boolean {
+    return project.likes?.includes(this.authService.currentUser()?.uid || '') || false;
+  }
+  
+  async deleteProject(id: string) {
+    if (!this.isOwner() || !confirm('¿Borrar?')) return;
+    await deleteDoc(doc(this.firestore, 'projects', id));
+  }
 }

@@ -2,10 +2,10 @@
 
   @if (authService.currentUser()) {
     <div class="fixed top-24 right-4 z-50 animate-bounce-in">
-      <button (click)="openMyRequestsModal()" class="btn btn-circle btn-primary btn-lg shadow-2xl border-2 border-white/20 tooltip tooltip-left" data-tip="Mis Solicitudes">
+      <button (click)="openMyRequestsModal()" class="btn btn-circle btn-primary btn-lg shadow-2xl border-2 border-white/20 tooltip tooltip-left" data-tip="Centro de Solicitudes">
         <div class="indicator">
           <span class="text-2xl">🔔</span>
-          @if (notifications$ | async; as asesorias) {
+          @if ((notifications$ | async)?.length) {
             <span class="badge badge-sm badge-error indicator-item animate-pulse"></span>
           }
         </div>
@@ -42,11 +42,11 @@
             <div class="flex flex-col items-center md:items-start gap-2">
               @if (isAvailableNow(profile)) {
                 <div class="badge badge-success gap-1 text-white font-bold animate-pulse">
-                  🟢 Disponible ahora<span class="font-normal opacity-75 text-neutral-950">({{ profile.availability?.horas || 'Sin horario' }})</span>
+                  🟢 Disponible ahora
                 </div>
               } @else {
                 <div class="badge badge-error gap-1 text-white font-bold opacity-80">
-                  🔴 Fuera de horario <span class="font-normal opacity-75 text-neutral-950">({{ profile.availability?.horas || 'Sin horario' }})</span>
+                  🔴 Fuera de horario <span class="font-normal opacity-75">({{ profile.availability?.horas || 'Sin horario' }})</span>
                 </div>
               }
 
@@ -55,23 +55,14 @@
                 class="btn btn-primary px-6 font-bold shadow-lg shadow-primary/20 gap-2 disabled:bg-gray-700 disabled:text-gray-500 disabled:border-none"
                 [disabled]="!isAvailableNow(profile)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                
-                @if (isAvailableNow(profile)) {
-                  Contactar / Agendar
-                } @else {
-                  Cerrado (Vuelve mañana)
-                }
+                @if (isAvailableNow(profile)) { Contactar / Agendar } @else { Cerrado por ahora }
               </button>
             </div>
 
             @if (isOwner()) {
               <div class="flex flex-col gap-2 ml-4 border-l border-gray-700 pl-4">
-                <button (click)="openProjectModal()" class="btn btn-outline btn-secondary btn-sm">
-                  ➕ Agregar Proyecto
-                </button>
-                <button (click)="openAvailabilityModal(profile)" class="btn btn-outline btn-accent btn-sm">
-                  ⏰ Configurar Horario
-                </button>
+                <button (click)="openProjectModal()" class="btn btn-outline btn-secondary btn-sm">➕ Agregar Proyecto</button>
+                <button (click)="openAvailabilityModal(profile)" class="btn btn-outline btn-accent btn-sm">⏰ Configurar Horario</button>
               </div>
             }
           </div>
@@ -87,28 +78,13 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @if (projects$ | async; as projects) {
-          
           @for (project of projects; track project.id) {
             <div class="card bg-[#1e293b] border border-gray-700 shadow-xl hover:border-gray-600 transition-all duration-300 group">
-              
               <div class="card-body">
                 <div class="flex justify-between items-start">
-                  
-                  <div class="badge text-white font-bold" 
-                       [class.badge-secondary]="project.category === 'Academico'" 
-                       [class.badge-accent]="project.category === 'Laboral'">
-                    {{ project.category }}
-                  </div>
-                  
+                  <div class="badge text-white font-bold" [class.badge-secondary]="project.category === 'Academico'" [class.badge-accent]="project.category === 'Laboral'">{{ project.category }}</div>
                   <div class="flex gap-2 items-center">
-                    <button 
-                      (click)="toggleLike(project)" 
-                      class="btn btn-circle btn-sm border-none shadow-md"
-                      [class.bg-yellow-400]="isLikedByMe(project)"
-                      [class.bg-gray-700]="!isLikedByMe(project)">
-                      ⭐
-                    </button>
-
+                    <button (click)="toggleLike(project)" class="btn btn-circle btn-sm border-none shadow-md" [class.bg-yellow-400]="isLikedByMe(project)" [class.bg-gray-700]="!isLikedByMe(project)">⭐</button>
                     @if (isOwner()) {
                       <div class="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button (click)="openProjectModal(project)" class="btn btn-xs btn-ghost text-info tooltip" data-tip="Editar">✏️</button>
@@ -117,117 +93,57 @@
                     }
                   </div>
                 </div>
-
                 <h3 class="card-title text-white text-xl mt-2">{{ project.title }}</h3>
-                
-                @if (project.likes && project.likes.length > 0) {
-                  <div class="text-xs text-yellow-500 font-bold mb-1 flex items-center gap-1">
-                    <span>⭐</span> {{ project.likes.length }} Destacados
-                  </div>
-                }
-
+                @if (project.likes && project.likes.length > 0) { <div class="text-xs text-yellow-500 font-bold mb-1 flex items-center gap-1"><span>⭐</span> {{ project.likes.length }} Destacados</div> }
                 <p class="text-sm text-primary font-mono mb-2">{{ project.role }}</p>
                 <p class="text-gray-400 text-sm mb-4 min-h-[60px] line-clamp-3">{{ project.description }}</p>
-
                 <div class="flex flex-wrap gap-2 mb-6">
-                  @for (tech of project.technologies; track tech) {
-                    <span class="px-2 py-1 bg-[#0f172a] rounded text-xs text-blue-400 border border-blue-900/30">{{ tech }}</span>
-                  }
+                  @for (tech of project.technologies; track tech) { <span class="px-2 py-1 bg-[#0f172a] rounded text-xs text-blue-400 border border-blue-900/30">{{ tech }}</span> }
                 </div>
-
                 <div class="flex gap-3 mt-auto">
-                  @if (project.demoUrl) {
-                    <a [href]="project.demoUrl" target="_blank" class="btn btn-sm btn-primary flex-1">🚀 Demo</a>
-                  }
-                  @if (project.repoUrl) {
-                    <a [href]="project.repoUrl" target="_blank" class="btn btn-sm btn-outline flex-1 border-gray-600 text-gray-300">💻 Código</a>
-                  }
+                  @if (project.demoUrl) { <a [href]="project.demoUrl" target="_blank" class="btn btn-sm btn-primary flex-1">🚀 Demo</a> }
+                  @if (project.repoUrl) { <a [href]="project.repoUrl" target="_blank" class="btn btn-sm btn-outline flex-1 border-gray-600 text-gray-300">💻 Código</a> }
                 </div>
               </div>
             </div>
           }
-
-          @if (projects.length === 0) {
-            <div class="col-span-full text-center py-16 border-2 border-dashed border-gray-700 rounded-2xl">
-              <p class="text-gray-500 text-lg">Aún no hay proyectos cargados.</p>
-            </div>
-          }
-
-        } @else {
-          <div class="col-span-full text-center py-20"><span class="loading loading-spinner text-primary loading-lg"></span></div>
-        }
+          @if (projects.length === 0) { <div class="col-span-full text-center py-16 border-2 border-dashed border-gray-700 rounded-2xl"><p class="text-gray-500 text-lg">Aún no hay proyectos cargados.</p></div> }
+        } @else { <div class="col-span-full text-center py-20"><span class="loading loading-spinner text-primary loading-lg"></span></div> }
       </div>
     </div>
 
   } @else {
-    <div class="flex justify-center items-center h-screen bg-[#0f172a]">
-      <span class="loading loading-dots loading-lg text-primary"></span>
-    </div>
+    <div class="flex justify-center items-center h-screen bg-[#0f172a]"><span class="loading loading-dots loading-lg text-primary"></span></div>
   }
 
 </div>
 
 <dialog id="booking_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
   <div class="modal-box bg-[#0f172a] text-white border border-gray-700 w-11/12 max-w-4xl shadow-2xl p-0 overflow-hidden flex flex-col md:flex-row">
-    
     <div class="bg-blue-600 p-10 flex flex-col justify-center text-white md:w-1/3 relative overflow-hidden">
       <div class="absolute top-0 left-0 w-full h-full bg-white/5 skew-y-12 origin-top-left pointer-events-none"></div>
-      
       <h3 class="font-bold text-3xl mb-2 relative z-10">Agendar Cita</h3>
       <p class="opacity-90 mb-6 relative z-10">Estás contactando a <span class="font-bold underline">{{ targetProfile?.displayName }}</span>.</p>
-      
       <div class="bg-white/20 p-4 rounded-xl backdrop-blur-sm border border-white/10 mb-6 relative z-10">
         <p class="text-xs uppercase tracking-widest opacity-80 font-bold mb-1">Horario de Atención</p>
-        <div class="flex items-center gap-2">
-          <span class="text-xl">🕒</span>
-          <div>
-            <p class="font-bold text-lg leading-tight">{{ targetProfile?.availability?.horas || '09:00 - 18:00' }}</p>
-            <p class="text-sm opacity-80">{{ targetProfile?.availability?.dias || 'Lunes a Viernes' }}</p>
-          </div>
-        </div>
+        <div class="flex items-center gap-2"><span class="text-xl">🕒</span><div><p class="font-bold text-lg leading-tight">{{ targetProfile?.availability?.horas || '09:00 - 18:00' }}</p><p class="text-sm opacity-80">{{ targetProfile?.availability?.dias || 'Lunes a Viernes' }}</p></div></div>
       </div>
-
-      <div class="flex items-center gap-3 relative z-10">
-        <span class="bg-white/20 p-2 rounded-full">📧</span>
-        <span class="text-sm opacity-80 break-all">{{ targetProfile?.email || 'Privado' }}</span>
-      </div>
+      <div class="flex items-center gap-3 relative z-10"><span class="bg-white/20 p-2 rounded-full">📧</span><span class="text-sm opacity-80 break-all">{{ targetProfile?.email || 'Privado' }}</span></div>
     </div>
-
     <div class="p-8 md:w-2/3 bg-[#1e293b]">
       <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="space-y-4">
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="label"><span class="label-text text-gray-400 font-semibold">Fecha Deseada</span></label>
-            <input type="date" formControlName="date" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text text-gray-400 font-semibold">Hora</span></label>
-            <input type="time" formControlName="time" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
-          </div>
+          <div class="form-control"><label class="label"><span class="label-text text-gray-400 font-semibold">Fecha Deseada</span></label><input type="date" formControlName="date" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" /></div>
+          <div class="form-control"><label class="label"><span class="label-text text-gray-400 font-semibold">Hora</span></label><input type="time" formControlName="time" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" /></div>
         </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text text-gray-400 font-semibold">Asunto</span></label>
-          <input type="text" formControlName="subject" placeholder="Ej: Proyecto Web" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
-        </div>
-
-        <div class="form-control">
-          <label class="label"><span class="label-text text-gray-400 font-semibold">Mensaje</span></label>
-          <textarea formControlName="comment" class="textarea textarea-bordered h-32 bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white text-base w-full" placeholder="Hola, me gustaría saber si..."></textarea>
-        </div>
-
+        <div class="form-control"><label class="label"><span class="label-text text-gray-400 font-semibold">Asunto</span></label><input type="text" formControlName="subject" placeholder="Ej: Proyecto Web" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" /></div>
+        <div class="form-control"><label class="label"><span class="label-text text-gray-400 font-semibold">Mensaje</span></label><textarea formControlName="comment" class="textarea textarea-bordered h-32 bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white text-base w-full" placeholder="Hola, me gustaría saber si..."></textarea></div>
         <div class="modal-action justify-end mt-6">
           <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" onclick="document.getElementById('booking_modal').close()">Cancelar</button>
-          
-          <button type="submit" class="btn btn-primary px-8 bg-blue-600 border-none hover:bg-blue-700 text-white" [disabled]="bookingForm.invalid || loadingBooking()">
-            @if (loadingBooking()) { <span class="loading loading-spinner"></span> }
-            Enviar Solicitud 🚀
-          </button>
+          <button type="submit" class="btn btn-primary px-8 bg-blue-600 border-none hover:bg-blue-700 text-white" [disabled]="bookingForm.invalid || loadingBooking()">@if (loadingBooking()) { <span class="loading loading-spinner"></span> } Enviar Solicitud 🚀</button>
         </div>
       </form>
     </div>
-
   </div>
   <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
 </dialog>
@@ -235,7 +151,9 @@
 <dialog id="my_requests_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
   <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-4xl shadow-2xl p-6">
     <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
-      <h3 class="font-bold text-2xl flex items-center gap-2">🔔 Mis Solicitudes Enviadas</h3>
+      <h3 class="font-bold text-2xl flex items-center gap-2">
+        🔔 {{ isOwner() ? 'Solicitudes Recibidas (Gestión)' : 'Mis Solicitudes Enviadas' }}
+      </h3>
       <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white">✕</button></form>
     </div>
 
@@ -243,55 +161,65 @@
       <table class="table w-full">
         <thead>
           <tr class="text-gray-400 uppercase text-xs tracking-wider border-b border-gray-700">
-            <th class="py-4 pl-4">Programador</th>
+            <th class="py-4 pl-4">{{ isOwner() ? 'Cliente' : 'Programador' }}</th>
             <th>Fecha Solicitada</th>
             <th>Asunto</th>
-            <th class="text-center">Estado</th>
-            <th class="pr-4">Respuesta Admin</th>
+            <th class="text-center">Estado / Acción</th>
+            <th class="pr-4">Respuesta</th>
           </tr>
         </thead>
         <tbody>
           @if (notifications$ | async; as asesorias) {
             @for (cita of asesorias; track cita.id) {
               <tr class="border-b border-gray-800 hover:bg-[#0f172a]/50 transition-colors">
-                <td class="font-bold pl-4 text-primary">{{ cita.programmerName }}</td>
+                
+                <td class="font-bold pl-4 text-primary">
+                  {{ isOwner() ? cita.clientName : cita.programmerName }}
+                </td>
+
                 <td>
                   <div class="font-bold">{{ cita.date }}</div>
                   <div class="text-xs opacity-60">{{ cita.time }}</div>
                 </td>
-                <td class="text-sm opacity-80 max-w-xs truncate" [title]="cita.comment">{{ cita.comment.split(']')[0].replace('[', '') || 'Sin asunto' }}</td>
+
+                <td class="text-sm opacity-80 max-w-xs truncate" [title]="cita.comment">
+                  {{ cita.comment.split(']')[0].replace('[', '') || 'Sin asunto' }}
+                </td>
                 
                 <td class="text-center">
                   @switch (cita.status) {
-                    @case ('pendiente') { <div class="badge badge-warning badge-outline gap-1 font-bold">⏳ Pendiente</div> }
-                    @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold shadow-lg shadow-green-500/20 animate-pulse">✅ Aprobada</div> }
-                    @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold shadow-lg shadow-red-500/20">❌ Rechazada</div> }
+                    @case ('pendiente') {
+                      @if (isOwner()) {
+                        <div class="join shadow-md border border-white/10">
+                          <button (click)="respondToRequest(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:bg-green-600 border-none">✔ Aprobar</button>
+                          <button (click)="respondToRequest(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:bg-red-600 border-none">✖ Rechazar</button>
+                        </div>
+                      } @else {
+                        <div class="badge badge-warning badge-outline gap-1 font-bold">⏳ Pendiente</div>
+                      }
+                    }
+                    @case ('aprobada') { 
+                      <div class="badge badge-success gap-1 text-white font-bold animate-pulse">✅ Aprobada</div> 
+                    }
+                    @case ('rechazada') { 
+                      <div class="badge badge-error gap-1 text-white font-bold">❌ Rechazada</div> 
+                    }
                   }
                 </td>
 
-                <td class="text-sm italic opacity-70 pr-4">
-                  {{ cita.responseMsg || 'Esperando respuesta...' }}
+                <td class="text-sm italic opacity-70 pr-4 max-w-[150px] truncate" [title]="cita.responseMsg">
+                  {{ cita.responseMsg || 'Esperando...' }}
                 </td>
               </tr>
             }
             @empty {
-              <tr>
-                <td colspan="5" class="text-center py-16">
-                  <div class="flex flex-col items-center gap-2 opacity-50">
-                    <span class="text-4xl">📭</span>
-                    <span class="text-lg">No tienes solicitudes pendientes.</span>
-                  </div>
-                </td>
-              </tr>
+              <tr><td colspan="5" class="text-center py-16"><div class="flex flex-col items-center gap-2 opacity-50"><span class="text-4xl">📭</span><span class="text-lg">No hay solicitudes en este momento.</span></div></td></tr>
             }
           }
         </tbody>
       </table>
     </div>
-
-    <div class="modal-action">
-      <form method="dialog"><button class="btn btn-primary">Cerrar</button></form>
-    </div>
+    <div class="modal-action"><form method="dialog"><button class="btn btn-primary">Cerrar</button></form></div>
   </div>
   <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
 </dialog>
@@ -299,55 +227,19 @@
 <dialog id="project_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-sm">
   <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-2xl">
     <h3 class="font-bold text-2xl text-primary mb-6">{{ isEditing() ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h3>
-    
     <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
-      
-      <div class="form-control w-full mb-3">
-        <label class="label"><span class="label-text text-gray-300">Nombre del Proyecto</span></label>
-        <input type="text" formControlName="title" class="input input-bordered bg-[#0f172a] text-white" />
-      </div>
-
+      <div class="form-control w-full mb-3"><label class="label"><span class="label-text text-gray-300">Nombre del Proyecto</span></label><input type="text" formControlName="title" class="input input-bordered bg-[#0f172a] text-white" /></div>
       <div class="flex gap-3 mb-3">
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Categoría</span></label>
-          <select formControlName="category" class="select select-bordered bg-[#0f172a] text-white">
-            <option value="Academico">🎓 Académico</option>
-            <option value="Laboral">💼 Laboral</option>
-          </select>
-        </div>
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Rol</span></label>
-          <input type="text" formControlName="role" class="input input-bordered bg-[#0f172a] text-white" placeholder="Ej: Frontend Dev" />
-        </div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Categoría</span></label><select formControlName="category" class="select select-bordered bg-[#0f172a] text-white"><option value="Academico">🎓 Académico</option><option value="Laboral">💼 Laboral</option></select></div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Rol</span></label><input type="text" formControlName="role" class="input input-bordered bg-[#0f172a] text-white" placeholder="Ej: Frontend Dev" /></div>
       </div>
-
-      <div class="form-control mb-3">
-        <label class="label"><span class="label-text text-gray-300">Tecnologías (separadas por coma)</span></label>
-        <input type="text" formControlName="technologies" class="input input-bordered bg-[#0f172a] text-white" placeholder="Angular, Firebase, etc." />
-      </div>
-
-      <div class="form-control mb-3">
-        <label class="label"><span class="label-text text-gray-300">Descripción</span></label>
-        <textarea formControlName="description" class="textarea textarea-bordered bg-[#0f172a] text-white h-20"></textarea>
-      </div>
-
+      <div class="form-control mb-3"><label class="label"><span class="label-text text-gray-300">Tecnologías (separadas por coma)</span></label><input type="text" formControlName="technologies" class="input input-bordered bg-[#0f172a] text-white" placeholder="Angular, Firebase, etc." /></div>
+      <div class="form-control mb-3"><label class="label"><span class="label-text text-gray-300">Descripción</span></label><textarea formControlName="description" class="textarea textarea-bordered bg-[#0f172a] text-white h-20"></textarea></div>
       <div class="flex gap-3 mb-6">
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Repo URL</span></label>
-          <input type="text" formControlName="repoUrl" class="input input-bordered bg-[#0f172a] text-white" />
-        </div>
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Demo URL</span></label>
-          <input type="text" formControlName="demoUrl" class="input input-bordered bg-[#0f172a] text-white" />
-        </div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Repo URL</span></label><input type="text" formControlName="repoUrl" class="input input-bordered bg-[#0f172a] text-white" /></div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Demo URL</span></label><input type="text" formControlName="demoUrl" class="input input-bordered bg-[#0f172a] text-white" /></div>
       </div>
-
-      <div class="modal-action">
-        <button type="button" class="btn btn-ghost text-gray-400" onclick="document.getElementById('project_modal').close()">Cancelar</button>
-        <button type="submit" class="btn btn-primary px-8" [disabled]="projectForm.invalid || loading()">
-          @if (loading()) { <span class="loading loading-spinner"></span> } Guardar
-        </button>
-      </div>
+      <div class="modal-action"><button type="button" class="btn btn-ghost text-gray-400" onclick="document.getElementById('project_modal').close()">Cancelar</button><button type="submit" class="btn btn-primary px-8" [disabled]="projectForm.invalid || loading()">@if (loading()) { <span class="loading loading-spinner"></span> } Guardar</button></div>
     </form>
   </div>
   <form method="dialog" class="modal-backdrop"><button>close</button></form>
@@ -356,35 +248,13 @@
 <dialog id="availability_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-sm">
   <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-sm">
     <h3 class="font-bold text-lg text-accent mb-4">⏰ Configurar Horario de Atención</h3>
-    
     <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()">
-      
-      <div class="form-control w-full mb-3">
-        <label class="label"><span class="label-text text-gray-300">Días de Atención</span></label>
-        <select formControlName="days" class="select select-bordered bg-[#0f172a] text-white">
-          <option value="Lunes a Viernes">Lunes a Viernes</option>
-          <option value="Lunes a Sábado">Lunes a Sábado</option>
-          <option value="Todos los días">Todos los días</option>
-        </select>
-      </div>
-
+      <div class="form-control w-full mb-3"><label class="label"><span class="label-text text-gray-300">Días de Atención</span></label><select formControlName="days" class="select select-bordered bg-[#0f172a] text-white"><option value="Lunes a Viernes">Lunes a Viernes</option><option value="Lunes a Sábado">Lunes a Sábado</option><option value="Todos los días">Todos los días</option></select></div>
       <div class="flex gap-2 mb-6">
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Apertura</span></label>
-          <input type="time" formControlName="startHour" class="input input-bordered bg-[#0f172a] text-white" />
-        </div>
-        <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Cierre</span></label>
-          <input type="time" formControlName="endHour" class="input input-bordered bg-[#0f172a] text-white" />
-        </div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Apertura</span></label><input type="time" formControlName="startHour" class="input input-bordered bg-[#0f172a] text-white" /></div>
+        <div class="form-control w-1/2"><label class="label"><span class="label-text text-gray-300">Cierre</span></label><input type="time" formControlName="endHour" class="input input-bordered bg-[#0f172a] text-white" /></div>
       </div>
-
-      <div class="modal-action">
-        <button type="button" class="btn btn-ghost" onclick="document.getElementById('availability_modal').close()">Cancelar</button>
-        <button type="submit" class="btn btn-accent" [disabled]="availabilityForm.invalid || loading()">
-          @if (loading()) { <span class="loading loading-spinner"></span> } Guardar Horario
-        </button>
-      </div>
+      <div class="modal-action"><button type="button" class="btn btn-ghost" onclick="document.getElementById('availability_modal').close()">Cancelar</button><button type="submit" class="btn btn-accent" [disabled]="availabilityForm.invalid || loading()">@if (loading()) { <span class="loading loading-spinner"></span> } Guardar Horario</button></div>
     </form>
   </div>
   <form method="dialog" class="modal-backdrop"><button>close</button></form>

@@ -36,9 +36,7 @@
        [class.bg-primary]="activeTab() === 'users'"
        [class.text-white]="activeTab() === 'users'"
        [class.shadow-lg]="activeTab() === 'users'"
-       [class.shadow-primary/30]="activeTab() === 'users'"
        [class.text-gray-400]="activeTab() !== 'users'"
-       [class.hover:bg-white/5]="activeTab() !== 'users'"
        (click)="switchTab('users')">
        <span>👥</span> Usuarios
     </button>
@@ -46,9 +44,7 @@
        [class.bg-secondary]="activeTab() === 'asesorias'"
        [class.text-white]="activeTab() === 'asesorias'"
        [class.shadow-lg]="activeTab() === 'asesorias'"
-       [class.shadow-secondary/30]="activeTab() === 'asesorias'"
        [class.text-gray-400]="activeTab() !== 'asesorias'"
-       [class.hover:bg-white/5]="activeTab() !== 'asesorias'"
        (click)="switchTab('asesorias')">
        <span>📅</span> Asesorías
     </button>
@@ -56,7 +52,6 @@
 
   @if (activeTab() === 'users') {
     <div class="card bg-[#1e293b]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in">
-      
       <div class="p-5 border-b border-white/5 flex justify-between items-center bg-white/5">
         <h3 class="font-bold text-white text-lg">Listado de Usuarios</h3>
         <button (click)="openModal()" class="btn btn-primary btn-sm gap-2 border-0 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 transition-all text-white">
@@ -75,24 +70,16 @@
               <th class="text-right pr-8">Acciones</th>
             </tr>
           </thead>
-          
           <tbody class="divide-y divide-white/5">
             @if (users$ | async; as users) {
               @for (user of users; track user.uid) {
                 <tr class="hover:bg-white/5 transition-colors group">
-                  
                   <td class="pl-8 py-4">
                     <div class="flex items-center gap-4">
                       <div class="avatar placeholder">
-                        @if (user.photoURL) {
-                          <div class="w-10 h-10 rounded-full ring-2 ring-white/10 group-hover:ring-primary transition-all">
-                            <img [src]="user.photoURL" />
-                          </div>
-                        } @else {
-                          <div class="bg-gradient-to-tr from-gray-700 to-gray-600 text-white ring-2 ring-white/10 w-10 h-10 rounded-full flex items-center justify-center font-bold">
-                            {{ user.email.charAt(0).toUpperCase() }}
-                          </div>
-                        }
+                        <div class="bg-gradient-to-tr from-gray-700 to-gray-600 text-white ring-2 ring-white/10 w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                          {{ user.email.charAt(0).toUpperCase() }}
+                        </div>
                       </div>
                       <div>
                         <div class="font-bold text-gray-200 group-hover:text-primary transition-colors">{{ user.displayName || 'Sin nombre' }}</div>
@@ -100,47 +87,30 @@
                       </div>
                     </div>
                   </td>
-
                   <td class="text-center">
                     @switch (user.role) {
                       @case ('admin') { <div class="badge badge-error gap-1 text-white font-bold bg-red-500/20 border-red-500/30">🛡️ Admin</div> }
-                      @case ('Programador') { <div class="badge badge-secondary gap-1 text-white font-bold bg-secondary/20 border-secondary/30">💻 Dev</div> }
+                      @case ('Programador') { <div class="badge badge-secondary gap-1 text-white font-bold bg-secondary/20 border-secondary/30">💻 Programador</div> }
                       @default { <div class="badge badge-ghost text-gray-400 border-white/10">User</div> }
                     }
                   </td>
-
                   <td class="text-center">
                     @if (user.role === 'Programador') {
                       <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border border-white/10 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all group/btn">
                         @if (user.availability) {
-                          <span class="text-success font-semibold flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Configurado
-                          </span>
+                          <span class="text-success font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Configurado</span>
                         } @else {
-                          <span class="text-warning font-semibold flex items-center gap-1">
-                             ⚠️ Sin Horario
-                          </span>
+                          <span class="text-warning font-semibold flex items-center gap-1">⚠️ Sin Horario</span>
                         }
                       </button>
-                    } @else {
-                      <span class="text-xs opacity-20 select-none">--</span>
-                    }
+                    } @else { <span class="text-xs opacity-20 select-none">--</span> }
                   </td>
-
                   <td class="text-right pr-8">
                     @if (user.role !== 'admin') {
                       <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <div class="tooltip tooltip-left" [attr.data-tip]="user.role === 'Programador' ? 'Degradar a Usuario' : 'Ascender a Programador'">
-                            <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10">
-                                @if(user.role === 'Programador') {⬇️} @else {⬆️}
-                            </button>
-                        </div>
-                        <div class="tooltip tooltip-left" data-tip="Eliminar Usuario">
-                            <button (click)="deleteUser(user)" class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10">🗑️</button>
-                        </div>
+                        <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10">@if(user.role === 'Programador') {⬇️} @else {⬆️}</button>
+                        <button (click)="deleteUser(user)" class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10">🗑️</button>
                       </div>
-                    } @else {
-                      <span class="text-xs opacity-30 italic select-none">N/A</span>
                     }
                   </td>
                 </tr>
@@ -155,7 +125,7 @@
   @if (activeTab() === 'asesorias') {
     <div class="card bg-[#1e293b]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in">
        <div class="p-5 border-b border-white/5 bg-white/5">
-        <h3 class="font-bold text-white text-lg">Solicitudes de Asesoría</h3>
+        <h3 class="font-bold text-white text-lg">Supervisión de Asesorías</h3>
       </div>
 
       <div class="overflow-x-auto">
@@ -166,7 +136,7 @@
               <th>Programador</th>
               <th>Fecha/Hora</th>
               <th class="text-center">Estado</th>
-              <th class="text-right pr-8">Gestión</th>
+              <th class="pr-8">Justificación / Respuesta</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5">
@@ -175,7 +145,9 @@
                 <tr class="hover:bg-white/5 transition-colors">
                   
                   <td class="pl-8 py-4 font-bold text-white">{{ cita.clientName }}</td>
+                  
                   <td class="font-medium text-primary">{{ cita.programmerName }}</td>
+                  
                   <td>
                     <div class="flex flex-col">
                       <span class="font-bold text-gray-300 text-sm">{{ cita.date }}</span>
@@ -185,26 +157,26 @@
                   
                   <td class="text-center">
                     @switch (cita.status) {
-                      @case ('pendiente') { <div class="badge badge-warning text-warning-content gap-1 font-bold animate-pulse">⏳ Pendiente</div> }
+                      @case ('pendiente') { <div class="badge badge-warning text-warning-content gap-1 font-bold">⏳ Pendiente</div> }
                       @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold bg-green-500/20 border-green-500/30">✅ Aprobada</div> }
                       @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold bg-red-500/20 border-red-500/30">❌ Rechazada</div> }
                     }
                   </td>
 
-                  <td class="text-right pr-8">
-                    @if (cita.status === 'pendiente') {
-                      <div class="join shadow-md border border-white/10">
-                        <button (click)="updateAsesoriaStatus(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:bg-green-600 border-none">Aprobar</button>
-                        <button (click)="updateAsesoriaStatus(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:bg-red-600 border-none">Rechazar</button>
+                  <td class="pr-8">
+                    @if (cita.responseMsg) {
+                      <div class="text-sm italic opacity-80 bg-white/5 p-2 rounded border border-white/5 max-w-xs break-words">
+                        "{{ cita.responseMsg }}"
                       </div>
                     } @else {
-                      <span class="text-xs opacity-30 italic">Completada</span>
+                      <span class="text-xs opacity-30 italic">Esperando respuesta...</span>
                     }
                   </td>
+
                 </tr>
               }
               @empty {
-                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium text-gray-400">No hay solicitudes pendientes.</td></tr>
+                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium text-gray-400">No hay solicitudes registradas.</td></tr>
               }
             }
           </tbody>
@@ -215,7 +187,6 @@
 
   @if (showModal()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
-      
       <div class="card w-full max-w-md bg-[#1e293b] text-white shadow-2xl border border-white/10 scale-100 animate-pop-up rounded-2xl">
         <div class="card-body p-6">
           <div class="flex justify-between items-center mb-6 pb-2 border-b border-white/5">
@@ -224,22 +195,18 @@
           </div>
           
           <form [formGroup]="createUserForm" (ngSubmit)="createUser()" class="space-y-4">
-            
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Nombre Completo</span></label>
               <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
-
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Correo Electrónico</span></label>
               <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
-
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Contraseña</span></label>
               <input type="password" formControlName="password" placeholder="******" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
-
             <div class="form-control w-full">
               <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Rol Inicial</span></label>
               <select formControlName="role" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary">
@@ -247,7 +214,6 @@
                 <option value="Programador">Programador (Perfil Público)</option>
               </select>
             </div>
-
             <div class="card-actions justify-end gap-3 mt-4">
               <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" (click)="closeModal()">Cancelar</button>
               <button type="submit" class="btn btn-primary px-6 border-0 bg-gradient-to-r from-primary to-blue-600 shadow-lg shadow-primary/20" [disabled]="loading() || createUserForm.invalid">
@@ -255,12 +221,10 @@
                 Crear Cuenta
               </button>
             </div>
-
           </form>
         </div>
       </div>
     </div>
   }
-
 
 </div>
