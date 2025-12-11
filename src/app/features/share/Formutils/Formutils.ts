@@ -13,7 +13,7 @@ export class FormUtils {
 
     if (!errors) return null;
 
-    // Aquí manejas todos los errores posibles de tu app
+    // Aquí manejas todos los errores posibles 
     const errorKeys = Object.keys(errors);
 
     for (const key of errorKeys) {
@@ -26,7 +26,8 @@ export class FormUtils {
           return `Mínimo ${errors['minlength'].requiredLength} caracteres.`;
         case 'min':
           return `El valor mínimo es ${errors['min'].min}.`;
-        // Puedes agregar más casos aquí (pattern, max, etc.)
+        case 'required':
+            return 'Este campo es obligatorio.';
         default:
           return 'El campo contiene errores.';
       }

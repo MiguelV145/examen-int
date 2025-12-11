@@ -1,131 +1,132 @@
-<main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 relative overflow-hidden">
+<main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 relative overflow-hidden font-sans">
   
-    <div aria-hidden="true" class="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none"></div>
-    <div aria-hidden="true" class="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] translate-y-1/2 pointer-events-none"></div>
+  <div aria-hidden="true" class="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none animate-pulse"></div>
+  <div aria-hidden="true" class="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] translate-y-1/2 pointer-events-none"></div>
 
-    <section class="card w-full max-w-md bg-[#1e293b]/40 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10">
-        <div class="card-body p-8 sm:p-10">
+  <section class="card w-full max-w-md bg-[#1e293b]/40 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10 transition-all duration-500 hover:shadow-violet-500/5">
+    <div class="card-body p-8 sm:p-10">
+        
+        <header class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600/20 to-primary/20 mb-4 ring-1 ring-white/10 shadow-lg shadow-violet-500/10">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-black text-white tracking-tight">Crear Cuenta</h1>
+            <p class="text-gray-400 text-sm mt-2 font-medium">Únete a nuestro portafolio de talentos</p>
+        </header>
+
+        @if (errorMessage()) {
+            <div role="alert" class="alert alert-error bg-red-500/10 border border-red-500/20 text-red-200 mb-6 py-3 px-4 rounded-xl text-sm flex items-center gap-3 animate-bounce-in">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span class="font-semibold">{{ errorMessage() }}</span>
+            </div>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
             
-            <header class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600/20 to-primary/20 mb-4 ring-1 ring-white/10 shadow-lg shadow-violet-500/10">
-                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
+            <div class="form-control">
+                <label class="label pl-1 pt-0" for="email">
+                    <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Correo Electrónico</span>
+                </label>
+                <div class="relative group">
+                    <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">📧</span>
+                    <input 
+                        id="email"
+                        type="email" 
+                        autocomplete="username"
+                        placeholder="ejemplo@correo.com" 
+                        formControlName="email"
+                        class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                        [class.input-error]="formUtils.isValidField(registerForm, 'email')" 
+                    />
                 </div>
-                <h1 class="text-3xl font-black text-white tracking-tight">Crear Cuenta</h1>
-                <p class="text-gray-400 text-sm mt-2 font-medium">Únete a nuestro portafolio de talentos</p>
-            </header>
-
-            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
-                
-                <div class="form-control">
-                    <label class="label pl-1 pt-0" for="email">
-                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Correo Electrónico</span>
-                    </label>
-                    <div class="relative group">
-                        <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">📧</span>
-                        <input 
-                            id="email"
-                            type="email" 
-                            autocomplete="username"
-                            placeholder="ejemplo@correo.com" 
-                            formControlName="email"
-                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
-                            [class.input-error]="email?.invalid && email?.touched" />
-                    </div>
-                    @if (email?.invalid && email?.touched) {
-                        <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
-                            @if (email?.hasError('required')) { <span>• El correo es obligatorio.</span> }
-                            @if (email?.hasError('email')) { <span>• Correo no válido.</span> }
-                        </div>
-                    }
-                </div>
-
-                <div class="form-control">
-                    <label class="label pl-1 pt-0" for="password">
-                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Contraseña</span>
-                    </label>
-                    <div class="relative group">
-                        <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔒</span>
-                        <input 
-                            id="password"
-                            type="password" 
-                            autocomplete="new-password"
-                            placeholder="******" 
-                            formControlName="password"
-                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
-                            [class.input-error]="password?.invalid && password?.touched" />
-                    </div>
-                    @if (password?.invalid && password?.touched) {
-                        <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
-                            @if (password?.hasError('required')) { <span>• Contraseña obligatoria.</span> }
-                            @if (password?.hasError('minlength')) { <span>• Mínimo 6 caracteres.</span> }
-                        </div>
-                    }
-                </div>
-
-                <div class="form-control">
-                    <label class="label pl-1 pt-0" for="confirmPassword">
-                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Confirmar Contraseña</span>
-                    </label>
-                    <div class="relative group">
-                        <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔐</span>
-                        <input 
-                            id="confirmPassword"
-                            type="password" 
-                            autocomplete="new-password"
-                            placeholder="******" 
-                            formControlName="confirmPassword"
-                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
-                            [class.input-error]="confirmPassword?.invalid && confirmPassword?.touched" />
-                    </div>
-                    @if (confirmPassword?.invalid && confirmPassword?.touched) {
-                        <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
-                            @if (confirmPassword?.hasError('required')) { <span>• Repite tu contraseña.</span> }
-                            @if (confirmPassword?.hasError('passwordMismatch')) { <span>• Las contraseñas no coinciden.</span> }
-                        </div>
-                    }
-                </div>
-
-                @if (errorMessage()) {
-                    <div role="alert" class="alert alert-error bg-red-500/10 border border-red-500/20 text-red-200 mt-2 py-3 px-4 rounded-xl text-sm flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span class="font-semibold">{{ errorMessage() }}</span>
+                @if (formUtils.isValidField(registerForm, 'email')) {
+                    <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
+                        <span>• {{ formUtils.getFieldError(registerForm, 'email') }}</span>
                     </div>
                 }
-
-                <div class="form-control mt-6">
-                    <button 
-                        type="submit" 
-                        class="btn btn-primary w-full border-0 bg-gradient-to-r from-violet-600 to-primary hover:shadow-lg hover:shadow-violet-600/30 hover:scale-[1.02] transition-all duration-300 text-neutral-900 font-bold rounded-xl" 
-                        [disabled]="loading()">
-                        @if (loading()) {
-                            <span class="loading loading-spinner loading-sm"></span>
-                            Registrando...
-                        } @else {
-                            Crear Cuenta
-                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        }
-                    </button>
-                </div>
-
-            </form>
-
-            <div class="relative my-8">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-white/10"></div>
-                </div>
-                <div class="relative flex justify-center text-xs uppercase">
-                    <span class="bg-[#1b2638] px-3 text-gray-500 font-medium">¿Ya tienes cuenta?</span>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <a routerLink="/login" class="btn btn-ghost btn-sm text-violet-400 hover:text-white hover:bg-white/5 font-semibold gap-2">
-                    Inicia Sesión aquí
-                </a>
             </div>
 
+            <div class="form-control">
+                <label class="label pl-1 pt-0" for="password">
+                    <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Contraseña</span>
+                </label>
+                <div class="relative group">
+                    <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔒</span>
+                    <input 
+                        id="password"
+                        type="password" 
+                        autocomplete="new-password"
+                        placeholder="******" 
+                        formControlName="password"
+                        class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                        [class.input-error]="formUtils.isValidField(registerForm, 'password')" 
+                    />
+                </div>
+                @if (formUtils.isValidField(registerForm, 'password')) {
+                    <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
+                        <span>• {{ formUtils.getFieldError(registerForm, 'password') }}</span>
+                    </div>
+                }
+            </div>
+
+            <div class="form-control">
+                <label class="label pl-1 pt-0" for="confirmPassword">
+                    <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Confirmar Contraseña</span>
+                </label>
+                <div class="relative group">
+                    <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔐</span>
+                    <input 
+                        id="confirmPassword"
+                        type="password" 
+                        autocomplete="new-password"
+                        placeholder="******" 
+                        formControlName="confirmPassword"
+                        class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                        [class.input-error]="formUtils.isValidField(registerForm, 'confirmPassword')" 
+                    />
+                </div>
+                @if (formUtils.isValidField(registerForm, 'confirmPassword')) {
+                    <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
+                        <span>• {{ formUtils.getFieldError(registerForm, 'confirmPassword') }}</span>
+                    </div>
+                }
+            </div>
+
+            <div class="form-control mt-6">
+                <button 
+                    type="submit" 
+                    class="btn btn-primary w-full border-0 bg-gradient-to-r from-violet-600 to-primary hover:shadow-lg hover:shadow-violet-600/30 hover:scale-[1.02] transition-all duration-300 text-neutral-900 font-bold rounded-xl h-12 min-h-0" 
+                    [disabled]="loading()">
+                    
+                    @if (loading()) {
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Registrando...
+                    } @else {
+                        Crear Cuenta
+                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    }
+                </button>
+            </div>
+
+        </form>
+
+        <div class="relative my-8">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-white/10"></div>
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+                <span class="bg-[#1b2638] px-3 text-gray-500 font-bold tracking-wider">¿Ya tienes cuenta?</span>
+            </div>
         </div>
-    </section>
+        
+        <div class="text-center">
+            <a routerLink="/login" class="btn btn-ghost btn-sm text-violet-400 hover:text-white hover:bg-white/5 font-semibold gap-2">
+                Inicia Sesión aquí
+            </a>
+        </div>
+
+    </div>
+  </section>
 </main>

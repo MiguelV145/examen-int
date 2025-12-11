@@ -10,17 +10,14 @@ export interface UserProfile {
   uid: string;
   email: string;
   role: 'admin' | 'user' | 'Programador';
-  
   // Datos Básicos
   displayName?: string;
   photoURL?: string;
-  
   // Datos de Programador (Opcionales)
   specialty?: string;     // Título (Frontend, etc.)
   description?: string;   // Biografía
   skills?: string[];      // Array de etiquetas (React, Angular...)
   availability?: Availability; // Objeto de horario
-  
   // Datos Auxiliares (No se guardan en BD, solo uso interno)
   photoFile?: File; 
 }
@@ -36,6 +33,7 @@ export interface Project {
   technologies: string[]; // Array de strings
   repoUrl?: string;
   demoUrl?: string;
+  photoURL?: string;
   likes?: string[];       // Array de UIDs de usuarios que dieron like
 }
 

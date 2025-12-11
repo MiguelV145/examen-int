@@ -18,9 +18,11 @@ export class LoginPage {
   private authService = inject(AuthService);
   private router = inject(Router);
   
+  // Estados reactivos para la UI
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
+  // Formulario y Utilidades
   loginForm: FormGroup;
   formUtils = FormUtils;
 
@@ -31,7 +33,7 @@ export class LoginPage {
     });
   }
 
-  // --- LOGIN CORREO ---
+  // --- LOGIN CON CORREO ---
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -40,6 +42,7 @@ export class LoginPage {
 
     this.loading.set(true);
     this.errorMessage.set(null);
+
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
@@ -47,7 +50,6 @@ export class LoginPage {
         this.loading.set(false);
         this.router.navigate(['/home']);
       },
-      // SOLUCIÓN: Usamos (error: any) para evitar la línea roja
       error: (error: any) => {
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error.code));
@@ -55,35 +57,33 @@ export class LoginPage {
     });
   }
 
-  // --- LOGIN GOOGLE ---
+  // --- LOGIN CON GOOGLE ---
   onGoogleLogin() {
     this.loading.set(true);
     this.errorMessage.set(null);
 
+    
     this.authService.loginWithGoogle().subscribe({
       next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/home']);
+        console.log('Redirigiendo a Google...');
       },
-      // SOLUCIÓN: Usamos (err: any) para evitar la línea roja
       error: (err: any) => {
         console.error('Error Google:', err);
         this.loading.set(false);
-        this.errorMessage.set('Error con Google: ' + (err.code || err.message));
+        this.errorMessage.set('No se pudo conectar con Google.');
       }
     });
   }
 
-  getErrorMessage(code: string): string {
+  // Traducción de errores de Firebase para el usuario
+  private getErrorMessage(code: string): string {
     const messages: { [key: string]: string } = {
-      'auth/user-not-found': 'Usuario no encontrado.',
-      'auth/wrong-password': 'Contraseña incorrecta.',
-      'auth/invalid-email': 'Correo inválido.',
-      'auth/popup-closed-by-user': 'Inicio de sesión cancelado.'
+      'auth/user-not-found': 'No encontramos una cuenta con este correo.',
+      'auth/wrong-password': 'La contraseña es incorrecta.',
+      'auth/invalid-email': 'El formato del correo no es válido.',
+      'auth/too-many-requests': 'Demasiados intentos fallidos. Espera un momento.',
+      'auth/popup-closed-by-user': 'Cancelaste el inicio de sesión.'
     };
-    return messages[code] || `Error: ${code}`;
+    return messages[code] || `Error desconocido: ${code}`;
   }
-
-  get email() { return this.loginForm.get('email'); }
-  get password() { return this.loginForm.get('password'); }
 }
