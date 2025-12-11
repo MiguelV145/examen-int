@@ -1,76 +1,87 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 relative overflow-hidden font-sans">
+<div class="min-h-screen flex items-center justify-center bg-[#0f172a] relative overflow-hidden font-sans selection:bg-cyan-500 selection:text-white">
   
-  <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none animate-pulse"></div>
-  <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] translate-y-1/2 pointer-events-none"></div>
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px]"></div>
+  </div>
 
-  <div class="card w-full max-w-md bg-[#1e293b]/40 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10 transition-all duration-500 hover:shadow-primary/5">
+  <div class="card w-full max-w-md bg-[#1e293b]/70 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative z-10 transition-all duration-500 hover:shadow-cyan-500/10 rounded-3xl overflow-hidden">
+    
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
+
     <div class="card-body p-8 sm:p-10">
       
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary/20 to-secondary/20 mb-4 ring-1 ring-white/10 shadow-lg shadow-primary/10">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 mb-6 ring-1 ring-white/10 shadow-lg shadow-cyan-500/20 group">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-cyan-400 drop-shadow-md group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
           </svg>
         </div>
-        <h1 class="text-3xl font-black text-white tracking-tight">¡Bienvenido!</h1>
-        <p class="text-gray-400 text-sm mt-2 font-medium">Ingresa tus credenciales para acceder</p>
+        <h1 class="text-3xl font-black text-white tracking-tight mb-2">¡Bienvenido de nuevo!</h1>
+        <p class="text-gray-400 text-sm font-medium">Accede a tu panel de control</p>
       </div>
 
       @if (errorMessage()) {
-        <div role="alert" class="alert alert-error bg-red-500/10 border border-red-500/20 text-red-200 mb-6 py-3 px-4 rounded-xl text-sm flex items-center gap-3 animate-bounce-in">
+        <div role="alert" class="alert alert-error bg-red-500/10 border border-red-500/20 text-red-200 mb-6 py-3 px-4 rounded-xl text-sm flex items-center gap-3 animate-bounce-in shadow-lg shadow-red-900/20">
           <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           <span class="font-semibold">{{ errorMessage() }}</span>
         </div>
       }
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
         
-        <div class="form-control mb-5">
-          <label class="label pl-1">
+        <div class="form-control">
+          <label class="label pl-1 pb-1">
             <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Correo electrónico</span>
           </label>
           <div class="relative group">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">📧</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition-colors pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </span>
             <input 
               type="email" 
               formControlName="email"
-              placeholder="ejemplo@correo.com" 
-              class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium"
+              placeholder="nombre@ejemplo.com" 
+              class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-cyan-500 focus:bg-[#0f172a] focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-gray-600 rounded-xl font-medium h-12"
               [class.input-error]="formUtils.isValidField(loginForm, 'email')"
             />
           </div>
           @if (formUtils.isValidField(loginForm, 'email')) {
             <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
-               <span>• {{ formUtils.getFieldError(loginForm, 'email') }}</span>
-            </div>
-          }
-        </div>
-
-        <div class="form-control mb-8">
-          <label class="label pl-1">
-            <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Contraseña</span>
-          </label>
-          <div class="relative group">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">🔒</span>
-            <input 
-              type="password" 
-              formControlName="password"
-              placeholder="••••••••" 
-              class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium"
-              [class.input-error]="formUtils.isValidField(loginForm, 'password')"
-            />
-          </div>
-          @if (formUtils.isValidField(loginForm, 'password')) {
-            <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
-               <span>• {{ formUtils.getFieldError(loginForm, 'password') }}</span>
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+               <span>{{ formUtils.getFieldError(loginForm, 'email') }}</span>
             </div>
           }
         </div>
 
         <div class="form-control">
+          <label class="label pl-1 pb-1">
+            <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Contraseña</span>
+          </label>
+          <div class="relative group">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition-colors pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </span>
+            <input 
+              type="password" 
+              formControlName="password"
+              placeholder="••••••••" 
+              class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-cyan-500 focus:bg-[#0f172a] focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-gray-600 rounded-xl font-medium h-12"
+              [class.input-error]="formUtils.isValidField(loginForm, 'password')"
+            />
+          </div>
+          @if (formUtils.isValidField(loginForm, 'password')) {
+            <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+               <span>{{ formUtils.getFieldError(loginForm, 'password') }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="form-control pt-2">
           <button 
             type="submit" 
-            class="btn btn-primary w-full border-0 bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-300 text-white font-bold rounded-xl h-12 min-h-0"
+            class="btn btn-primary w-full border-0 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.02] transition-all duration-300 text-white font-bold rounded-xl h-12 min-h-0 uppercase tracking-wide text-sm"
             [disabled]="loading()">
             
             @if (loading()) {
@@ -89,14 +100,14 @@
           <div class="w-full border-t border-white/10"></div>
         </div>
         <div class="relative flex justify-center text-xs uppercase">
-          <span class="bg-[#1b2638] px-3 text-gray-500 font-bold tracking-wider">O continúa con</span>
+          <span class="bg-[#1e293b] px-3 text-gray-500 font-bold tracking-wider rounded-full">O continúa con</span>
         </div>
       </div>
 
       <button 
         type="button" 
         (click)="onGoogleLogin()"
-        class="btn btn-outline border-white/10 text-gray-300 w-full gap-3 hover:bg-white hover:text-black hover:border-white transition-all rounded-xl font-medium h-12 min-h-0 normal-case"
+        class="btn btn-outline border-white/10 bg-white/5 text-gray-300 w-full gap-3 hover:bg-white hover:text-black hover:border-white transition-all rounded-xl font-medium h-12 min-h-0 normal-case"
         [disabled]="loading()">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -110,7 +121,7 @@
       <div class="text-center mt-8 pt-4 border-t border-white/5">
         <p class="text-sm text-gray-500">
           ¿No tienes cuenta?
-          <a routerLink="/register" class="text-primary hover:text-secondary font-bold hover:underline transition-colors ml-1 cursor-pointer">
+          <a routerLink="/register" class="text-cyan-400 hover:text-cyan-300 font-bold hover:underline transition-colors ml-1 cursor-pointer">
             Regístrate aquí
           </a>
         </p>
