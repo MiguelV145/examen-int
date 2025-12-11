@@ -26,8 +26,6 @@ export class FormUtils {
           return `Mínimo ${errors['minlength'].requiredLength} caracteres.`;
         case 'min':
           return `El valor mínimo es ${errors['min'].min}.`;
-        case 'required':
-            return 'Este campo es obligatorio.';
         default:
           return 'El campo contiene errores.';
       }
