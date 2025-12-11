@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/features/share/services/Asesorias.Servicets"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

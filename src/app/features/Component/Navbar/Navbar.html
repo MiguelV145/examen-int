@@ -1,60 +1,58 @@
-<div class="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-50 border-b border-base-200/50 supports-[backdrop-filter]:bg-base-100/60 transition-all duration-300">
+<div class="navbar bg-base-100/70 backdrop-blur-lg sticky top-0 z-50 border-b border-base-content/5 supports-[backdrop-filter]:bg-base-100/50 transition-all duration-300">
   
   <div class="flex-1">
-    <a routerLink="/" class="btn btn-ghost normal-case text-xl font-extrabold tracking-tight hover:bg-transparent">
-      <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+    <a routerLink="/" class="btn btn-ghost gap-2 normal-case text-xl font-black tracking-tighter hover:bg-transparent group">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+        <span class="font-bold text-lg">P</span>
+      </div>
+      <span class="bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/60 group-hover:from-primary group-hover:to-secondary transition-all duration-300">
         Portafolio
       </span>
     </a>
   </div>
 
-  <div class="flex gap-2 items-center">
+  <div class="flex gap-3 items-center px-2">
 
     @if (authService.currentUser()) {
       
-      <nav class="hidden md:flex items-center gap-1 mr-4">
-        
+      <nav class="hidden md:flex items-center mr-2">
         <a routerLink="/home" 
-           routerLinkActive="bg-primary/10 text-primary" 
-           class="btn btn-ghost btn-sm font-medium gap-2">
-           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+           routerLinkActive="!text-primary bg-primary/10 font-bold" 
+           class="btn btn-ghost btn-sm font-medium text-base-content/70 hover:text-primary transition-all duration-200">
            Inicio
         </a>
-
-        </nav>
+      </nav>
 
       <div class="dropdown dropdown-end">
         
-        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring ring-primary ring-offset-base-100 ring-offset-2 transition-transform hover:scale-105 duration-200">
-  
-  @if (authService.currentProfile()?.photoURL) {
-    <div class="w-10 rounded-full">
-      <img [src]="authService.currentProfile()?.photoURL" alt="Perfil" class="object-cover" />
-    </div>
-  } 
-  @else {
-    <div class="w-10 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center">
-      <span class="text-xl font-bold">
-        {{ authService.currentProfile()?.email?.charAt(0)?.toUpperCase() }}
-      </span>
-    </div>
-  }
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring-2 ring-transparent hover:ring-primary/50 transition-all duration-300">
+          @if (authService.currentProfile()?.photoURL) {
+            <div class="w-9 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2">
+              <img [src]="authService.currentProfile()?.photoURL" alt="Perfil" class="object-cover" />
+            </div>
+          } 
+          @else {
+            <div class="w-9 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center shadow-md ring ring-base-200 ring-offset-base-100 ring-offset-2">
+              <span class="text-lg font-bold">
+                {{ authService.currentProfile()?.email?.charAt(0)?.toUpperCase() }}
+              </span>
+            </div>
+          }
+        </div>
 
-</div>
-
-        <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-60 p-2 shadow-xl border border-base-200/50 origin-top-right transition-all">
+        <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100/95 backdrop-blur-md rounded-2xl z-[1] mt-4 w-64 p-3 shadow-2xl border border-white/10 ring-1 ring-black/5 origin-top-right transform transition-all duration-200">
           
-          <li class="menu-title px-4 py-3 border-b border-base-200 mb-2">
-            <div class="flex flex-col gap-1">
-              <span class="font-bold text-base-content text-sm">Hola,</span>
-              <span class="font-extrabold text-primary truncate block w-full">
+          <li class="mb-2 pointer-events-none">
+            <div class="bg-base-200/50 rounded-xl p-3 flex flex-col gap-0.5">
+              <span class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Conectado como</span>
+              <span class="font-bold text-base-content truncate w-full text-sm">
                 {{ authService.currentProfile()?.displayName || authService.currentProfile()?.email }}
               </span>
             </div>
           </li>
 
           <li>
-            <a routerLink="/home" class="py-2" routerLinkActive="active font-bold">
+            <a routerLink="/home" class="py-2.5 rounded-lg hover:bg-base-200 font-medium" routerLinkActive="bg-primary/10 text-primary">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
               Inicio
             </a>
@@ -62,29 +60,29 @@
           
           @if (authService.hasRole('Programador') || authService.hasRole('admin')) {
              <li>
-              <a routerLink="/panel" class="justify-between py-2" routerLinkActive="active font-bold">
+              <a routerLink="/panel" class="py-2.5 rounded-lg justify-between hover:bg-base-200 font-medium" routerLinkActive="bg-secondary/10 text-secondary">
                 <span class="flex gap-2 items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                   Mi Panel
                 </span>
-                <span class="badge badge-sm badge-secondary font-mono">DEV</span>
+                <span class="badge badge-xs badge-secondary font-mono font-bold px-2 py-2">DEV</span>
               </a>
             </li>
           }
           
           @if (authService.hasRole('admin')) {
             <li>
-              <a routerLink="/admin" class="py-2 text-error font-semibold" routerLinkActive="active font-bold">
+              <a routerLink="/admin" class="py-2.5 rounded-lg text-error hover:bg-error/5 hover:text-error font-medium" routerLinkActive="bg-error/10 font-bold">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                 Panel Admin
               </a>
             </li>
           }
           
-          <div class="divider my-1"></div>
+          <div class="h-px bg-base-200 my-1"></div>
 
           <li>
-            <button (click)="logout()" class="text-error hover:bg-error/10 hover:text-error py-2 font-medium">
+            <button (click)="logout()" class="py-2.5 rounded-lg text-base-content/70 hover:bg-base-200 hover:text-base-content font-medium">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
               Cerrar Sesión
             </button>
@@ -94,11 +92,11 @@
 
     } @else {
       
-      <div class="flex gap-3 items-center">
-        <a routerLink="/login" class="btn btn-ghost btn-sm hover:text-primary transition-colors">
-          Iniciar Sesión
+      <div class="flex gap-2 items-center">
+        <a routerLink="/login" class="btn btn-ghost btn-sm font-medium hover:bg-base-200">
+          Ingresar
         </a>
-        <a routerLink="/register" class="btn btn-primary btn-sm shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all hidden sm:inline-flex">
+        <a routerLink="/register" class="btn btn-sm border-0 bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all duration-200 rounded-full px-5 hidden sm:inline-flex">
           Registrarse
         </a>
       </div>

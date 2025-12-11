@@ -1,0 +1,197 @@
+<div class="min-h-screen  from-[#0f172a] via-[#1e293b] to-[#0f172a] flex justify-center items-center p-4 lg:p-10 font-sans relative overflow-hidden pb-20">
+  
+  <div class="absolute top-0 left-1/2 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+  <div class="card w-full max-w-3xl bg-[#1e293b]/40 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10 animate-fade-in-up">
+    <div class="card-body p-8 lg:p-12">
+      
+      <div class="text-center mb-10">
+        <div class="inline-flex p-3 rounded-2xl  from-primary/20 to-secondary/20 mb-4 border border-white/5 shadow-lg shadow-primary/10">
+           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+           </svg>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">
+          Tu Perfil Profesional
+        </h2>
+        <p class="text-gray-400 mt-2 font-medium">Personaliza cómo te ven otros desarrolladores y clientes</p>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        
+        <div class="flex flex-col items-center mb-10">
+          <input 
+            type="file" 
+            #fileInput 
+            class="hidden" 
+            (change)="onFileSelected($event)" 
+            accept="image/png, image/jpeg, image/jpg"
+          >
+
+          <div 
+            (click)="fileInput.click()" 
+            class="relative group cursor-pointer"
+            title="Clic para actualizar foto">
+            
+            <div class="absolute -inset-1  from-primary to-secondary rounded-full blur opacity-20 group-hover:opacity-75 transition duration-500"></div>
+            
+            <div class="avatar placeholder relative z-10">
+              <div class="w-36 h-36 rounded-full ring-4 ring-[#1e293b] overflow-hidden shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
+                
+                @if (previewUrl()) {
+                  <img [src]="previewUrl()" alt="Preview" class="object-cover w-full h-full" />
+                } 
+                @else if (profileForm.get('photoURL')?.value) {
+                  <img [src]="profileForm.get('photoURL')?.value" alt="Foto Actual" class="object-cover w-full h-full" />
+                } 
+                @else {
+                  <div class=" from-gray-700 to-gray-900 text-white w-full h-full flex items-center justify-center">
+                    <span class="text-4xl font-bold">
+                      {{ user()?.email?.charAt(0)?.toUpperCase() }}
+                    </span>
+                  </div>
+                }
+
+                <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white mb-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span class="text-white text-xs font-bold tracking-widest uppercase transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">Cambiar</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-[#1e293b] z-20 group-hover:scale-110 transition-transform">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+               </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-6">
+
+          <div class="form-control">
+            <label class="label pl-1 pt-0">
+              <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Nombre Completo</span>
+            </label>
+            <div class="relative group">
+               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">👤</span>
+               <input 
+                 type="text" 
+                 formControlName="displayName"
+                 placeholder="Ej: Juan Pérez" 
+                 class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium" 
+                 [class.input-error]="profileForm.get('displayName')?.invalid && profileForm.get('displayName')?.touched"
+               />
+            </div>
+            @if(profileForm.get('displayName')?.invalid && profileForm.get('displayName')?.touched) {
+              <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium">
+                 <span>• El nombre es requerido</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-control">
+            <label class="label pl-1 pt-0">
+              <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Especialidad</span>
+            </label>
+            <div class="relative group">
+               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">💼</span>
+               <input 
+                 type="text" 
+                 formControlName="specialty"
+                 placeholder="Ej: Senior Frontend Developer" 
+                 class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium" 
+                 [class.input-error]="profileForm.get('specialty')?.invalid && profileForm.get('specialty')?.touched"
+               />
+            </div>
+            @if(profileForm.get('specialty')?.invalid && profileForm.get('specialty')?.touched) {
+              <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium">
+                 <span>• Campo requerido</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-control">
+            <label class="label pl-1 pt-0">
+              <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Tecnologías & Herramientas</span>
+            </label>
+            
+            <div class="relative group mb-3">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">⚡</span>
+              <input 
+                type="text" 
+                placeholder="Escribe y presiona Enter (Ej: React, AWS, Docker)" 
+                class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium"
+                (keydown.enter)="$event.preventDefault(); addSkill($event)" 
+              />
+            </div>
+
+            <div class="flex flex-wrap gap-2 min-h-[60px] p-4 bg-[#0f172a]/30 rounded-xl border border-white/5 shadow-inner">
+              @if (skills().length === 0) {
+                <div class="flex flex-col items-center justify-center w-full text-gray-500 py-2">
+                   <span class="text-2xl opacity-50 mb-1">🏷️</span>
+                   <span class="text-xs italic">Añade tus mejores habilidades</span>
+                </div>
+              }
+
+              @for (skill of skills(); track skill) {
+                <div class="badge badge-lg gap-2 pl-3 pr-2 py-4 bg-primary/10 text-primary-content border border-primary/20 backdrop-blur-md shadow-lg shadow-primary/5 transition-all hover:scale-105 hover:bg-primary/20 hover:border-primary/50 group/chip">
+                  <span class="font-bold text-sm">{{ skill }}</span>
+                  <button 
+                    type="button" 
+                    (click)="removeSkill(skill)" 
+                    class="btn btn-ghost btn-xs btn-circle text-primary/70 hover:text-white hover:bg-red-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-control">
+            <label class="label pl-1 pt-0">
+              <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Descripción Profesional</span>
+            </label>
+            <textarea 
+              formControlName="description"
+              class="textarea h-32 bg-[#0f172a]/50 border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl text-base resize-none" 
+              placeholder="Cuéntanos sobre tu experiencia, logros y lo que te apasiona..."
+              [class.textarea-error]="profileForm.get('description')?.invalid && profileForm.get('description')?.touched"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-3">
+           @if (successMessage()) {
+            <div role="alert" class="alert bg-green-500/10 border-green-500/20 text-green-200 shadow-lg flex items-center gap-3 rounded-xl animate-fade-in">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span class="font-medium">{{ successMessage() }}</span>
+            </div>
+          }
+           @if (errorMessage()) {
+            <div role="alert" class="alert bg-red-500/10 border-red-500/20 text-red-200 shadow-lg flex items-center gap-3 rounded-xl animate-shake">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span class="font-medium">{{ errorMessage() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="card-actions justify-end mt-8 border-t border-white/5 pt-6">
+          <button 
+            type="submit" 
+            class="btn btn-primary w-full md:w-auto px-10 border-0 from-primary to-secondary shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-300 rounded-xl font-bold text-lg"
+            [disabled]="loading()">
+            @if(loading()) { <span class="loading loading-spinner"></span> }
+            Guardar Cambios
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

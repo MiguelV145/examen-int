@@ -37,7 +37,7 @@ export const routes: Routes = [
     {
         path: 'panel',
         // Verifica que la ruta del archivo coincida con donde guardaste ProgrammerPage
-        loadComponent: () => import('./features/pages/Programmer-Page/Programmer-Page').then(m => m.ProgrammerPage),
+        loadComponent: () => import('./features/pages/Perfil-page/Perfil-Page').then(m => m.ProgrammerPage),
         canActivate: [authGuard] // Solo usuarios logueados pueden entrar aquí
     },
     

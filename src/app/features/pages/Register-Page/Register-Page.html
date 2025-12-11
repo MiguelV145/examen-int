@@ -1,117 +1,125 @@
-<div class="min-h-screen flex items-center justify-center bg-base-200 px-4">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 relative overflow-hidden">
   
-  <div class="card w-full max-w-md shadow-2xl bg-base-100">
-    <div class="card-body">
-      
-      <h2 class="card-title text-2xl font-bold text-center justify-center mb-2">
-        Crear Cuenta
-      </h2>
-      <p class="text-center text-base-content/60 mb-6">
-        Únete a nuestro portafolio de talentos
-      </p>
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] translate-y-1/2 pointer-events-none"></div>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
-        
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Correo Electrónico</span>
-          </label>
-          <input 
-            type="email" 
-            placeholder="ejemplo@correo.com" 
-            formControlName="email"
-            class="input input-bordered w-full"
-            [class.input-error]="email?.invalid && email?.touched" />
-          
-          @if (email?.invalid && email?.touched) {
-            <div class="label pb-0">
-              @if (email?.hasError('required')) {
-                <span class="label-text-alt text-error">El correo es obligatorio.</span>
-              }
-              @if (email?.hasError('email')) {
-                <span class="label-text-alt text-error">Correo no válido.</span>
-              }
+    <div class="card w-full max-w-md bg-[#1e293b]/40 backdrop-blur-xl border border-white/10 shadow-2xl relative z-10">
+        <div class="card-body p-8 sm:p-10">
+            
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600/20 to-primary/20 mb-4 ring-1 ring-white/10 shadow-lg shadow-violet-500/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-black text-white tracking-tight">Crear Cuenta</h2>
+                <p class="text-gray-400 text-sm mt-2 font-medium">Únete a nuestro portafolio de talentos</p>
             </div>
-          }
-        </div>
 
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Contraseña</span>
-          </label>
-          <input 
-            type="password" 
-            placeholder="******" 
-            formControlName="password"
-            class="input input-bordered w-full"
-            [class.input-error]="password?.invalid && password?.touched" />
-          
-          @if (password?.invalid && password?.touched) {
-            <div class="label pb-0">
-              @if (password?.hasError('required')) {
-                <span class="label-text-alt text-error">Contraseña obligatoria.</span>
-              }
-              @if (password?.hasError('minlength')) {
-                <span class="label-text-alt text-error">Mínimo 6 caracteres.</span>
-              }
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
+                
+                <div class="form-control">
+                    <label class="label pl-1 pt-0">
+                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Correo Electrónico</span>
+                    </label>
+                    <div class="relative group">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">📧</span>
+                        <input 
+                            type="email" 
+                            placeholder="ejemplo@correo.com" 
+                            formControlName="email"
+                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                            [class.input-error]="email?.invalid && email?.touched" />
+                    </div>
+                    @if (email?.invalid && email?.touched) {
+                        <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
+                            @if (email?.hasError('required')) { <span>• El correo es obligatorio.</span> }
+                            @if (email?.hasError('email')) { <span>• Correo no válido.</span> }
+                        </div>
+                    }
+                </div>
+
+                <div class="form-control">
+                    <label class="label pl-1 pt-0">
+                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Contraseña</span>
+                    </label>
+                    <div class="relative group">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔒</span>
+                        <input 
+                            type="password" 
+                            placeholder="******" 
+                            formControlName="password"
+                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                            [class.input-error]="password?.invalid && password?.touched" />
+                    </div>
+                    @if (password?.invalid && password?.touched) {
+                        <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
+                            @if (password?.hasError('required')) { <span>• Contraseña obligatoria.</span> }
+                            @if (password?.hasError('minlength')) { <span>• Mínimo 6 caracteres.</span> }
+                        </div>
+                    }
+                </div>
+
+                <div class="form-control">
+                    <label class="label pl-1 pt-0">
+                        <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Confirmar Contraseña</span>
+                    </label>
+                    <div class="relative group">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔐</span>
+                        <input 
+                            type="password" 
+                            placeholder="******" 
+                            formControlName="confirmPassword"
+                            class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                            [class.input-error]="confirmPassword?.invalid && confirmPassword?.touched" />
+                    </div>
+                    @if (confirmPassword?.invalid && confirmPassword?.touched) {
+                        <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-pulse">
+                            @if (confirmPassword?.hasError('required')) { <span>• Repite tu contraseña.</span> }
+                            @if (confirmPassword?.hasError('passwordMismatch')) { <span>• Las contraseñas no coinciden.</span> }
+                        </div>
+                    }
+                </div>
+
+                @if (errorMessage()) {
+                    <div role="alert" class="alert alert-error bg-red-500/10 border border-red-500/20 text-red-200 mt-2 py-3 px-4 rounded-xl text-sm flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="font-semibold">{{ errorMessage() }}</span>
+                    </div>
+                }
+
+                <div class="form-control mt-6">
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary w-full border-0 bg-gradient-to-r from-violet-600 to-primary hover:shadow-lg hover:shadow-violet-600/30 hover:scale-[1.02] transition-all duration-300 text-white font-bold rounded-xl" 
+                        [disabled]="loading()">
+                        @if (loading()) {
+                            <span class="loading loading-spinner loading-sm"></span>
+                            Registrando...
+                        } @else {
+                            Crear Cuenta
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        }
+                    </button>
+                </div>
+
+            </form>
+
+            <div class="relative my-8">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-white/10"></div>
+                </div>
+                <div class="relative flex justify-center text-xs uppercase">
+                    <span class="bg-[#1b2638] px-3 text-gray-500 font-medium">¿Ya tienes cuenta?</span>
+                </div>
             </div>
-          }
-        </div>
-
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text font-semibold">Confirmar Contraseña</span>
-          </label>
-          <input 
-            type="password" 
-            placeholder="******" 
-            formControlName="confirmPassword"
-            class="input input-bordered w-full"
-            [class.input-error]="confirmPassword?.invalid && confirmPassword?.touched" />
-          
-          @if (confirmPassword?.invalid && confirmPassword?.touched) {
-            <div class="label pb-0">
-              @if (confirmPassword?.hasError('required')) {
-                <span class="label-text-alt text-error">Repite tu contraseña.</span>
-              }
-              @if (confirmPassword?.hasError('passwordMismatch')) {
-                <span class="label-text-alt text-error">Las contraseñas no coinciden.</span>
-              }
+            
+            <div class="text-center">
+                <a routerLink="/login" class="btn btn-ghost btn-sm text-violet-400 hover:text-white hover:bg-white/5 font-semibold gap-2">
+                    Inicia Sesión aquí
+                </a>
             </div>
-          }
+
         </div>
-
-        @if (errorMessage()) {
-          <div role="alert" class="alert alert-error mt-4 p-3 text-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span>{{ errorMessage() }}</span>
-          </div>
-        }
-
-        <div class="form-control mt-6">
-          <button 
-            type="submit" 
-            class="btn btn-primary w-full" 
-            [disabled]="loading()">
-            @if (loading()) {
-              <span class="loading loading-spinner"></span>
-              Registrando...
-            } @else {
-              Crear Cuenta
-            }
-          </button>
-        </div>
-
-      </form>
-
-      <div class="divider text-sm text-base-content/60">¿Ya tienes cuenta?</div>
-      
-      <div class="text-center">
-        <a routerLink="/login" class="link link-primary no-underline hover:underline font-semibold">
-          Inicia Sesión aquí
-        </a>
-      </div>
-
     </div>
-  </div>
 </div>

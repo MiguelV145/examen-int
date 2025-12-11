@@ -12,7 +12,7 @@ import { from, tap, finalize, take, of, catchError } from 'rxjs';
   standalone: true,
   // 👇 AQUÍ SE AGREGA:
   imports: [CommonModule, ReactiveFormsModule], 
-  templateUrl: './Programmer-Page.html',
+  templateUrl: './Perfil-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgrammerPage implements OnInit { 

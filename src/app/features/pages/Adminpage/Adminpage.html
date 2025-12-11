@@ -1,58 +1,65 @@
-<div class="min-h-screen bg-base-200 p-4 lg:p-10 font-sans relative">
+<div class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 lg:p-10 font-sans relative selection:bg-primary selection:text-white pb-20">
   
-  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 animate-fade-in-down">
+  <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 animate-fade-in-down">
     <div class="text-center md:text-left">
-      <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
+      <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm tracking-tight">
         Panel de Control
       </h1>
-      <p class="text-base-content/60 mt-2 font-medium">Administración de usuarios y roles del sistema</p>
+      <p class="text-gray-400 mt-2 font-medium text-lg">Administración integral del sistema</p>
     </div>
     
     <div class="flex flex-col md:flex-row items-center gap-4">
-      <div class="flex items-center gap-4 bg-base-100/80 backdrop-blur-md px-6 py-3 rounded-2xl shadow-lg border border-base-200">
-        <div class="avatar placeholder ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full">
-          @if (authService.currentUser()?.photoURL) {
-            <div class="w-12 rounded-full">
+      <div class="flex items-center gap-4 bg-[#1e293b]/60 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white/10 hover:border-primary/30 transition-colors duration-300">
+        <div class="avatar placeholder">
+          <div class="w-12 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-[#0f172a]">
+            @if (authService.currentUser()?.photoURL) {
               <img [src]="authService.currentUser()?.photoURL" alt="Admin Avatar" />
-            </div>
-          } @else {
-            <div class="bg-gradient-to-br from-primary to-secondary text-primary-content w-12 rounded-full flex items-center justify-center">
-              <span class="text-xl font-bold">
-                {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
-              </span>
-            </div>
-          }
+            } @else {
+              <div class="bg-gradient-to-br from-primary to-secondary text-white w-full h-full flex items-center justify-center">
+                <span class="text-xl font-bold">
+                  {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
+                </span>
+              </div>
+            }
+          </div>
         </div>
-        <div>
-          <p class="font-bold text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
-          <div class="badge badge-primary badge-sm font-mono mt-1">SUPER ADMIN</div>
+        <div class="text-left">
+          <p class="font-bold text-white text-base">{{ authService.currentUser()?.displayName || 'Administrador' }}</p>
+          <div class="badge badge-primary badge-xs font-bold shadow-lg shadow-primary/20">SUPER ADMIN</div>
         </div>
       </div>
     </div>
   </div>
 
-  <div role="tablist" class="tabs tabs-boxed bg-base-100 shadow-md p-2 mb-6 max-w-md mx-auto md:mx-0">
-    <a role="tab" class="tab transition-all duration-300 font-bold" 
-       [class.tab-active]="activeTab() === 'users'" 
+  <div role="tablist" class="flex p-1 gap-1 bg-black/20 backdrop-blur-sm rounded-xl mb-8 max-w-md mx-auto md:mx-0 border border-white/5">
+    <button role="tab" class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 flex justify-center items-center gap-2" 
        [class.bg-primary]="activeTab() === 'users'"
-       [class.text-primary-content]="activeTab() === 'users'"
+       [class.text-white]="activeTab() === 'users'"
+       [class.shadow-lg]="activeTab() === 'users'"
+       [class.shadow-primary/30]="activeTab() === 'users'"
+       [class.text-gray-400]="activeTab() !== 'users'"
+       [class.hover:bg-white/5]="activeTab() !== 'users'"
        (click)="switchTab('users')">
-       👥 Usuarios
-    </a>
-    <a role="tab" class="tab transition-all duration-300 font-bold" 
-       [class.tab-active]="activeTab() === 'asesorias'" 
-       [class.bg-primary]="activeTab() === 'asesorias'"
-       [class.text-primary-content]="activeTab() === 'asesorias'"
+       <span>👥</span> Usuarios
+    </button>
+    <button role="tab" class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all duration-300 flex justify-center items-center gap-2" 
+       [class.bg-secondary]="activeTab() === 'asesorias'"
+       [class.text-white]="activeTab() === 'asesorias'"
+       [class.shadow-lg]="activeTab() === 'asesorias'"
+       [class.shadow-secondary/30]="activeTab() === 'asesorias'"
+       [class.text-gray-400]="activeTab() !== 'asesorias'"
+       [class.hover:bg-white/5]="activeTab() !== 'asesorias'"
        (click)="switchTab('asesorias')">
-       📅 Asesorías
-    </a>
+       <span>📅</span> Asesorías
+    </button>
   </div>
 
   @if (activeTab() === 'users') {
-    <div class="card bg-base-100 shadow-2xl overflow-hidden border border-base-200 rounded-3xl animate-fade-in">
+    <div class="card bg-[#1e293b]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in">
       
-      <div class="p-4 border-b border-base-200 flex justify-end bg-base-200/30">
-        <button (click)="openModal()" class="btn btn-primary btn-sm gap-2 shadow-md hover:shadow-lg transition-shadow">
+      <div class="p-5 border-b border-white/5 flex justify-between items-center bg-white/5">
+        <h3 class="font-bold text-white text-lg">Listado de Usuarios</h3>
+        <button (click)="openModal()" class="btn btn-primary btn-sm gap-2 border-0 bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg hover:shadow-primary/30 transition-all text-white">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
           Nuevo Usuario
         </button>
@@ -60,75 +67,80 @@
 
       <div class="overflow-x-auto">
         <table class="table w-full align-middle">
-          <thead class="bg-base-200/50 text-base-content/70 uppercase text-xs font-bold tracking-wider">
+          <thead class="bg-[#0f172a]/50 text-gray-400 uppercase text-xs font-bold tracking-wider">
             <tr>
-              <th class="pl-8 py-4">Usuario</th>
+              <th class="pl-8 py-5">Usuario</th>
               <th class="text-center">Rol</th>
               <th class="text-center">Horario</th>
               <th class="text-right pr-8">Acciones</th>
             </tr>
           </thead>
           
-          <tbody>
+          <tbody class="divide-y divide-white/5">
             @if (users$ | async; as users) {
               @for (user of users; track user.uid) {
-                <tr class="hover:bg-base-200/40 border-b border-base-100 last:border-none group transition-colors">
+                <tr class="hover:bg-white/5 transition-colors group">
                   
                   <td class="pl-8 py-4">
                     <div class="flex items-center gap-4">
                       <div class="avatar placeholder">
                         @if (user.photoURL) {
-                          <div class="w-10 h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                          <div class="w-10 h-10 rounded-full ring-2 ring-white/10 group-hover:ring-primary transition-all">
                             <img [src]="user.photoURL" />
                           </div>
                         } @else {
-                          <div class="bg-amber-600/10 text-amber-500  ring ring-primary ring-offset-base-100 ring-offset-2 w-10 h-10 rounded-full flex items-center justify-center font-bold">
+                          <div class="bg-gradient-to-tr from-gray-700 to-gray-600 text-white ring-2 ring-white/10 w-10 h-10 rounded-full flex items-center justify-center font-bold">
                             {{ user.email.charAt(0).toUpperCase() }}
                           </div>
                         }
                       </div>
                       <div>
-                        <div class="font-bold group-hover:text-primary transition-colors">{{ user.displayName || 'Sin nombre' }}</div>
-                        <div class="text-xs opacity-50">{{ user.email }}</div>
+                        <div class="font-bold text-gray-200 group-hover:text-primary transition-colors">{{ user.displayName || 'Sin nombre' }}</div>
+                        <div class="text-xs text-gray-500 font-mono">{{ user.email }}</div>
                       </div>
                     </div>
                   </td>
 
                   <td class="text-center">
                     @switch (user.role) {
-                      @case ('admin') { <div class="badge badge-error text-white font-bold shadow-sm">Admin</div> }
-                      @case ('Programador') { <div class="badge badge-secondary text-white font-bold shadow-sm">Programador</div> }
-                      @default { <div class="badge badge-ghost font-medium">User</div> }
+                      @case ('admin') { <div class="badge badge-error gap-1 text-white font-bold bg-red-500/20 border-red-500/30">🛡️ Admin</div> }
+                      @case ('Programador') { <div class="badge badge-secondary gap-1 text-white font-bold bg-secondary/20 border-secondary/30">💻 Dev</div> }
+                      @default { <div class="badge badge-ghost text-gray-400 border-white/10">User</div> }
                     }
                   </td>
 
                   <td class="text-center">
                     @if (user.role === 'Programador') {
-                      <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border-base-300 hover:border-primary hover:text-primary transition-all group/btn">
+                      <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border border-white/10 hover:border-primary hover:bg-primary/10 hover:text-primary transition-all group/btn">
                         @if (user.availability) {
                           <span class="text-success font-semibold flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-success animate-pulse"></span> Configurado
+                            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Configurado
                           </span>
                         } @else {
-                          <span class="text-warning font-semibold">Sin Horario</span>
+                          <span class="text-warning font-semibold flex items-center gap-1">
+                             ⚠️ Sin Horario
+                          </span>
                         }
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                       </button>
                     } @else {
-                      <span class="text-xs opacity-30">-</span>
+                      <span class="text-xs opacity-20 select-none">--</span>
                     }
                   </td>
 
                   <td class="text-right pr-8">
                     @if (user.role !== 'admin') {
-                      <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button (click)="toggleRole(user)" class="btn btn-sm btn-circle btn-ghost tooltip tooltip-left" [attr.data-tip]="user.role === 'Programador' ? 'Degradar' : 'Ascender'">
-                          @if(user.role === 'Programador') {⬇️} @else {⬆️}
-                        </button>
-                        <button (click)="deleteUser(user)" class="btn btn-sm btn-circle btn-ghost text-error tooltip tooltip-left" data-tip="Eliminar">🗑️</button>
+                      <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <div class="tooltip tooltip-left" [attr.data-tip]="user.role === 'Programador' ? 'Degradar a Usuario' : 'Ascender a Programador'">
+                            <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10">
+                                @if(user.role === 'Programador') {⬇️} @else {⬆️}
+                            </button>
+                        </div>
+                        <div class="tooltip tooltip-left" data-tip="Eliminar Usuario">
+                            <button (click)="deleteUser(user)" class="btn btn-sm btn-square btn-ghost text-error hover:bg-error/10">🗑️</button>
+                        </div>
                       </div>
                     } @else {
-                      <span class="text-xs opacity-40 italic select-none">Protegido</span>
+                      <span class="text-xs opacity-30 italic select-none">N/A</span>
                     }
                   </td>
                 </tr>
@@ -141,54 +153,58 @@
   }
 
   @if (activeTab() === 'asesorias') {
-    <div class="card bg-base-100 shadow-2xl overflow-hidden border border-base-200 rounded-3xl animate-fade-in">
+    <div class="card bg-[#1e293b]/40 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in">
+       <div class="p-5 border-b border-white/5 bg-white/5">
+        <h3 class="font-bold text-white text-lg">Solicitudes de Asesoría</h3>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="table w-full align-middle">
-          <thead class="bg-base-200/50 text-base-content/70 uppercase text-xs font-bold tracking-wider">
+          <thead class="bg-[#0f172a]/50 text-gray-400 uppercase text-xs font-bold tracking-wider">
             <tr>
-              <th class="pl-8 py-4">Cliente</th>
+              <th class="pl-8 py-5">Cliente</th>
               <th>Programador</th>
               <th>Fecha/Hora</th>
               <th class="text-center">Estado</th>
               <th class="text-right pr-8">Gestión</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-white/5">
             @if (asesorias$ | async; as asesorias) {
               @for (cita of asesorias; track cita.id) {
-                <tr class="hover:bg-base-200/40 border-b border-base-100 last:border-none transition-colors">
+                <tr class="hover:bg-white/5 transition-colors">
                   
-                  <td class="pl-8 py-4 font-bold text-base-content">{{ cita.clientName }}</td>
+                  <td class="pl-8 py-4 font-bold text-white">{{ cita.clientName }}</td>
                   <td class="font-medium text-primary">{{ cita.programmerName }}</td>
                   <td>
                     <div class="flex flex-col">
-                      <span class="font-bold text-sm">{{ cita.date }}</span>
-                      <span class="text-xs opacity-60">{{ cita.time }}</span>
+                      <span class="font-bold text-gray-300 text-sm">{{ cita.date }}</span>
+                      <span class="text-xs text-gray-500">{{ cita.time }}</span>
                     </div>
                   </td>
                   
                   <td class="text-center">
                     @switch (cita.status) {
-                      @case ('pendiente') { <div class="badge badge-warning gap-1 animate-pulse">⏳ Pendiente</div> }
-                      @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold shadow-sm">✅ Aprobada</div> }
-                      @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold shadow-sm">❌ Rechazada</div> }
+                      @case ('pendiente') { <div class="badge badge-warning text-warning-content gap-1 font-bold animate-pulse">⏳ Pendiente</div> }
+                      @case ('aprobada') { <div class="badge badge-success gap-1 text-white font-bold bg-green-500/20 border-green-500/30">✅ Aprobada</div> }
+                      @case ('rechazada') { <div class="badge badge-error gap-1 text-white font-bold bg-red-500/20 border-red-500/30">❌ Rechazada</div> }
                     }
                   </td>
 
                   <td class="text-right pr-8">
                     @if (cita.status === 'pendiente') {
-                      <div class="join shadow-sm">
-                        <button (click)="updateAsesoriaStatus(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:scale-105 transition-transform">Aprobar</button>
-                        <button (click)="updateAsesoriaStatus(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:scale-105 transition-transform">Rechazar</button>
+                      <div class="join shadow-md border border-white/10">
+                        <button (click)="updateAsesoriaStatus(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:bg-green-600 border-none">Aprobar</button>
+                        <button (click)="updateAsesoriaStatus(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:bg-red-600 border-none">Rechazar</button>
                       </div>
                     } @else {
-                      <span class="text-xs opacity-50 italic">Finalizada</span>
+                      <span class="text-xs opacity-30 italic">Completada</span>
                     }
                   </td>
                 </tr>
               }
               @empty {
-                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium">No hay solicitudes de asesoría pendientes.</td></tr>
+                <tr><td colspan="5" class="text-center py-20 opacity-50 font-medium text-gray-400">No hay solicitudes pendientes.</td></tr>
               }
             }
           </tbody>
@@ -198,43 +214,43 @@
   }
 
   @if (showModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in">
       
-      <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 scale-100 animate-pop-up">
-        <div class="card-body">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="card-title text-2xl font-bold">Registrar Nuevo Usuario</h2>
-            <button class="btn btn-sm btn-circle btn-ghost" (click)="closeModal()">✕</button>
+      <div class="card w-full max-w-md bg-[#1e293b] text-white shadow-2xl border border-white/10 scale-100 animate-pop-up rounded-2xl">
+        <div class="card-body p-6">
+          <div class="flex justify-between items-center mb-6 pb-2 border-b border-white/5">
+            <h2 class="card-title text-2xl font-bold text-white">Registrar Usuario</h2>
+            <button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white" (click)="closeModal()">✕</button>
           </div>
           
-          <form [formGroup]="createUserForm" (ngSubmit)="createUser()">
+          <form [formGroup]="createUserForm" (ngSubmit)="createUser()" class="space-y-4">
             
-            <div class="form-control w-full mb-3">
-              <label class="label"><span class="label-text font-semibold">Nombre Completo</span></label>
-              <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered w-full focus:input-primary" />
+            <div class="form-control w-full">
+              <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Nombre Completo</span></label>
+              <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
 
-            <div class="form-control w-full mb-3">
-              <label class="label"><span class="label-text font-semibold">Correo Electrónico</span></label>
-              <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered w-full focus:input-primary" />
+            <div class="form-control w-full">
+              <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Correo Electrónico</span></label>
+              <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
 
-            <div class="form-control w-full mb-3">
-              <label class="label"><span class="label-text font-semibold">Contraseña</span></label>
-              <input type="password" formControlName="password" placeholder="******" class="input input-bordered w-full focus:input-primary" />
+            <div class="form-control w-full">
+              <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Contraseña</span></label>
+              <input type="password" formControlName="password" placeholder="******" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary focus:bg-[#0f172a]" />
             </div>
 
-            <div class="form-control w-full mb-6">
-              <label class="label"><span class="label-text font-semibold">Rol Inicial</span></label>
-              <select formControlName="role" class="select select-bordered w-full focus:select-primary">
+            <div class="form-control w-full">
+              <label class="label pt-0"><span class="label-text text-gray-400 text-xs uppercase font-bold">Rol Inicial</span></label>
+              <select formControlName="role" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-primary">
                 <option value="user">Usuario (Visitante)</option>
                 <option value="Programador">Programador (Perfil Público)</option>
               </select>
             </div>
 
-            <div class="card-actions justify-end gap-3">
-              <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-6" [disabled]="loading() || createUserForm.invalid">
+            <div class="card-actions justify-end gap-3 mt-4">
+              <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" (click)="closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-6 border-0 bg-gradient-to-r from-primary to-blue-600 shadow-lg shadow-primary/20" [disabled]="loading() || createUserForm.invalid">
                 @if (loading()) { <span class="loading loading-spinner"></span> }
                 Crear Cuenta
               </button>
@@ -246,72 +262,5 @@
     </div>
   }
 
-  @if (showAvailabilityModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-      <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-200 scale-100 animate-pop-up">
-        <div class="card-body">
-          
-          <div class="flex items-center gap-3 mb-4 border-b border-base-200 pb-4">
-            <div class="bg-primary/10 p-3 rounded-full text-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <h2 class="card-title text-xl font-bold">Gestionar Horario</h2>
-              <p class="text-xs opacity-60 font-medium">Programador: {{ selectedProgrammer()?.displayName }}</p>
-            </div>
-          </div>
-          
-          <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()">
-            
-            <div class="form-control w-full mb-4">
-              <label class="label"><span class="label-text font-semibold">Días Laborales</span></label>
-              <select formControlName="dias" class="select select-bordered w-full focus:select-primary">
-                <option value="" disabled selected>Selecciona una opción</option>
-                <option value="Lunes a Viernes">Lunes a Viernes</option>
-                <option value="Lunes a Sábado">Lunes a Sábado</option>
-                <option value="Fines de Semana">Fines de Semana</option>
-                <option value="Todos los días">Todos los días</option>
-              </select>
-            </div>
-
-            <div class="form-control w-full mb-6">
-              <label class="label"><span class="label-text font-semibold">Franja Horaria</span></label>
-              
-              <div class="flex items-center gap-2">
-                <select formControlName="startHour" class="select select-bordered flex-1 text-center focus:select-primary">
-                  @for (hour of availableHours; track hour) {
-                    <option [value]="hour">{{ hour }}</option>
-                  }
-                </select>
-                
-                <span class="font-bold text-base-content/50 text-sm">A</span>
-                
-                <select formControlName="endHour" class="select select-bordered flex-1 text-center focus:select-primary">
-                  @for (hour of availableHours; track hour) {
-                    <option [value]="hour">{{ hour }}</option>
-                  }
-                </select>
-              </div>
-              
-              <label class="label">
-                <span class="label-text-alt text-base-content/50">Selecciona hora de inicio y fin</span>
-              </label>
-            </div>
-
-            <div class="card-actions justify-end gap-3 mt-2">
-              <button type="button" class="btn btn-ghost" (click)="closeAvailabilityModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-6" [disabled]="loading() || availabilityForm.invalid">
-                @if (loading()) { <span class="loading loading-spinner"></span> }
-                Guardar Horario
-              </button>
-            </div>
-
-          </form>
-        </div>
-      </div>
-    </div>
-  }
 
 </div>
