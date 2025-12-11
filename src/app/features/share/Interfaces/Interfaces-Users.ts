@@ -10,19 +10,22 @@ export interface UserProfile {
   uid: string;
   email: string;
   role: 'admin' | 'user' | 'Programador';
+  
   // Datos Básicos
   displayName?: string;
   photoURL?: string;
+  
   // Datos de Programador
   specialty?: string;     
   description?: string;   
   skills?: string[];      
   availability?: Availability; 
+  
   // Datos Auxiliares
   photoFile?: File; 
 }
 
-// 3. Interfaz de Proyectos (CORREGIDA)
+// 3. Interfaz de Proyectos
 export interface Project {
   id?: string;
   programmerId: string;
@@ -34,10 +37,11 @@ export interface Project {
   repoUrl?: string;
   demoUrl?: string;
   
-  // 👇 AQUÍ AGREGAMOS LA PROPIEDAD QUE FALTABA 👇
-  image?: string;      // URL de la imagen SEO automática
+  // Campo para la imagen SEO automática
+  image?: string;      
   
-  photoURL?: string;   // (Opcional, si subes fotos manuales)
+  // Campos opcionales/legacy
+  photoURL?: string;   
   likes?: string[];
 }
 
@@ -53,4 +57,22 @@ export interface Asesoria {
   comment: string;
   status: 'pendiente' | 'aprobada' | 'rechazada';
   responseMsg?: string;
+}
+
+// 5. Interfaces para el Servicio de Links (NUEVAS)
+export interface LinkPreview {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+}
+
+export interface MicrolinkResponse {
+  status: string;
+  data: {
+    title?: string;
+    description?: string;
+    image?: { url: string };
+    url?: string;
+  };
 }
