@@ -78,7 +78,7 @@
             </a>
           </li>
           
-          @if (authService.hasRole('Programador') || authService.hasRole('admin')) {
+          @if (authService.hasRole('Programador')) {
              <li>
               <a routerLink="/panel" class="py-3 rounded-lg justify-between text-gray-300 hover:bg-white/10 hover:text-white font-medium" routerLinkActive="text-purple-400 bg-purple-900/20">
                 <span class="flex gap-2 items-center">

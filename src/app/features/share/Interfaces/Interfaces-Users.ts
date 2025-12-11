@@ -4,7 +4,7 @@ export interface Availability {
   horas: string;  // Ej: "09:00 - 18:00"
 }
 
-// 2. Interfaz Principal de Usuario (FUSIONADA)
+// 2. Interfaz Principal de Usuario
 export interface UserProfile {
   // Datos de Autenticación
   uid: string;
@@ -13,40 +13,44 @@ export interface UserProfile {
   // Datos Básicos
   displayName?: string;
   photoURL?: string;
-  // Datos de Programador (Opcionales)
-  specialty?: string;     // Título (Frontend, etc.)
-  description?: string;   // Biografía
-  skills?: string[];      // Array de etiquetas (React, Angular...)
-  availability?: Availability; // Objeto de horario
-  // Datos Auxiliares (No se guardan en BD, solo uso interno)
+  // Datos de Programador
+  specialty?: string;     
+  description?: string;   
+  skills?: string[];      
+  availability?: Availability; 
+  // Datos Auxiliares
   photoFile?: File; 
 }
 
-// 3. Interfaz de Proyectos
+// 3. Interfaz de Proyectos (CORREGIDA)
 export interface Project {
   id?: string;
-  programmerId: string;   // ID del dueño
+  programmerId: string;
   title: string;
   description: string;
   category: 'Academico' | 'Laboral'; 
-  role: string;           // Tu rol en el proyecto
-  technologies: string[]; // Array de strings
+  role: string;
+  technologies: string[];
   repoUrl?: string;
   demoUrl?: string;
-  photoURL?: string;
-  likes?: string[];       // Array de UIDs de usuarios que dieron like
+  
+  // 👇 AQUÍ AGREGAMOS LA PROPIEDAD QUE FALTABA 👇
+  image?: string;      // URL de la imagen SEO automática
+  
+  photoURL?: string;   // (Opcional, si subes fotos manuales)
+  likes?: string[];
 }
 
-// 4. Interfaz de Asesorías (Citas)
+// 4. Interfaz de Asesorías
 export interface Asesoria {
   id?: string;
   programmerId: string;
   programmerName: string;
-  clientId: string;       // UID del que pide la cita
-  clientName: string;     // Nombre del que pide
-  date: string;           // Fecha YYYY-MM-DD
-  time: string;           // Hora HH:MM
-  comment: string;        // Mensaje/Motivo
+  clientId: string;
+  clientName: string;
+  date: string;
+  time: string;
+  comment: string;
   status: 'pendiente' | 'aprobada' | 'rechazada';
-  responseMsg?: string;   // Respuesta del programador
+  responseMsg?: string;
 }

@@ -21,12 +21,8 @@
                 <div class="avatar border-2 border-[#1e293b]">
                   <div class="w-10 bg-gradient-to-br from-cyan-400 to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-lg">+50</div>
                 </div>
-                <div class="avatar">
-                  <div class="w-10"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" /></div>
-                </div>
-                <div class="avatar">
-                  <div class="w-10"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" /></div>
-                </div>
+                <div class="avatar"><div class="w-10"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" /></div></div>
+                <div class="avatar"><div class="w-10"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" /></div></div>
              </div>
              <div>
                <p class="text-white font-bold text-base leading-tight">Expertos Unidos</p>
@@ -50,14 +46,12 @@
         <p class="text-lg text-gray-400 leading-relaxed max-w-lg mx-auto lg:mx-0">
           Conectamos a los mejores desarrolladores con proyectos visionarios. Descubre talento, inspírate y construye el futuro digital hoy mismo.
         </p>
-
-        </div>
+      </div>
 
     </div>
   </div>
 
   <div id="talentos" class="container mx-auto px-4 mt-20 max-w-7xl scroll-mt-24 relative z-10">
-    
     <div class="flex flex-col items-center mb-16 text-center">
       <h2 class="text-4xl lg:text-5xl font-bold text-white mb-4">Nuestros Expertos</h2>
       <div class="w-32 h-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full mb-6"></div>
@@ -66,43 +60,36 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       @if (programmers$ | async; as programmers) {
-        
         @for (prog of programmers; track prog.uid) {
           <div class="card group bg-[#1e293b]/60 backdrop-blur-md border border-white/5 hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(34,211,238,0.2)] rounded-3xl overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-cyan-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             
             <div class="card-body items-center text-center p-8 relative z-10">
-              
               <div class="avatar mb-4 relative">
                 <div class="absolute -inset-1 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-full opacity-0 group-hover:opacity-100 blur transition duration-500"></div>
                 <div class="w-32 rounded-full ring-4 ring-[#0f172a] relative z-10 bg-[#0f172a]">
                   <img [src]="prog.photoURL || 'https://ui-avatars.com/api/?name=' + prog.displayName" class="object-cover" />
                 </div>
               </div>
-              
               <h2 class="card-title text-2xl text-white font-bold mb-1">{{ prog.displayName }}</h2>
               <div class="badge badge-outline border-cyan-500/30 text-cyan-400 bg-cyan-900/10 font-mono text-xs py-3 px-4 rounded-lg uppercase tracking-wide">
                 {{ prog.specialty || 'Full Stack Developer' }}
               </div>
-              
               <div class="card-actions w-full mt-8">
                 <a [routerLink]="['/portfolio', prog.uid]" class="btn btn-block bg-white/5 border-white/10 text-white hover:bg-white hover:text-[#0f172a] hover:border-white transition-all rounded-xl group/btn">
                     Ver Portafolio 
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </a>
               </div>
-
             </div>
           </div>
         }
-        
         @if (programmers.length === 0) {
           <div class="col-span-full text-center py-24 bg-white/5 rounded-3xl border border-dashed border-white/10">
             <div class="text-7xl mb-4 grayscale opacity-30">👨‍💻</div>
             <p class="text-gray-500 text-xl font-medium">No hay talentos registrados aún.</p>
           </div>
         }
-
       }
     </div>
   </div>
@@ -116,7 +103,7 @@
         </h2>
         <p class="text-gray-400 text-lg">La crema y nata del desarrollo, votado por la comunidad.</p>
       </div>
-   
+      <button class="btn btn-sm btn-ghost text-cyan-400 hover:bg-cyan-900/20">Ver todos →</button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -124,14 +111,20 @@
         
         @for (proj of projects; track proj.id) {
           
-          <div [routerLink]="['/portfolio', proj.programmerId]" class="card bg-[#162032] border border-white/5 shadow-xl hover:shadow-[0_0_30px_-5px_rgba(250,204,21,0.15)] hover:border-yellow-500/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer group h-[340px] overflow-hidden rounded-3xl">
+          <div [routerLink]="['/portfolio', proj.programmerId]" class="card bg-[#162032] border border-white/5 shadow-xl hover:shadow-[0_0_30px_-5px_rgba(250,204,21,0.15)] hover:border-yellow-500/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer group h-[450px] overflow-hidden rounded-3xl">
             
-            <figure class="relative h-48 overflow-hidden">
-              <div class="absolute inset-0 bg-gradient-to-t from-[#162032] via-transparent to-transparent z-10"></div>
+            <figure class="relative h-56 overflow-hidden bg-gray-900">
+              <div class="absolute inset-0 bg-gradient-to-t from-[#162032] via-transparent to-transparent z-10 opacity-90"></div>
+              
               <div class="absolute top-4 right-4 z-20 badge badge-warning bg-yellow-400 text-black border-none font-bold shadow-lg shadow-yellow-500/20">
                 ⭐ {{ proj.likes?.length || 0 }}
               </div>
-              <img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Project Cover" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
+
+              @if (proj['image']) {
+                <img [src]="proj['image']" alt="Project Cover" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"/>
+              } @else {
+                <img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Default Cover" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-50 grayscale group-hover:grayscale-0"/>
+              }
             </figure>
             
             <div class="card-body p-6 pt-2 relative z-20 bg-[#162032]">
@@ -140,7 +133,8 @@
               <h2 class="card-title text-white text-2xl font-bold line-clamp-1 group-hover:text-yellow-400 transition-colors">
                 {{ proj.title }}
               </h2>
-              <p class="text-gray-400 text-sm line-clamp-2 font-light leading-relaxed">{{ proj.description }}</p>
+
+              <p class="text-gray-400 text-sm line-clamp-4 font-light leading-relaxed">{{ proj.description }}</p>
               
               <div class="card-actions justify-between items-center mt-auto pt-4 border-t border-white/5">
                  <span class="text-xs font-mono text-gray-500 uppercase tracking-widest">{{ proj.category || 'Proyecto' }}</span>
@@ -184,4 +178,4 @@
   .perspective-1000 {
     perspective: 1000px;
   }
-</style>*
+</style>
