@@ -297,7 +297,7 @@ export class PortfolioDetail implements OnInit {
           'service_y02aan7',   // Service ID
           'template_faf7lba',  // Template ID
           templateParams,
-          'rjFCNeLrN83tOInc19' // Public Key (Por seguridad la pasamos aquí también)
+          'rjFCNekN83tOlNc19' // Public Key (Por seguridad la pasamos aquí también)
         );
       }
       
