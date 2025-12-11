@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -16,7 +16,12 @@ export const appConfig: ApplicationConfig = {
 
   providers: [
     
-    provideRouter(routes),
+    provideRouter(routes, 
+      // 2. Agregar esta configuración de scroll 👇
+      withInMemoryScrolling({
+        anchorScrolling: 'enabled',
+        scrollPositionRestoration: 'enabled'
+      })),
     provideHttpClient(withFetch()), // habilita HttpClient usando la API Fetch
     provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),
@@ -31,6 +36,3 @@ export const appConfig: ApplicationConfig = {
     })
   ]
 };
-
-
-
