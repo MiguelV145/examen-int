@@ -1,13 +1,13 @@
-<div class="min-h-screen bg-[#0f172a] text-gray-300 font-sans pb-20 relative">
+<div class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-gray-300 font-sans pb-20 relative selection:bg-primary selection:text-white">
 
   @if (authService.currentUser()) {
     @if ((currentUser$ | async)?.role !== 'admin') {
-      <div class="fixed top-24 right-4 z-50 animate-bounce-in">
-        <button (click)="openMyRequestsModal()" class="btn btn-circle btn-primary btn-lg shadow-2xl border-2 border-white/20 tooltip tooltip-left" data-tip="Centro de Solicitudes">
+      <div class="fixed top-24 right-6 z-40 animate-bounce-in">
+        <button (click)="openMyRequestsModal()" class="group relative btn btn-circle btn-lg border-none bg-gradient-to-tr from-primary to-secondary text-white shadow-lg shadow-primary/30 hover:scale-110 hover:shadow-primary/50 transition-all duration-300 tooltip tooltip-left" data-tip="Mis Solicitudes">
           <div class="indicator">
-            <span class="text-2xl">🔔</span>
+            <span class="text-2xl drop-shadow-md group-hover:rotate-12 transition-transform">🔔</span>
             @if ((notifications$ | async)?.length) {
-              <span class="badge badge-sm badge-error indicator-item animate-pulse"></span>
+              <span class="badge badge-sm badge-error indicator-item animate-pulse border-white"></span>
             }
           </div>
         </button>
@@ -17,66 +17,90 @@
 
   @if (profile$ | async; as profile) {
     
-    <div class="bg-[#1e293b] border-b border-gray-700 py-12">
-      <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8 max-w-5xl">
+    <div class="relative pt-12 pb-16 overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full bg-primary/5 -skew-y-2 origin-top-left pointer-events-none"></div>
+      
+      <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-10 max-w-5xl relative z-10">
         
-        <div class="avatar">
-          <div class="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-            <img [src]="profile.photoURL || 'https://ui-avatars.com/api/?name=' + profile.displayName" alt="Profile" />
+        <div class="relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+          <div class="avatar relative">
+            <div class="w-36 h-36 rounded-full ring-4 ring-base-100 ring-offset-2 ring-offset-primary/20 shadow-2xl">
+              <img [src]="profile.photoURL || 'https://ui-avatars.com/api/?name=' + profile.displayName" alt="Profile" class="object-cover" />
+            </div>
           </div>
         </div>
 
-        <div class="text-center md:text-left flex-1">
-          <h1 class="text-4xl font-extrabold text-white mb-2">{{ profile.displayName }}</h1>
-          <p class="text-xl text-primary font-medium mb-3">{{ profile.specialty || 'Desarrollador de Software' }}</p>
-          <p class="max-w-2xl text-gray-400 leading-relaxed mb-4">{{ profile.description || 'Sin descripción.' }}</p>
+        <div class="text-center md:text-left flex-1 space-y-3">
+          <div>
+             <h1 class="text-5xl font-black text-white tracking-tight mb-1">{{ profile.displayName }}</h1>
+             <p class="text-xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-bold">{{ profile.specialty || 'Desarrollador de Software' }}</p>
+          </div>
+          
+          <p class="max-w-2xl text-gray-400 leading-relaxed text-lg font-light">{{ profile.description || 'Sin descripción profesional aún.' }}</p>
           
           @if (profile['skills']) {
-            <div class="flex flex-wrap gap-2 mb-6 justify-center md:justify-start">
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start pt-2">
               @for (skill of profile['skills']; track skill) {
-                <span class="badge badge-outline text-xs border-gray-600 text-gray-400">{{ skill }}</span>
+                <span class="px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-primary/50 transition-colors cursor-default">
+                  {{ skill }}
+                </span>
               }
             </div>
           }
 
-          <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start items-center">
+          <div class="flex flex-col md:flex-row gap-5 justify-center md:justify-start items-center pt-4">
             
-            <div class="flex flex-col items-center md:items-start gap-2">
+            <div class="flex flex-col items-center md:items-start gap-3">
               @if (isAvailableNow(profile)) {
-                <div class="badge badge-success gap-1 text-white font-bold animate-pulse">
-                  🟢 Disponible ahora
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-sm font-semibold">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  Disponible ahora ({{ profile.availability?.horas }})
                 </div>
               } @else {
-                <div class="badge badge-error gap-1 text-white font-bold opacity-80">
-                  🔴 Fuera de horario ({{ profile.availability?.horas || 'Sin horario' }})
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold">
+                   <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                   Fuera de horario ({{ profile.availability?.horas }})
                 </div>
               }
 
               @if (currentUser$ | async; as currentUser) {
                 @if (currentUser.role === 'admin') {
-                  <button class="btn btn-disabled bg-gray-800 text-gray-500 border-gray-700 shadow-none cursor-not-allowed gap-2">
+                  <button class="btn btn-wide btn-disabled bg-white/5 text-gray-500 border-white/5 cursor-not-allowed">
                     🛡️ Vista de Administrador
                   </button>
                 } @else {
                   <button 
                     (click)="openBookingModal(profile, currentUser.role)" 
-                    class="btn btn-primary px-6 font-bold shadow-lg shadow-primary/20 gap-2 disabled:bg-gray-700 disabled:text-gray-500 disabled:border-none"
+                    class="btn btn-primary btn-wide font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 disabled:bg-white/5 disabled:text-gray-600 disabled:border-white/5 disabled:shadow-none"
                     [disabled]="!isAvailableNow(profile)">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    @if (isAvailableNow(profile)) { Contactar / Agendar } @else { Cerrado por ahora }
+                    
+                    @if (isAvailableNow(profile)) {
+                      Agendar Asesoría
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    } @else {
+                      Cerrado Temporalmente
+                    }
                   </button>
                 }
               } @else {
-                <button (click)="openBookingModal(profile)" class="btn btn-primary px-6 font-bold shadow-lg shadow-primary/20 gap-2">
-                  📩 Contactar / Agendar
+                <button (click)="openBookingModal(profile)" class="btn btn-primary btn-wide font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40">
+                  Agendar Asesoría
                 </button>
               }
             </div>
 
             @if (isOwner()) {
-              <div class="flex flex-col gap-2 ml-4 border-l border-gray-700 pl-4">
-                <button (click)="openProjectModal()" class="btn btn-outline btn-secondary btn-sm">➕ Agregar Proyecto</button>
-                <button (click)="openAvailabilityModal(profile)" class="btn btn-outline btn-accent btn-sm">⏰ Configurar Horario</button>
+              <div class="flex gap-2 pl-4 border-l border-white/10">
+                <button (click)="openProjectModal()" class="btn btn-square btn-outline border-white/20 hover:bg-white/10 hover:border-white text-white tooltip tooltip-bottom" data-tip="Nuevo Proyecto">
+                  ➕
+                </button>
+                <button (click)="openAvailabilityModal(profile)" class="btn btn-square btn-outline border-white/20 hover:bg-white/10 hover:border-white text-white tooltip tooltip-bottom" data-tip="Configurar Horario">
+                  ⏰
+                </button>
               </div>
             }
           </div>
@@ -85,67 +109,76 @@
       </div>
     </div>
 
-    <div class="container mx-auto px-4 mt-12 max-w-6xl">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold text-white">Portafolio Destacado</h2>
+    <div class="container mx-auto px-4 mt-8 max-w-6xl">
+      <div class="flex justify-between items-end mb-10 border-b border-white/5 pb-4">
+        <div>
+           <h2 class="text-3xl font-bold text-white mb-1">Portafolio Destacado</h2>
+           <p class="text-gray-500 text-sm">Explora mis últimos trabajos y colaboraciones.</p>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @if (projects$ | async; as projects) {
           
           @for (project of projects; track project.id) {
-            <div class="card bg-[#1e293b] border border-gray-700 shadow-xl hover:border-gray-600 transition-all duration-300 group">
+            <div class="card group bg-[#162032] border border-white/5 shadow-xl hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
               
-              <div class="card-body">
-                <div class="flex justify-between items-start">
-                  
-                  <div class="badge text-white font-bold" 
-                       [class.badge-secondary]="project.category === 'Academico'" 
-                       [class.badge-accent]="project.category === 'Laboral'">
+              <div class="p-6 pb-2 flex justify-between items-start">
+                 <div class="badge font-bold border-0" 
+                      [class.bg-secondary]="project.category === 'Academico'" 
+                      [class.text-secondary-content]="project.category === 'Academico'"
+                      [class.bg-accent]="project.category === 'Laboral'"
+                      [class.text-accent-content]="project.category === 'Laboral'">
                     {{ project.category }}
-                  </div>
-                  
-                  <div class="flex gap-2 items-center">
-                    <button 
-                      (click)="toggleLike(project)" 
-                      class="btn btn-circle btn-sm border-none shadow-md"
-                      [class.bg-yellow-400]="isLikedByMe(project)"
-                      [class.bg-gray-700]="!isLikedByMe(project)">
-                      ⭐
-                    </button>
-
+                 </div>
+                 
+                 <div class="flex gap-2">
                     @if (isOwner()) {
-                      <div class="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button (click)="openProjectModal(project)" class="btn btn-xs btn-ghost text-info tooltip" data-tip="Editar">✏️</button>
-                        <button (click)="deleteProject(project.id!)" class="btn btn-xs btn-ghost text-error tooltip" data-tip="Eliminar">🗑️</button>
+                      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button (click)="openProjectModal(project)" class="btn btn-xs btn-ghost text-info hover:bg-info/10">✏️</button>
+                        <button (click)="deleteProject(project.id!)" class="btn btn-xs btn-ghost text-error hover:bg-error/10">🗑️</button>
                       </div>
                     }
-                  </div>
+
+                    <button 
+                      (click)="toggleLike(project)" 
+                      class="btn btn-circle btn-sm border-none shadow-inner transition-transform active:scale-90"
+                      [class.bg-yellow-400]="isLikedByMe(project)"
+                      [class.text-yellow-900]="isLikedByMe(project)"
+                      [class.bg-white/10]="!isLikedByMe(project)"
+                      [class.text-gray-400]="!isLikedByMe(project)">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"  viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </button>
+                 </div>
+              </div>
+
+              <div class="card-body pt-2">
+                <div class="flex justify-between items-baseline mb-2">
+                    <h3 class="card-title text-white text-2xl font-bold group-hover:text-primary transition-colors">{{ project.title }}</h3>
+                    @if (project.likes && project.likes.length > 0) {
+                      <span class="text-xs font-mono text-yellow-500/80">{{ project.likes.length }} likes</span>
+                    }
                 </div>
-
-                <h3 class="card-title text-white text-xl mt-2">{{ project.title }}</h3>
                 
-                @if (project.likes && project.likes.length > 0) {
-                  <div class="text-xs text-yellow-500 font-bold mb-1 flex items-center gap-1">
-                    <span>⭐</span> {{ project.likes.length }} Destacados
-                  </div>
-                }
-
-                <p class="text-sm text-primary font-mono mb-2">{{ project.role }}</p>
-                <p class="text-gray-400 text-sm mb-4 min-h-[60px] line-clamp-3">{{ project.description }}</p>
+                <p class="text-sm font-mono text-primary/80 mb-2">{{ project.role }}</p>
+                <p class="text-gray-400 text-sm leading-relaxed mb-4 min-h-[60px] line-clamp-3">{{ project.description }}</p>
 
                 <div class="flex flex-wrap gap-2 mb-6">
                   @for (tech of project.technologies; track tech) {
-                    <span class="px-2 py-1 bg-[#0f172a] rounded text-xs text-blue-400 border border-blue-900/30">{{ tech }}</span>
+                    <span class="px-2.5 py-1 rounded bg-[#0f172a] text-xs text-gray-300 border border-white/5 shadow-sm">
+                      {{ tech }}
+                    </span>
                   }
                 </div>
 
-                <div class="flex gap-3 mt-auto">
+                <div class="card-actions grid grid-cols-2 gap-3 mt-auto">
                   @if (project.demoUrl) {
-                    <a [href]="project.demoUrl" target="_blank" class="btn btn-sm btn-primary flex-1">🚀 Demo</a>
+                    <a [href]="project.demoUrl" target="_blank" class="btn btn-sm btn-primary border-none shadow-lg shadow-primary/20 hover:shadow-primary/40">🚀 Demo</a>
                   }
                   @if (project.repoUrl) {
-                    <a [href]="project.repoUrl" target="_blank" class="btn btn-sm btn-outline flex-1 border-gray-600 text-gray-300">💻 Código</a>
+                    <a [href]="project.repoUrl" target="_blank" class="btn btn-sm btn-outline text-gray-300 border-gray-600 hover:bg-white hover:text-black">💻 Código</a>
                   }
                 </div>
               </div>
@@ -153,124 +186,136 @@
           }
 
           @if (projects.length === 0) {
-            <div class="col-span-full text-center py-16 border-2 border-dashed border-gray-700 rounded-2xl">
-              <p class="text-gray-500 text-lg">Aún no hay proyectos cargados.</p>
+            <div class="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-3xl bg-white/5">
+              <span class="text-5xl mb-4 opacity-50">📁</span>
+              <p class="text-gray-400 text-lg font-medium">Aún no hay proyectos publicados.</p>
             </div>
           }
 
         } @else {
-          <div class="col-span-full text-center py-20"><span class="loading loading-spinner text-primary loading-lg"></span></div>
+          <div class="col-span-full flex justify-center py-20">
+             <span class="loading loading-spinner text-primary loading-lg"></span>
+          </div>
         }
       </div>
     </div>
 
   } @else {
-    <div class="flex justify-center items-center h-screen bg-[#0f172a]">
-      <span class="loading loading-dots loading-lg text-primary"></span>
+    <div class="flex justify-center items-center h-screen">
+      <span class="loading loading-infinity loading-lg text-primary scale-150"></span>
     </div>
   }
 
 </div>
 
-<dialog id="booking_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
-  <div class="modal-box bg-[#0f172a] text-white border border-gray-700 w-11/12 max-w-4xl shadow-2xl p-0 overflow-hidden flex flex-col md:flex-row">
+<dialog id="booking_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-xl">
+  <div class="modal-box p-0 bg-[#1e293b] text-white border border-white/10 w-11/12 max-w-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row rounded-3xl">
     
-    <div class="bg-blue-600 p-10 flex flex-col justify-center text-white md:w-1/3 relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-full bg-white/5 skew-y-12 origin-top-left pointer-events-none"></div>
-      <h3 class="font-bold text-3xl mb-2 relative z-10">Agendar Cita</h3>
-      <p class="opacity-90 mb-6 relative z-10">Estás contactando a <span class="font-bold underline">{{ targetProfile?.displayName }}</span>.</p>
+    <div class="bg-gradient-to-br from-blue-600 to-indigo-900 p-10 flex flex-col justify-center text-white md:w-5/12 relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute bottom-10 left-10 w-20 h-20 bg-blue-400/20 rounded-full blur-xl"></div>
       
-      <div class="bg-white/20 p-4 rounded-xl backdrop-blur-sm border border-white/10 mb-6 relative z-10">
-        <p class="text-xs uppercase tracking-widest opacity-80 font-bold mb-1">Horario de Atención</p>
-        <div class="flex items-center gap-2">
-          <span class="text-xl">🕒</span>
+      <h3 class="font-bold text-3xl mb-1 relative z-10">Agendar Cita</h3>
+      <p class="text-blue-200 text-sm mb-8 relative z-10">Completa los detalles para contactar al experto.</p>
+      
+      <div class="bg-white/10 p-5 rounded-2xl backdrop-blur-sm border border-white/10 mb-6 relative z-10 hover:bg-white/20 transition-colors">
+        <p class="text-xs uppercase tracking-widest text-blue-200 font-bold mb-2">Horario Disponible</p>
+        <div class="flex items-start gap-3">
+          <span class="text-2xl mt-1">🕒</span>
           <div>
-            <p class="font-bold text-lg leading-tight">{{ targetProfile?.availability?.horas || '09:00 - 18:00' }}</p>
-            <p class="text-sm opacity-80">{{ targetProfile?.availability?.dias || 'Lunes a Viernes' }}</p>
+            <p class="font-bold text-xl">{{ targetProfile?.availability?.horas || '09:00 - 18:00' }}</p>
+            <p class="text-sm text-blue-100">{{ targetProfile?.availability?.dias || 'Lunes a Viernes' }}</p>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-3 relative z-10">
-        <span class="bg-white/20 p-2 rounded-full">📧</span>
-        <span class="text-sm opacity-80 break-all">{{ targetProfile?.email || 'Privado' }}</span>
+      <div class="flex items-center gap-3 relative z-10 pl-2">
+        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">📧</div>
+        <span class="text-sm text-blue-100 font-medium">{{ targetProfile?.email || 'Privado' }}</span>
       </div>
     </div>
 
-    <div class="p-8 md:w-2/3 bg-[#1e293b]">
-      <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="space-y-4">
+    <div class="p-8 md:w-7/12 bg-[#0f172a]">
+      <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="space-y-5">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="form-control">
-            <label class="label"><span class="label-text text-gray-400 font-semibold">Fecha Deseada</span></label>
-            <input type="date" formControlName="date" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
+            <label class="label pt-0"><span class="label-text text-gray-400 font-medium text-xs uppercase">Fecha</span></label>
+            <input type="date" formControlName="date" class="input input-bordered bg-[#1e293b] border-white/10 focus:border-primary text-white w-full shadow-inner" />
           </div>
           <div class="form-control">
-            <label class="label"><span class="label-text text-gray-400 font-semibold">Hora</span></label>
-            <input type="time" formControlName="time" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
+            <label class="label pt-0"><span class="label-text text-gray-400 font-medium text-xs uppercase">Hora</span></label>
+            <input type="time" formControlName="time" class="input input-bordered bg-[#1e293b] border-white/10 focus:border-primary text-white w-full shadow-inner" />
           </div>
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text text-gray-400 font-semibold">Asunto</span></label>
-          <input type="text" formControlName="subject" placeholder="Ej: Proyecto Web" class="input input-bordered bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white w-full" />
+          <label class="label pt-0"><span class="label-text text-gray-400 font-medium text-xs uppercase">Asunto</span></label>
+          <input type="text" formControlName="subject" placeholder="Ej: Consultoría de Proyecto Web" class="input input-bordered bg-[#1e293b] border-white/10 focus:border-primary text-white w-full shadow-inner placeholder-gray-600" />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text text-gray-400 font-semibold">Mensaje</span></label>
-          <textarea formControlName="comment" class="textarea textarea-bordered h-32 bg-[#0f172a] border-gray-600 focus:border-blue-500 text-white text-base w-full" placeholder="Hola, me gustaría saber si..."></textarea>
+          <label class="label pt-0"><span class="label-text text-gray-400 font-medium text-xs uppercase">Mensaje</span></label>
+          <textarea formControlName="comment" class="textarea textarea-bordered h-28 bg-[#1e293b] border-white/10 focus:border-primary text-white text-base w-full shadow-inner placeholder-gray-600 resize-none" placeholder="Hola, me gustaría agendar para revisar..."></textarea>
         </div>
 
-        <div class="modal-action justify-end mt-6">
-          <button type="button" class="btn btn-ghost text-gray-400 hover:text-white" onclick="document.getElementById('booking_modal').close()">Cancelar</button>
+        <div class="modal-action flex justify-between items-center mt-8 pt-4 border-t border-white/5">
+          <button type="button" class="btn btn-ghost text-gray-400 hover:text-white hover:bg-white/5" onclick="document.getElementById('booking_modal').close()">Cancelar</button>
           
-          <button type="submit" class="btn btn-primary px-8 bg-blue-600 border-none hover:bg-blue-700 text-white" [disabled]="bookingForm.invalid || loadingBooking()">
-            @if (loadingBooking()) { <span class="loading loading-spinner"></span> }
-            Enviar Solicitud 🚀
+          <button type="submit" class="btn btn-primary px-8 border-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/50" [disabled]="bookingForm.invalid || loadingBooking()">
+            @if (loadingBooking()) { <span class="loading loading-spinner loading-sm"></span> }
+            Confirmar Cita
           </button>
         </div>
       </form>
     </div>
 
   </div>
-  <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
+  <form method="dialog" class="modal-backdrop bg-black/60 backdrop-blur-sm"><button>close</button></form>
 </dialog>
 
-<dialog id="my_requests_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
-  <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-4xl shadow-2xl p-6">
-    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
-      <h3 class="font-bold text-2xl flex items-center gap-2">
-        🔔 {{ isOwner() ? 'Solicitudes Recibidas' : 'Mis Solicitudes Enviadas' }}
-      </h3>
-      <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white">✕</button></form>
+<dialog id="my_requests_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-xl">
+  <div class="modal-box bg-[#1e293b]/95 text-white border border-white/10 w-11/12 max-w-5xl shadow-2xl p-8 rounded-3xl">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h3 class="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+          🔔 {{ isOwner() ? 'Solicitudes Recibidas' : 'Mis Solicitudes' }}
+        </h3>
+        <p class="text-sm text-gray-500 mt-1">Gestión de citas.</p>
+      </div>
+      <form method="dialog"><button class="btn btn-circle btn-ghost text-gray-400 hover:bg-white/10">✕</button></form>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="overflow-hidden rounded-xl border border-white/5 shadow-inner bg-[#0f172a]/50">
       <table class="table w-full">
-        <thead>
-          <tr class="text-gray-400 uppercase text-xs tracking-wider border-b border-gray-700">
-            <th class="py-4 pl-4">{{ isOwner() ? 'Cliente' : 'Programador' }}</th>
-            <th>Fecha Solicitada</th>
+        <thead class="bg-white/5 text-gray-300">
+          <tr>
+            <th class="py-4 pl-6">{{ isOwner() ? 'Cliente' : 'Programador' }}</th>
+            <th>Agenda</th>
             <th>Asunto</th>
             <th class="text-center">Estado / Acción</th>
-            <th class="pr-4">Respuesta</th>
+            <th class="pr-6">Respuesta</th>
           </tr>
         </thead>
         <tbody>
           @if (notifications$ | async; as asesorias) {
             @for (cita of asesorias; track cita.id) {
-              <tr class="border-b border-gray-800 hover:bg-[#0f172a]/50 transition-colors">
+              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
                 
-                <td class="font-bold pl-4 text-primary">
-                  {{ isOwner() ? cita.clientName : cita.programmerName }}
+                <td class="pl-6">
+                   <div class="font-bold text-white group-hover:text-primary transition-colors">
+                     {{ isOwner() ? cita.clientName : cita.programmerName }}
+                   </div>
                 </td>
 
                 <td>
-                  <div class="font-bold">{{ cita.date }}</div>
-                  <div class="text-xs opacity-60">{{ cita.time }}</div>
+                  <div class="flex flex-col">
+                    <span class="font-medium text-gray-300">{{ cita.date }}</span>
+                    <span class="text-xs text-primary/70">{{ cita.time }}</span>
+                  </div>
                 </td>
 
-                <td class="text-sm opacity-80 max-w-xs truncate" [title]="cita.comment">
+                <td class="max-w-xs truncate text-gray-400" [title]="cita.comment">
                   {{ cita.comment.split(']')[0].replace('[', '') || 'Sin asunto' }}
                 </td>
                 
@@ -279,40 +324,55 @@
                     
                     @case ('pendiente') {
                       @if (isOwner()) {
-                        <div class="join shadow-md border border-white/10">
-                          <button (click)="respondToRequest(cita, 'aprobada')" class="btn btn-xs btn-success join-item text-white hover:bg-green-600 border-none">✔ Aprobar</button>
-                          <button (click)="respondToRequest(cita, 'rechazada')" class="btn btn-xs btn-error join-item text-white hover:bg-red-600 border-none">✖ Rechazar</button>
+                        <div class="join shadow-sm border border-white/10">
+                          <button 
+                            (click)="respondToRequest(cita, 'aprobada')" 
+                            class="btn btn-xs join-item btn-success text-white border-none hover:brightness-110">
+                            ✔
+                          </button>
+                          <button 
+                            (click)="respondToRequest(cita, 'rechazada')" 
+                            class="btn btn-xs join-item btn-error text-white border-none hover:brightness-110">
+                            ✖
+                          </button>
                         </div>
                       } @else {
-                        <div class="badge badge-warning badge-outline gap-1 font-bold">⏳ Pendiente</div>
+                        <span class="badge badge-warning badge-outline text-xs font-bold bg-warning/5">En espera</span>
                       }
                     }
 
                     @case ('aprobada') { 
-                      <div class="badge badge-success gap-1 text-white font-bold bg-green-600 border-none shadow-lg">
+                      <span class="badge badge-success text-white text-xs font-bold shadow-lg shadow-green-500/30 border-none">
                         ✅ Aprobada
-                      </div> 
+                      </span> 
                     }
 
                     @case ('rechazada') { 
-                      <div class="badge badge-error gap-1 text-white font-bold bg-red-600 border-none shadow-lg">
+                      <span class="badge badge-error text-white text-xs font-bold bg-red-500/80 border-none">
                         ❌ Rechazada
-                      </div> 
+                      </span> 
                     }
                   }
                 </td>
 
-                <td class="text-sm italic opacity-70 pr-4 max-w-[150px] truncate" [title]="cita.responseMsg">
-                  {{ cita.responseMsg || 'Esperando...' }}
+                <td class="pr-6">
+                  @if (cita.responseMsg) {
+                    <div class="text-sm text-gray-300 italic flex items-center gap-2 max-w-[200px] truncate" [title]="cita.responseMsg">
+                       <span class="w-1 h-1 rounded-full bg-primary"></span>
+                       {{ cita.responseMsg }}
+                    </div>
+                  } @else {
+                    <span class="text-xs text-gray-600">--</span>
+                  }
                 </td>
               </tr>
             }
             @empty {
               <tr>
-                <td colspan="5" class="text-center py-16">
-                  <div class="flex flex-col items-center gap-2 opacity-50">
-                    <span class="text-4xl">📭</span>
-                    <span class="text-lg">No hay solicitudes registradas.</span>
+                <td colspan="5" class="text-center py-24">
+                  <div class="flex flex-col items-center gap-3 opacity-30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    <span class="text-lg font-medium">No hay solicitudes registradas.</span>
                   </div>
                 </td>
               </tr>
@@ -321,104 +381,108 @@
         </tbody>
       </table>
     </div>
-
-    <div class="modal-action">
-      <form method="dialog"><button class="btn btn-primary">Cerrar</button></form>
-    </div>
   </div>
-  <form method="dialog" class="modal-backdrop bg-black/50"><button>close</button></form>
+  <form method="dialog" class="modal-backdrop bg-black/60"><button>close</button></form>
 </dialog>
 
-<dialog id="project_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-sm">
-  <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-2xl">
-    <h3 class="font-bold text-2xl text-primary mb-6">{{ isEditing() ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h3>
+<dialog id="project_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-xl">
+  <div class="modal-box bg-[#1e293b] text-white border border-white/10 w-11/12 max-w-2xl shadow-2xl rounded-2xl">
+    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+      <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">📂</div>
+      <h3 class="font-bold text-2xl">{{ isEditing() ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h3>
+    </div>
     
-    <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+    <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="space-y-4">
       
-      <div class="form-control w-full mb-3">
-        <label class="label"><span class="label-text text-gray-300">Nombre del Proyecto</span></label>
-        <input type="text" formControlName="title" class="input input-bordered bg-[#0f172a] text-white" />
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Título</span></label>
+        <input type="text" formControlName="title" class="input input-bordered bg-[#0f172a] border-white/10 focus:border-primary text-white w-full" placeholder="Nombre del proyecto" />
       </div>
 
-      <div class="flex gap-3 mb-3">
+      <div class="flex gap-4">
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Categoría</span></label>
-          <select formControlName="category" class="select select-bordered bg-[#0f172a] text-white">
+          <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Categoría</span></label>
+          <select formControlName="category" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full">
             <option value="Academico">🎓 Académico</option>
             <option value="Laboral">💼 Laboral</option>
           </select>
         </div>
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Rol</span></label>
-          <input type="text" formControlName="role" class="input input-bordered bg-[#0f172a] text-white" placeholder="Ej: Frontend Dev" />
+          <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Rol</span></label>
+          <input type="text" formControlName="role" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full" placeholder="Ej: Frontend Dev" />
         </div>
       </div>
 
-      <div class="form-control mb-3">
-        <label class="label"><span class="label-text text-gray-300">Tecnologías (separadas por coma)</span></label>
-        <input type="text" formControlName="technologies" class="input input-bordered bg-[#0f172a] text-white" placeholder="Angular, Firebase, etc." />
+      <div class="form-control">
+        <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Tecnologías (CSV)</span></label>
+        <input type="text" formControlName="technologies" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full" placeholder="Angular, Tailwind, Firebase..." />
       </div>
 
-      <div class="form-control mb-3">
-        <label class="label"><span class="label-text text-gray-300">Descripción</span></label>
-        <textarea formControlName="description" class="textarea textarea-bordered bg-[#0f172a] text-white h-20"></textarea>
+      <div class="form-control">
+        <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Descripción</span></label>
+        <textarea formControlName="description" class="textarea textarea-bordered bg-[#0f172a] border-white/10 text-white h-24 text-base" placeholder="Describe brevemente el proyecto..."></textarea>
       </div>
 
-      <div class="flex gap-3 mb-6">
+      <div class="flex gap-4 p-4 bg-white/5 rounded-xl border border-white/5">
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Repo URL</span></label>
-          <input type="text" formControlName="repoUrl" class="input input-bordered bg-[#0f172a] text-white" />
+          <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Repo URL 🐙</span></label>
+          <input type="text" formControlName="repoUrl" class="input input-sm input-ghost bg-transparent border-b border-gray-600 rounded-none focus:bg-transparent text-white px-0" placeholder="https://github.com/..." />
         </div>
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Demo URL</span></label>
-          <input type="text" formControlName="demoUrl" class="input input-bordered bg-[#0f172a] text-white" />
+          <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Demo URL 🔗</span></label>
+          <input type="text" formControlName="demoUrl" class="input input-sm input-ghost bg-transparent border-b border-gray-600 rounded-none focus:bg-transparent text-white px-0" placeholder="https://..." />
         </div>
       </div>
 
-      <div class="modal-action">
-        <button type="button" class="btn btn-ghost text-gray-400" onclick="document.getElementById('project_modal').close()">Cancelar</button>
-        <button type="submit" class="btn btn-primary px-8" [disabled]="projectForm.invalid || loading()">
-          @if (loading()) { <span class="loading loading-spinner"></span> } Guardar
+      <div class="modal-action pt-4">
+        <button type="button" class="btn btn-ghost hover:bg-white/5" onclick="document.getElementById('project_modal').close()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="projectForm.invalid || loading()">
+          @if (loading()) { <span class="loading loading-spinner"></span> } Guardar Cambios
         </button>
       </div>
     </form>
   </div>
-  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  <form method="dialog" class="modal-backdrop bg-black/60"><button>close</button></form>
 </dialog>
 
-<dialog id="availability_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-sm">
-  <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-sm">
-    <h3 class="font-bold text-lg text-accent mb-4">⏰ Configurar Horario de Atención</h3>
+<dialog id="availability_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-xl">
+  <div class="modal-box bg-[#1e293b] text-white border border-white/10 w-11/12 max-w-sm shadow-2xl rounded-2xl">
+    <div class="text-center mb-6">
+       <div class="inline-flex p-3 rounded-full bg-accent/10 text-accent mb-2 text-2xl">⏰</div>
+       <h3 class="font-bold text-xl">Configurar Horario</h3>
+       <p class="text-xs text-gray-500">Define cuándo pueden contactarte.</p>
+    </div>
     
-    <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()">
+    <form [formGroup]="availabilityForm" (ngSubmit)="saveAvailability()" class="space-y-4">
       
-      <div class="form-control w-full mb-3">
-        <label class="label"><span class="label-text text-gray-300">Días de Atención</span></label>
-        <select formControlName="days" class="select select-bordered bg-[#0f172a] text-white">
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text text-gray-400 text-xs uppercase font-bold">Días</span></label>
+        <select formControlName="days" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full">
           <option value="Lunes a Viernes">Lunes a Viernes</option>
           <option value="Lunes a Sábado">Lunes a Sábado</option>
           <option value="Todos los días">Todos los días</option>
         </select>
       </div>
 
-      <div class="flex gap-2 mb-6">
+      <div class="flex gap-3 bg-[#0f172a] p-3 rounded-xl border border-white/5">
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Apertura</span></label>
-          <input type="time" formControlName="startHour" class="input input-bordered bg-[#0f172a] text-white" />
+          <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Desde</span></label>
+          <input type="time" formControlName="startHour" class="input input-sm bg-transparent text-center text-white font-bold focus:outline-none" />
         </div>
+        <div class="divider divider-horizontal mx-0 px-0 opacity-20"></div>
         <div class="form-control w-1/2">
-          <label class="label"><span class="label-text text-gray-300">Cierre</span></label>
-          <input type="time" formControlName="endHour" class="input input-bordered bg-[#0f172a] text-white" />
+          <label class="label pt-0"><span class="label-text text-gray-400 text-xs">Hasta</span></label>
+          <input type="time" formControlName="endHour" class="input input-sm bg-transparent text-center text-white font-bold focus:outline-none" />
         </div>
       </div>
 
-      <div class="modal-action">
-        <button type="button" class="btn btn-ghost" onclick="document.getElementById('availability_modal').close()">Cancelar</button>
-        <button type="submit" class="btn btn-accent" [disabled]="availabilityForm.invalid || loading()">
+      <div class="modal-action justify-center w-full pt-2">
+        <button type="submit" class="btn btn-accent btn-block shadow-lg shadow-accent/20" [disabled]="availabilityForm.invalid || loading()">
           @if (loading()) { <span class="loading loading-spinner"></span> } Guardar Horario
         </button>
       </div>
+       <button type="button" class="btn btn-xs btn-ghost w-full mt-2 text-gray-500" onclick="document.getElementById('availability_modal').close()">Cancelar</button>
     </form>
   </div>
-  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  <form method="dialog" class="modal-backdrop bg-black/60"><button>close</button></form>
 </dialog>

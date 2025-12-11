@@ -77,11 +77,31 @@ export class ProgrammerPage implements OnInit {
     this.skills.update(s => s.filter(x => x !== skill));
   }
 
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      // Validar tamaño (máximo 500KB para no saturar Firestore)
+      if (file.size > 500000) {
+        alert('La imagen es muy grande. Usa una de menos de 500KB.');
+        return;
+      }
+
       const reader = new FileReader();
-      reader.onload = (e) => { this.previewUrl.set(e.target?.result as string); };
+      reader.onload = (e) => { 
+        const base64Image = e.target?.result as string;
+        
+        // 1. Mostrar vista previa
+        this.previewUrl.set(base64Image);
+        
+        // 2. IMPORTANTE: Guardar el string de la imagen en el formulario
+        this.profileForm.patchValue({
+          photoURL: base64Image
+        });
+        
+        // Marcar como 'dirty' para que Angular sepa que cambió
+        this.profileForm.get('photoURL')?.markAsDirty();
+      };
       reader.readAsDataURL(file);
     }
   }
@@ -97,18 +117,31 @@ export class ProgrammerPage implements OnInit {
 
     this.loading.set(true);
     const docRef = doc(this.firestore, 'users', user.uid);
-    const data = { ...this.profileForm.value, skills: this.skills() };
+    
+    // Obtenemos los valores del formulario (incluida la foto en Base64 si se cambió)
+    const formValues = this.profileForm.value;
 
-    from(updateDoc(docRef, data)).pipe(
+    const dataToUpdate = {
+      displayName: formValues.displayName,
+      specialty: formValues.specialty,
+      description: formValues.description,
+      photoURL: formValues.photoURL, // <--- Aquí va la foto
+      skills: this.skills()
+    };
+
+    from(updateDoc(docRef, dataToUpdate)).pipe(
       tap(() => {
-        this.successMessage.set('¡Perfil actualizado!');
+        this.successMessage.set('¡Perfil actualizado con éxito!');
         setTimeout(() => this.successMessage.set(''), 3000);
       }),
-      catchError(() => {
-        this.errorMessage.set('Error al guardar.');
+      catchError((error) => {
+        console.error(error);
+        this.errorMessage.set('Error al guardar. La imagen puede ser muy pesada.');
         return of(null);
       }),
       finalize(() => this.loading.set(false))
     ).subscribe();
   }
+
+ 
 }
