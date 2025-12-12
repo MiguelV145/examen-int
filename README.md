@@ -26,7 +26,7 @@
 
 Repositorio principal: [Repositorio](https://github.com/MiguelV145/examen-int)
 
-Video Link: [Youtube](https://youtu.be/JUmw7vOs-qM?si=rQVeNxT2XuEnQnb6)
+Video Link: [Youtube](https://youtu.be/5eN5oEftyWg)
 
 ---
 
