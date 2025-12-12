@@ -44,6 +44,7 @@
     "@angular/cli": "^21.0.2",
     "@angular/compiler-cli": "^21.0.0",
     "@tailwindcss/postcss": "^4.1.17",
+    "angular-cli-ghpages": "2.0.3",
     "daisyui": "^5.5.8",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.6",
