@@ -378,7 +378,7 @@
     <div class="overflow-x-auto rounded-xl border border-white/5">
       <table class="table w-full">
         <thead class="bg-[#0f172a]/50">
-          <tr class="text-gray-400 uppercase text-xs tracking-wider border-b border-gray-700">
+          <tr class="text-gray-400 uppercase text-xs  ">  
             <th class="py-4 pl-6">Tu Rol</th>
             <th>Contraparte</th>
             <th>Fecha Solicitada</th>
@@ -394,9 +394,9 @@
                 
                 <td class="pl-6">
                   @if (cita.programmerId === (authService.currentUser()?.uid)) {
-                    <span class="badge badge-sm badge-secondary font-bold shadow-sm">Recibida (Programador)</span>
+                    <span class="  font-bold shadow-sm">Recibida (Programador)</span>
                   } @else {
-                    <span class="badge badge-sm badge-outline text-gray-400 border-gray-600">Enviada (Cliente)</span>
+                    <span class=" badge-outline text-gray-400 border-gray-600">Enviada (Cliente)</span>
                   }
                 </td>
 
