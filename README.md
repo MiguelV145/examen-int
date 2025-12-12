@@ -24,7 +24,9 @@
 📧 jvanegasp1@est.ups.edu.ec   
 💻 GitHub: [josevac1](https://github.com/josevac1)
 
-Repositorio principal: https://github.com/MiguelV145/examen-int
+Repositorio principal: [Repositorio](https://github.com/MiguelV145/examen-int)
+
+Video Link: [Youtube](https://youtu.be/JUmw7vOs-qM?si=rQVeNxT2XuEnQnb6)
 
 ---
 
