@@ -42,12 +42,7 @@ export class Adminpage {
   formUtils = FormUtils; // Exponer al HTML
 
   // --- FORMULARIOS ---
-  createUserForm = this.fb.group({
-    displayName: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    role: ['user', Validators.required]
-  });
+  
 
   availabilityForm = this.fb.group({
     dias: ['', Validators.required],
@@ -67,60 +62,7 @@ export class Adminpage {
   switchTab(tab: 'users' | 'asesorias') {
     this.activeTab.set(tab);
   }
-
-  // --- CREAR USUARIO (Modal) ---
-  openCreateModal() {
-    this.createUserForm.reset({ role: 'user' });
-    this.showCreateModal.set(true);
-  }
-
-  closeCreateModal() {
-    this.showCreateModal.set(false);
-  }
-
-  async createUser() {
-    if (this.createUserForm.invalid) {
-      this.createUserForm.markAllAsTouched();
-      return;
-    }
-
-    this.loading.set(true);
-    const { email, password, displayName, role } = this.createUserForm.value;
-
-    // Inicializamos una app secundaria para no desloguear al admin
-    // IMPORTANTE: Asegúrate de que environment.firebaseConfig exista. Si se llama 'firebase', cámbialo aquí.
-    const secondaryApp = initializeApp(environment.firebaseConfig, 'Secondary'); 
-    const secondaryAuth = getAuth(secondaryApp);
-
-    try {
-      if(email && password) {
-        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-        const newUser = userCredential.user;
-
-        await updateProfile(newUser, { displayName: displayName });
-
-        const userDocRef = doc(this.firestore, `users/${newUser.uid}`);
-        await setDoc(userDocRef, {
-          uid: newUser.uid,
-          email: email,
-          displayName: displayName,
-          role: role,
-          photoURL: null,
-          createdAt: new Date().toISOString()
-        });
-
-        alert(`✅ Usuario ${displayName} creado exitosamente.`);
-        this.closeCreateModal();
-      }
-    } catch (error: any) {
-      console.error(error);
-      alert('Error: ' + error.message);
-    } finally {
-      this.loading.set(false);
-      await deleteApp(secondaryApp);
-    }
-  }
-
+  
   // --- GESTIÓN USUARIOS ---
   async toggleRole(user: UserProfile) {
     if (user.uid === this.authService.currentUser()?.uid) return alert('⛔ No puedes cambiar tu propio rol.');

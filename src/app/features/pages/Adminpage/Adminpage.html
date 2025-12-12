@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[#0f172a] text-gray-200 font-sans p-4 lg:p-8 pb-20 relative selection:bg-cyan-500 selection:text-white">
+<div class="pt-24 min-h-screen bg-[#0f172a] text-gray-200 font-sans p-4 lg:p-8 pb-20 relative">
   
   <div class="fixed inset-0 pointer-events-none">
     <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
@@ -66,16 +66,7 @@
   @if (activeTab() === 'users') {
     <div class="max-w-7xl mx-auto card bg-[#1e293b]/60 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-3xl animate-fade-in relative z-10">
       
-      <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/[0.02]">
-        <div>
-           <h3 class="font-bold text-white text-xl">Listado de Usuarios</h3>
-           <p class="text-xs text-gray-500 mt-1">Gestiona roles y permisos del sistema.</p>
-        </div>
-        <button (click)="openCreateModal()" class="btn btn-sm gap-2 border-0 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-900/20 hover:shadow-cyan-500/40 transition-all rounded-xl h-10 px-5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-          Nuevo Usuario
-        </button>
-      </div>
+      
 
       <div class="overflow-x-auto">
         <table class="table w-full align-middle">
@@ -215,56 +206,5 @@
       </div>
     </div>
   }
-
-  @if (showCreateModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div class="card w-full max-w-md bg-[#1e293b] text-white shadow-2xl border border-white/10 scale-100 animate-pop-up rounded-3xl">
-        <div class="card-body p-8">
-          <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
-            <div>
-               <h2 class="card-title text-2xl font-black text-white">Nuevo Usuario</h2>
-               <p class="text-xs text-gray-500 mt-1">Registra manualmente un miembro</p>
-            </div>
-            <button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white bg-white/5" (click)="closeCreateModal()">✕</button>
-          </div>
-          
-          <form [formGroup]="createUserForm" (ngSubmit)="createUser()" class="space-y-5">
-            
-            <div class="form-control w-full">
-              <label class="label pt-0"><span class="label-text text-gray-400 text-[10px] uppercase font-bold tracking-widest">Nombre Completo</span></label>
-              <input type="text" formControlName="displayName" placeholder="Ej: Juan Pérez" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-cyan-500 transition-colors h-11" [class.input-error]="formUtils.isValidField(createUserForm, 'displayName')"/>
-            </div>
-
-            <div class="form-control w-full">
-              <label class="label pt-0"><span class="label-text text-gray-400 text-[10px] uppercase font-bold tracking-widest">Correo Electrónico</span></label>
-              <input type="email" formControlName="email" placeholder="usuario@ejemplo.com" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-cyan-500 transition-colors h-11" [class.input-error]="formUtils.isValidField(createUserForm, 'email')"/>
-            </div>
-
-            <div class="form-control w-full">
-              <label class="label pt-0"><span class="label-text text-gray-400 text-[10px] uppercase font-bold tracking-widest">Contraseña</span></label>
-              <input type="password" formControlName="password" placeholder="••••••••" class="input input-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-cyan-500 transition-colors h-11" [class.input-error]="formUtils.isValidField(createUserForm, 'password')"/>
-            </div>
-
-            <div class="form-control w-full">
-              <label class="label pt-0"><span class="label-text text-gray-400 text-[10px] uppercase font-bold tracking-widest">Rol Inicial</span></label>
-              <select formControlName="role" class="select select-bordered bg-[#0f172a] border-white/10 text-white w-full focus:border-cyan-500 h-11">
-                <option value="user">Usuario (Visitante)</option>
-                <option value="Programador">Programador (Perfil Público)</option>
-              </select>
-            </div>
-
-            <div class="card-actions justify-end gap-3 mt-6 pt-4 border-t border-white/5">
-              <button type="button" class="btn btn-ghost text-gray-400 hover:text-white hover:bg-white/5" (click)="closeCreateModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary px-8 border-0 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-lg shadow-cyan-900/20 text-white h-11" [disabled]="loading() || createUserForm.invalid">
-                @if (loading()) { <span class="loading loading-spinner loading-sm"></span> } Crear Cuenta
-              </button>
-            </div>
-
-          </form>
-        </div>
-      </div>
-    </div>
-  }
-
 
 </div>

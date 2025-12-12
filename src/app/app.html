@@ -1,3 +1,11 @@
+@if (!authInitialized()) {
+  <div class="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center gap-4">
+    <span class="loading loading-infinity loading-lg text-primary scale-150"></span>
+    <p class="text-gray-400 font-mono text-sm animate-pulse tracking-widest">VERIFICANDO SESIÓN...</p>
+  </div>
+} 
+
+@else {
 <header><app-navbar></app-navbar>
 </header>
 
@@ -5,3 +13,5 @@
 <footer>
     <app-footer></app-footer>
 </footer>
+
+}

@@ -92,27 +92,22 @@ export class PortfolioDetail implements OnInit {
       })
     );
 
-    // CORRECCIÓN AQUÍ: LÓGICA DE NOTIFICACIONES
     this.notifications$ = this.authService.user$.pipe(
       switchMap(user => {
         if (!user) return of([]);
 
-        // Obtenemos el ID del perfil que estamos visitando
         const profileIdFromUrl = this.route.snapshot.paramMap.get('id');
         
-        // ¿Soy yo el dueño de este perfil?
         const isOwnerOfPage = user.uid === profileIdFromUrl;
         
         const citasRef = collection(this.firestore, 'asesorias');
         
         if (isOwnerOfPage) {
-          // CASO 1: SOY PROGRAMADOR (Dueño) -> Quiero ver las citas que ME ENVIARON
           return collectionData(
             query(citasRef, where('programmerId', '==', user.uid), orderBy('date', 'desc')), 
             { idField: 'id' }
           );
         } else {
-          // CASO 2: SOY CLIENTE (Visitante) -> Quiero ver las citas que YO ENVIÉ
           return collectionData(
             query(citasRef, where('clientId', '==', user.uid), orderBy('date', 'desc')), 
             { idField: 'id' }
