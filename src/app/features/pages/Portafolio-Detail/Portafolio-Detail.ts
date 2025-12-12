@@ -5,8 +5,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 // Firebase Imports
 import { Firestore, doc, docData, collection, query, where, collectionData, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, orderBy } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/firebase/authservice';
-// RxJS
-import { Observable, of, switchMap, debounceTime, distinctUntilChanged } from 'rxjs';
+// RxJS Imports (Añadido combineLatest y map)
+import { Observable, of, switchMap, debounceTime, distinctUntilChanged, combineLatest, map } from 'rxjs';
 // Tus Interfaces y Servicios
 import { UserProfile, Project, Asesoria } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
@@ -74,6 +74,7 @@ export class PortfolioDetail implements OnInit {
   });
 
   constructor() {
+    // Escuchar cambios en la URL de Demo para generar preview
     this.projectForm.get('demoUrl')?.valueChanges.pipe(
       debounceTime(1000), 
       distinctUntilChanged() 
@@ -92,33 +93,40 @@ export class PortfolioDetail implements OnInit {
       })
     );
 
+    // 👇 AQUÍ ESTÁ LA MAGIA DEL TIEMPO REAL GLOBAL 👇
     this.notifications$ = this.authService.user$.pipe(
       switchMap(user => {
         if (!user) return of([]);
 
-        const profileIdFromUrl = this.route.snapshot.paramMap.get('id');
-        
-        const isOwnerOfPage = user.uid === profileIdFromUrl;
-        
         const citasRef = collection(this.firestore, 'asesorias');
-        
-        if (isOwnerOfPage) {
-          return collectionData(
-            query(citasRef, where('programmerId', '==', user.uid), orderBy('date', 'desc')), 
-            { idField: 'id' }
-          );
-        } else {
-          return collectionData(
-            query(citasRef, where('clientId', '==', user.uid), orderBy('date', 'desc')), 
-            { idField: 'id' }
-          );
-        }
+
+        // 1. Lo que YO envié (Soy Cliente)
+        const misEnviadas$ = collectionData(
+          query(citasRef, where('clientId', '==', user.uid)), 
+          { idField: 'id' }
+        ) as Observable<Asesoria[]>;
+
+        // 2. Lo que ME enviaron (Soy Programador)
+        const misRecibidas$ = collectionData(
+          query(citasRef, where('programmerId', '==', user.uid)), 
+          { idField: 'id' }
+        ) as Observable<Asesoria[]>;
+
+        // 3. Unimos todo en una sola lista ordenada por fecha
+        return combineLatest([misEnviadas$, misRecibidas$]).pipe(
+          map(([enviadas, recibidas]) => {
+            const todas = [...enviadas, ...recibidas];
+            // Ordenar por fecha (más reciente primero)
+            // Nota: Esto asume formato YYYY-MM-DD. Si no, ordena como string.
+            return todas.sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+          })
+        );
       })
-    ) as Observable<Asesoria[]>;
+    );
   }
 
   ngOnInit() {
-    emailjs.init("rjFCNeLrN83tOInc19");
+    emailjs.init("rjFCNeLrN83tOInc19"); // Tu Public Key
 
     this.visitedProfileId = this.route.snapshot.paramMap.get('id') || '';
     if (this.visitedProfileId) {
@@ -155,6 +163,7 @@ export class PortfolioDetail implements OnInit {
     return currentUser?.uid === this.visitedProfileId;
   }
 
+  // --- GUARDAR PROYECTO ---
   async saveProject() {
     if (this.projectForm.invalid || !this.isOwner()) {
         this.projectForm.markAllAsTouched();
@@ -165,12 +174,18 @@ export class PortfolioDetail implements OnInit {
 
     const data: any = { 
       programmerId: this.visitedProfileId,
-      title: val.title, description: val.description, category: val.category, 
-      role: val.role, technologies: (val.technologies || '').split(',').map((t: string) => t.trim()),
-      repoUrl: val.repoUrl || '', demoUrl: val.demoUrl || ''
+      title: val.title, 
+      description: val.description, 
+      category: val.category, 
+      role: val.role, 
+      technologies: (val.technologies || '').split(',').map((t: string) => t.trim()),
+      repoUrl: val.repoUrl || '', 
+      demoUrl: val.demoUrl || ''
     };
     
+    // LÓGICA INTELIGENTE DE IMAGEN
     const newPreviewImage = this.seoPreview()?.image;
+    
     if (newPreviewImage) {
         data.image = newPreviewImage;
     } else if (!this.isEditing()) {
@@ -196,6 +211,7 @@ export class PortfolioDetail implements OnInit {
      if (!this.isOwner()) return; 
      this.projectForm.reset({ category: 'Academico' });
      this.seoPreview.set(null); 
+     
      if (project) {
         this.isEditing.set(true);
         this.currentProjectId.set(project.id!);
@@ -203,7 +219,9 @@ export class PortfolioDetail implements OnInit {
            title: project.title, description: project.description, category: project.category as any,
            role: project.role, technologies: project.technologies?.join(', '), repoUrl: project.repoUrl, demoUrl: project.demoUrl
         });
-        if (project['image']) this.seoPreview.set({ image: project['image'], title: project.title, description: project.description });
+        if (project['image']) {
+          this.seoPreview.set({ image: project['image'], title: project.title, description: project.description });
+        }
      } else {
         this.isEditing.set(false);
         this.currentProjectId.set(null);
@@ -211,7 +229,7 @@ export class PortfolioDetail implements OnInit {
      (document.getElementById('project_modal') as HTMLDialogElement).showModal();
   }
 
-  // --- RESPONDER SOLICITUD (PROGRAMADOR) ---
+  // --- RESPONDER SOLICITUD ---
   async respondToRequest(cita: Asesoria, status: 'aprobada' | 'rechazada') {
     if (!cita.id) return;
     
@@ -241,14 +259,43 @@ export class PortfolioDetail implements OnInit {
   openBookingModal(profile: UserProfile, role?: string) {
     if (!this.authService.currentUser()) { alert('⚠️ Inicia sesión para contactar.'); return; }
     if (role === 'admin') { alert('🛡️ Admins no pueden agendar.'); return; }
+    
     this.targetProfile = profile;
     this.bookingForm.reset();
     (document.getElementById('booking_modal') as HTMLDialogElement).showModal();
   }
 
+  // --- VALIDACIÓN DE HORARIO REAL (CORREGIDA) ---
   isAvailableNow(profile: UserProfile): boolean {
     if (!profile.availability?.horas) return true;
-    return true; 
+
+    const now = new Date();
+    
+    // Opcional: Validar Días
+    // const days = profile.availability.dias; 
+    // const dayOfWeek = now.getDay(); // 0 = Domingo
+    // if (days === 'Lunes a Viernes' && (dayOfWeek === 0 || dayOfWeek === 6)) return false;
+
+    // Validar Horas
+    const currentMinutes = (now.getHours() * 60) + now.getMinutes(); 
+    
+    const parts = profile.availability.horas.split(' - ');
+    if (parts.length !== 2) return true;
+
+    const [startStr, endStr] = parts;
+    const startMinutes = this.timeStringToMinutes(startStr);
+    const endMinutes = this.timeStringToMinutes(endStr);
+
+    if (endMinutes < startMinutes) {
+        return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+  }
+
+  private timeStringToMinutes(timeStr: string): number {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return (hours * 60) + (minutes || 0);
   }
 
   openMyRequestsModal() {
