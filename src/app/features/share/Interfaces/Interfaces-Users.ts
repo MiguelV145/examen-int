@@ -10,17 +10,14 @@ export interface UserProfile {
   uid: string;
   email: string;
   role: 'admin' | 'user' | 'Programador';
-  
   // Datos Básicos
   displayName?: string;
   photoURL?: string;
-  
   // Datos de Programador
   specialty?: string;     
   description?: string;   
   skills?: string[];      
   availability?: Availability; 
-  
   // Datos Auxiliares
   photoFile?: File; 
 }
@@ -36,10 +33,8 @@ export interface Project {
   technologies: string[];
   repoUrl?: string;
   demoUrl?: string;
-  
   // Campo para la imagen SEO automática
   image?: string;      
-  
   // Campos opcionales/legacy
   photoURL?: string;   
   likes?: string[];
@@ -59,7 +54,7 @@ export interface Asesoria {
   responseMsg?: string;
 }
 
-// 5. Interfaces para el Servicio de Links (NUEVAS)
+// 5. Interfaces para el Servicio de Links 
 export interface LinkPreview {
   title?: string;
   description?: string;

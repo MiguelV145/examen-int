@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[#0f172a] text-gray-300 font-sans pb-20 relative">
+<div class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-gray-300 font-sans pb-20 relative selection:bg-primary selection:text-white">
 
   @if (authService.currentUser()) {
     @if ((currentUser$ | async)?.role !== 'admin') {
@@ -7,7 +7,7 @@
           <div class="indicator">
             <span class="text-2xl">🔔</span>
             @if ((notifications$ | async)?.length) {
-              <span class="badge badge-sm badge-error indicator-item animate-pulse"></span>
+              <span class="badge badge-sm badge-error indicator-item animate-pulse border-white"></span>
             }
           </div>
         </button>
@@ -114,20 +114,28 @@
                       <h3 class="card-title text-white text-2xl font-bold group-hover:text-primary transition-colors">{{ project.title }}</h3>
                       <p class="text-sm text-primary font-mono opacity-80">{{ project.role }}</p>
                    </div>
+                   
                    <div class="flex gap-2 items-center">
                     @if (isOwner()) {
                       <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity mr-2 bg-[#0f172a]/80 p-1 rounded-lg backdrop-blur-md">
                         <button (click)="openProjectModal(project)" class="btn btn-xs btn-ghost text-info tooltip" data-tip="Editar">✏️</button>
                         <button (click)="deleteProject(project.id!)" class="btn btn-xs btn-ghost text-error tooltip" data-tip="Eliminar">🗑️</button>
                       </div>
+                      <button (click)="toggleLike(project)" class="btn btn-circle btn-sm border-none shadow-lg bg-[#0f172a] hover:bg-gray-800" [class.text-yellow-400]="isLikedByMe(project)" [class.text-gray-500]="!isLikedByMe(project)">⭐</button>
                     }
-                    <button (click)="toggleLike(project)" class="btn btn-circle btn-sm border-none shadow-lg bg-[#0f172a] hover:bg-gray-800" [class.text-yellow-400]="isLikedByMe(project)" [class.text-gray-500]="!isLikedByMe(project)">⭐</button>
                   </div>
                 </div>
+
                 @if (project.likes && project.likes.length > 0) {
                   <div class="text-xs text-yellow-500 font-bold mt-2 flex items-center gap-1"><span>⭐</span> {{ project.likes.length }} Destacados</div>
                 }
+
                 <p class="text-gray-400 text-sm mt-3 mb-4 min-h-[60px] line-clamp-3 leading-relaxed">{{ project.description }}</p>
+                <div class="flex flex-wrap gap-2 mb-6">
+                  @for (tech of project.technologies; track tech) {
+                    <span class="px-2.5 py-1 rounded bg-[#0f172a] text-xs text-gray-300 border border-white/5 shadow-sm font-medium">{{ tech }}</span>
+                  }
+                </div>
                 <div class="flex gap-3 mt-auto pt-4 border-t border-white/5">
                   @if (project.demoUrl) { <a [href]="project.demoUrl" target="_blank" class="btn btn-sm btn-primary flex-1 shadow-lg shadow-primary/20 hover:shadow-primary/40">🚀 Demo</a> }
                   @if (project.repoUrl) { <a [href]="project.repoUrl" target="_blank" class="btn btn-sm btn-outline flex-1 border-gray-600 text-gray-300 hover:bg-white hover:text-black hover:border-white">💻 Código</a> }
@@ -230,7 +238,7 @@
 <dialog id="my_requests_modal" class="modal modal-bottom sm:modal-middle backdrop-blur-md">
   <div class="modal-box bg-[#1e293b] text-white border border-gray-700 w-11/12 max-w-4xl shadow-2xl p-6">
     <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
-      <h3 class="font-bold text-2xl flex items-center gap-2">🔔 {{ isOwner() ? 'Solicitudes Recibidas' : 'Mis Solicitudes' }}</h3>
+      <h3 class="font-bold text-2xl flex items-center gap-2">🔔 {{ isOwner() ? 'Solicitudes Recibidas' : 'Mis Solicitudes Enviadas' }}</h3>
       <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white">✕</button></form>
     </div>
     <div class="overflow-x-auto">

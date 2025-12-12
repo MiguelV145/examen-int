@@ -13,15 +13,14 @@ import { take } from 'rxjs';
 })
 export class App {
   protected readonly title = signal('examen-int');
-  private authService = inject(AuthService);
-  
-  // Señal para saber si ya terminamos de preguntar a Firebase
+  private authService = inject(AuthService);  
+  // Esta señal empieza en FALSE (La app está "cargando")
   authInitialized = signal(false);
 
   ngOnInit() {
-    // Nos suscribimos a user$ UNA sola vez (take(1)).
-    // Cuando Firebase responda (sea con un usuario o con null),
-    // sabremos que la inicialización terminó.
+    // Nos suscribimos a user$ UNA sola vez.
+    // Firebase emitirá un valor (el usuario o null) en cuanto termine de conectarse.
+    // Apenas eso pase, ponemos la señal en TRUE para desbloquear la vista.
     this.authService.user$.pipe(take(1)).subscribe(() => {
       this.authInitialized.set(true);
     });
