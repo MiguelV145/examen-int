@@ -1,11 +1,14 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+
   "cli": {
     "packageManager": "pnpm",
     "analytics": false
   },
+
   "newProjectRoot": "projects",
+
   "projects": {
     "examen-int": {
       "projectType": "application",
@@ -13,9 +16,11 @@
       "sourceRoot": "src",
       "prefix": "app",
       "schematics": {},
+
       "architect": {
         "build": {
           "builder": "@angular/build:application",
+
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
@@ -25,11 +30,19 @@
                 "glob": "**/*",
                 "input": "public",
                 "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
 
-            "styles": ["src/styles.css"]
+            "styles": [
+              "src/styles.css"
+            ]
           },
+
           "configurations": {
             "production": {
               "baseHref": "/examen-int/",
@@ -49,10 +62,12 @@
                 }
               ]
             },
+
             "development": {
               "optimization": false,
               "sourceMap": true,
               "extractLicenses": false,
+
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -61,11 +76,13 @@
               ]
             }
           },
+
           "defaultConfiguration": "production"
         },
 
         "serve": {
           "builder": "@angular/build:dev-server",
+
           "configurations": {
             "production": {
               "buildTarget": "examen-int:build:production"
@@ -74,6 +91,7 @@
               "buildTarget": "examen-int:build:development"
             }
           },
+
           "defaultConfiguration": "development"
         },
 
