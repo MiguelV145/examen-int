@@ -1,36 +1,54 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
+
   "cli": {
     "packageManager": "pnpm",
     "analytics": false
   },
+
   "newProjectRoot": "projects",
+
   "projects": {
     "examen-int": {
       "projectType": "application",
-      "schematics": {},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "schematics": {},
+
       "architect": {
         "build": {
           "builder": "@angular/build:application",
+
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
+
             "styles": [
               "src/styles.css"
             ]
           },
+
           "configurations": {
             "production": {
+              "baseHref": "/examen-int/",
+              "deployUrl": "/examen-int/",
+              "outputHashing": "all",
+
               "budgets": [
                 {
                   "type": "initial",
@@ -42,13 +60,14 @@
                   "maximumWarning": "4kB",
                   "maximumError": "8kB"
                 }
-              ],
-              "outputHashing": "all"
+              ]
             },
+
             "development": {
               "optimization": false,
-              "extractLicenses": false,
               "sourceMap": true,
+              "extractLicenses": false,
+
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -57,10 +76,13 @@
               ]
             }
           },
+
           "defaultConfiguration": "production"
         },
+
         "serve": {
           "builder": "@angular/build:dev-server",
+
           "configurations": {
             "production": {
               "buildTarget": "examen-int:build:production"
@@ -69,8 +91,10 @@
               "buildTarget": "examen-int:build:development"
             }
           },
+
           "defaultConfiguration": "development"
         },
+
         "test": {
           "builder": "@angular/build:unit-test"
         }

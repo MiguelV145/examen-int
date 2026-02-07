@@ -16,7 +16,7 @@ import { LinkPreviewService } from '../../../core/services/link-preview.service.
 @Component({
   selector: 'app-portfolio-detail',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, ],
   templateUrl: './Portafolio-Detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
