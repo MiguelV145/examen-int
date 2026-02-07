@@ -11,7 +11,7 @@ import { Observable, of, switchMap, debounceTime, distinctUntilChanged, combineL
 import { UserProfile, Project, Asesoria } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
 import emailjs from '@emailjs/browser';
-import { LinkPreviewService } from '../../../core/services/link-preview.service.ts';
+import { LinkPreviewServices } from '../../../core/services/link-preview.services';
 
 @Component({
   selector: 'app-portfolio-detail',
@@ -26,7 +26,7 @@ export class PortfolioDetail implements OnInit {
   private firestore = inject(Firestore);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
-  private linkService = inject(LinkPreviewService);
+  private linkService = inject(LinkPreviewServices);
 
   // Observables
   profile$: Observable<UserProfile | undefined> | null = null;
