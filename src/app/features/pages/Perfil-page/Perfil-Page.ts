@@ -49,7 +49,7 @@ export class ProgrammerPage implements OnInit {
 
   loadCurrentData() {
     const user = this.authService.currentUser();
-    if (user) {
+    if (user && user.uid) {
       this.loading.set(true);
       const docRef = doc(this.firestore, 'users', user.uid);
       
@@ -113,7 +113,7 @@ export class ProgrammerPage implements OnInit {
     }
     
     const user = this.authService.currentUser();
-    if (!user) return;
+    if (!user || !user.uid) return;
 
     this.loading.set(true);
     this.successMessage.set('');

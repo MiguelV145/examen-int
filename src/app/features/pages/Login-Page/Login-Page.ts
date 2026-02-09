@@ -55,7 +55,7 @@ export class LoginPage implements OnInit {
     }
   }
 
-  // --- LOGIN CON CORREO (JWT) ---
+  // --- LOGIN CON BACKEND SPRING BOOT (JWT) ---
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -69,7 +69,6 @@ export class LoginPage implements OnInit {
 
     const { email, password } = this.loginForm.value;
 
-    // Usar email como usernameOrEmail
     this.authService.login(email, password).subscribe({
       next: () => {
         // 2. Login exitoso: Desactivamos el bloqueo para poder navegar

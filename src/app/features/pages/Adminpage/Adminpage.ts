@@ -65,7 +65,8 @@ export class Adminpage {
   
   // --- GESTIÓN USUARIOS ---
   async toggleRole(user: UserProfile) {
-    if (user.uid === this.authService.currentUser()?.uid) return alert(' No puedes cambiar tu propio rol.');
+    const currentUserUid = this.authService.currentUser()?.uid || this.authService.currentUser()?.id.toString();
+    if (user.uid === currentUserUid) return alert('⛔ No puedes cambiar tu propio rol.');
     if (user.role === 'admin') return alert(' No puedes modificar a otro Admin.');
 
     const newRole = user.role === 'Programador' ? 'user' : 'Programador';
@@ -77,7 +78,8 @@ export class Adminpage {
   }
 
   async deleteUser(user: UserProfile) {
-    if (user.uid === this.authService.currentUser()?.uid) return alert(' No puedes eliminarte.');
+    const currentUserUid = this.authService.currentUser()?.uid || this.authService.currentUser()?.id.toString();
+    if (user.uid === currentUserUid) return alert('⛔ No puedes eliminarte.');
     if (user.role === 'admin') return alert(' No puedes borrar Admins.');
     if (!confirm(`¿Eliminar a ${user.email} permanentemente?`)) return;
 

@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 import { map, Observable } from 'rxjs';
 import { UserProfile, Asesoria, Project } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
+import { ToastrService } from 'ngx-toastr';
 import emailjs from '@emailjs/browser';
 
 @Component({
@@ -21,6 +22,7 @@ export class HomePage {
   private firestore = inject(Firestore);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
+  private toastr = inject(ToastrService);
   
   // Observables
   programmers$: Observable<UserProfile[]>;
@@ -85,12 +87,19 @@ export class HomePage {
     this.loadingBooking.set(true);
     const formVal = this.bookingForm.value;
 
+    // Validar que tenemos id
+    if (!currentUser.id) {
+      this.toastr.error('No se pudo obtener el ID de usuario', 'Error');
+      this.loadingBooking.set(false);
+      return;
+    }
+
     try {
       // 2. Guardar en Base de Datos (Para el panel del programador)
       const newAsesoria: Asesoria = {
         programmerId: this.selectedProg.uid,
         programmerName: this.selectedProg.displayName || 'Programador',
-        clientId: currentUser.uid,
+        clientId: currentUser.id.toString(),
         clientName: currentUser.displayName || currentUser.email!,
         date: formVal.date!,
         time: formVal.time!,

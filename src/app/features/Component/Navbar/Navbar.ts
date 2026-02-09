@@ -37,19 +37,16 @@ export class Navbar {
   private performLogout() {
     this.loggingOut.set(true);
     
-    this.authService.logout().subscribe({
-      next: () => {
-        this.loggingOut.set(false);
-        this.toastr.success('Has cerrado sesión correctamente', '¡Hasta pronto!');
-        // El servicio ya redirige, pero esto no hace daño
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        this.loggingOut.set(false);
-        console.error('Error al cerrar sesión:', error);
-        this.toastr.error('No se pudo cerrar la sesión', 'Error');
-      }
-    });
+    try {
+      this.authService.logout();
+      this.loggingOut.set(false);
+      this.toastr.success('Has cerrado sesión correctamente', '¡Hasta pronto!');
+      // El servicio ya redirige a /login
+    } catch (error: any) {
+      this.loggingOut.set(false);
+      console.error('Error al cerrar sesión:', error);
+      this.toastr.error('No se pudo cerrar la sesión', 'Error');
+    }
   }
 
   // Métodos auxiliares (si los necesitas en otro lado)

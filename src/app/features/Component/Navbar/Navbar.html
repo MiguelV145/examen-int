@@ -43,15 +43,15 @@
       <div class="dropdown dropdown-end">
         
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring-2 ring-transparent hover:ring-cyan-500/50 transition-all duration-300">
-          @if (authService.currentProfile()?.photoURL) {
+          @if (authService.currentUser()?.photoURL) {
             <div class="w-10 rounded-full ring-2 ring-[#0f172a] shadow-lg">
-              <img [src]="authService.currentProfile()?.photoURL" alt="Perfil" class="object-cover" />
+              <img [src]="authService.currentUser()?.photoURL" alt="Perfil" class="object-cover" />
             </div>
           } 
           @else {
             <div class="w-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 text-white flex items-center justify-center shadow-lg ring-2 ring-[#0f172a]">
               <span class="text-lg font-bold">
-                {{ authService.currentProfile()?.email?.charAt(0)?.toUpperCase() }}
+                {{ authService.currentUser()?.email?.charAt(0)?.toUpperCase() }}
               </span>
             </div>
           }
@@ -63,7 +63,7 @@
             <div class="bg-white/5 rounded-xl p-3 border border-white/5">
               <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Sesión activa</span>
               <span class="font-bold text-white truncate w-full text-sm">
-                {{ authService.currentProfile()?.displayName || authService.currentProfile()?.email }}
+                {{ authService.currentUser()?.displayName || authService.currentUser()?.email }}
               </span>
               @if (authService.hasRole('admin')) {
                 <span class="badge badge-xs badge-error badge-outline mt-1 font-mono">ADMINISTRADOR</span>

@@ -28,7 +28,6 @@ export class RegisterPage {
 
   constructor() {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
@@ -58,12 +57,11 @@ export class RegisterPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { username, email, password } = this.registerForm.value;
+    const { email, password, confirmPassword } = this.registerForm.value;
 
-    this.authService.register(username, email, password).subscribe({
+    this.authService.register(email, password, confirmPassword).subscribe({
       next: (response) => {
-        // Después del registro éxitoso, opcionalmente loguear al usuario automáticamente
-        // o redirigir a login para que complete el proceso manualmente
+        // Registro exitoso: redirigir a login
         this.loading.set(false);
         this.router.navigate(['/login'], {
           queryParams: { registered: 'true' }

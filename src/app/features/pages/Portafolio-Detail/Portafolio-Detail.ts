@@ -160,7 +160,8 @@ export class PortfolioDetail implements OnInit {
 
   isOwner(): boolean {
     const currentUser = this.authService.currentUser();
-    return !!(currentUser?.uid && currentUser.uid === this.visitedProfileId);
+    const userUid = currentUser?.uid || currentUser?.id.toString();
+    return !!(userUid && userUid === this.visitedProfileId);
   }
 
   // --- GUARDAR PROYECTO ---
@@ -320,13 +321,13 @@ export class PortfolioDetail implements OnInit {
   async submitBooking() {
     if (this.bookingForm.invalid) { this.bookingForm.markAllAsTouched(); return; }
     const currentUser = this.authService.currentUser();
-    if (!currentUser || !this.targetProfile || !this.targetProfile.uid || !currentUser.uid) return;
+    if (!currentUser || !this.targetProfile || !this.targetProfile.uid || !currentUser.id) return;
     this.loadingBooking.set(true);
     const formVal = this.bookingForm.value;
     try {
       await addDoc(collection(this.firestore, 'asesorias'), {
         programmerId: this.targetProfile.uid, programmerName: this.targetProfile.displayName || 'Programador',
-        clientId: currentUser.uid, clientName: currentUser.displayName || currentUser.email,
+        clientId: currentUser.uid || currentUser.id.toString(), clientName: currentUser.displayName || currentUser.email,
         date: formVal.date!, time: formVal.time!, comment: `[${formVal.subject}] ${formVal.comment}`, status: 'pendiente'
       });
       if (this.targetProfile.email) {
@@ -340,16 +341,17 @@ export class PortfolioDetail implements OnInit {
 
   async toggleLike(project: Project) {
     const user = this.authService.currentUser();
-    if (!user || !user.uid) { alert('Inicia sesión para dar like.'); return; }
+    const userUid = user?.uid || user?.id.toString();
+    if (!user || !userUid) { alert('Inicia sesión para dar like.'); return; }
     if (!this.authService.hasRole('PROGRAMADOR')) { alert('⛔ Solo programadores pueden votar.'); return; }
     if (!project.id) return;
     const ref = doc(this.firestore, 'projects', project.id);
-    const liked = project.likes?.includes(user.uid);
-    try { liked ? await updateDoc(ref, { likes: arrayRemove(user.uid) }) : await updateDoc(ref, { likes: arrayUnion(user.uid) }); } catch (error) { console.error(error); }
+    const liked = project.likes?.includes(userUid);
+    try { liked ? await updateDoc(ref, { likes: arrayRemove(userUid) }) : await updateDoc(ref, { likes: arrayUnion(userUid) }); } catch (error) { console.error(error); }
   }
 
   isLikedByMe(project: Project): boolean { 
-    const uid = this.authService.currentUser()?.uid;
+    const uid = this.authService.currentUser()?.uid || this.authService.currentUser()?.id.toString();
     return uid ? project.likes?.includes(uid) || false : false; 
   }
   async deleteProject(id: string) { if (!this.isOwner() || !confirm('¿Borrar?')) return; await deleteDoc(doc(this.firestore, 'projects', id)); }
