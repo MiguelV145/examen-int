@@ -9,7 +9,7 @@ import { deleteApp, initializeApp } from '@angular/fire/app';
 import { createUserWithEmailAndPassword, getAuth, updateProfile } from '@angular/fire/auth';
 
 // Tus servicios e interfaces
-import { AuthService } from '../../../core/services/firebase/authservice';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { Asesoria, Availability, UserProfile } from '../../share/Interfaces/Interfaces-Users';
 // Ajusta esta ruta a donde tengas tu environment.ts
 import { environment } from '../../../../environments/environment'; 
@@ -65,8 +65,8 @@ export class Adminpage {
   
   // --- GESTIÓN USUARIOS ---
   async toggleRole(user: UserProfile) {
-    if (user.uid === this.authService.currentUser()?.uid) return alert('⛔ No puedes cambiar tu propio rol.');
-    if (user.role === 'admin') return alert('⛔ No puedes modificar a otro Admin.');
+    if (user.uid === this.authService.currentUser()?.uid) return alert(' No puedes cambiar tu propio rol.');
+    if (user.role === 'admin') return alert(' No puedes modificar a otro Admin.');
 
     const newRole = user.role === 'Programador' ? 'user' : 'Programador';
     if (!confirm(`¿Cambiar rol de ${user.displayName} a ${newRole}?`)) return;
@@ -77,8 +77,8 @@ export class Adminpage {
   }
 
   async deleteUser(user: UserProfile) {
-    if (user.uid === this.authService.currentUser()?.uid) return alert('⛔ No puedes eliminarte.');
-    if (user.role === 'admin') return alert('⛔ No puedes borrar Admins.');
+    if (user.uid === this.authService.currentUser()?.uid) return alert(' No puedes eliminarte.');
+    if (user.role === 'admin') return alert(' No puedes borrar Admins.');
     if (!confirm(`¿Eliminar a ${user.email} permanentemente?`)) return;
 
     try {

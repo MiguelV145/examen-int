@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 // Firebase Imports
 import { Firestore, doc, docData, collection, query, where, collectionData, addDoc, deleteDoc, updateDoc, arrayUnion, arrayRemove, orderBy } from '@angular/fire/firestore';
-import { AuthService } from '../../../core/services/firebase/authservice';
+import { AuthService } from '../../../core/services/auth/auth.service';
 // RxJS Imports (Añadido combineLatest y map)
 import { Observable, of, switchMap, debounceTime, distinctUntilChanged, combineLatest, map } from 'rxjs';
 // Tus Interfaces y Servicios
@@ -16,7 +16,7 @@ import { LinkPreviewService } from '../../../core/services/link-preview.service.
 @Component({
   selector: 'app-portfolio-detail',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, ],
   templateUrl: './Portafolio-Detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -88,7 +88,7 @@ export class PortfolioDetail implements OnInit {
 
     this.currentUser$ = this.authService.user$.pipe(
       switchMap(user => {
-        if (!user) return of(undefined);
+        if (!user || !user.uid) return of(undefined);
         return docData(doc(this.firestore, 'users', user.uid)) as Observable<UserProfile>;
       })
     );
@@ -96,7 +96,7 @@ export class PortfolioDetail implements OnInit {
     // 👇 AQUÍ ESTÁ LA MAGIA DEL TIEMPO REAL GLOBAL 👇
     this.notifications$ = this.authService.user$.pipe(
       switchMap(user => {
-        if (!user) return of([]);
+        if (!user || !user.uid) return of([]);
 
         const citasRef = collection(this.firestore, 'asesorias');
 
@@ -160,7 +160,7 @@ export class PortfolioDetail implements OnInit {
 
   isOwner(): boolean {
     const currentUser = this.authService.currentUser();
-    return currentUser?.uid === this.visitedProfileId;
+    return !!(currentUser?.uid && currentUser.uid === this.visitedProfileId);
   }
 
   // --- GUARDAR PROYECTO ---
@@ -271,11 +271,6 @@ export class PortfolioDetail implements OnInit {
 
     const now = new Date();
     
-    // Opcional: Validar Días
-    // const days = profile.availability.dias; 
-    // const dayOfWeek = now.getDay(); // 0 = Domingo
-    // if (days === 'Lunes a Viernes' && (dayOfWeek === 0 || dayOfWeek === 6)) return false;
-
     // Validar Horas
     const currentMinutes = (now.getHours() * 60) + now.getMinutes(); 
     
@@ -325,7 +320,7 @@ export class PortfolioDetail implements OnInit {
   async submitBooking() {
     if (this.bookingForm.invalid) { this.bookingForm.markAllAsTouched(); return; }
     const currentUser = this.authService.currentUser();
-    if (!currentUser || !this.targetProfile) return;
+    if (!currentUser || !this.targetProfile || !this.targetProfile.uid || !currentUser.uid) return;
     this.loadingBooking.set(true);
     const formVal = this.bookingForm.value;
     try {
@@ -338,21 +333,24 @@ export class PortfolioDetail implements OnInit {
         const templateParams = { to_email: this.targetProfile.email, to_name: this.targetProfile.displayName, from_name: currentUser.displayName || 'Usuario', subject: formVal.subject, message: formVal.comment, date_time: `${formVal.date} - ${formVal.time}` };
         await emailjs.send('service_y02aan7', 'template_faf7lba', templateParams, 'rjFCNekN83tOlNc19');
       }
-      alert('✅ Solicitud enviada.');
+      alert(' Solicitud enviada.');
       (document.getElementById('booking_modal') as HTMLDialogElement).close();
     } catch (e: any) { alert('Error: ' + e.message); } finally { this.loadingBooking.set(false); }
   }
 
   async toggleLike(project: Project) {
     const user = this.authService.currentUser();
-    if (!user) { alert('Inicia sesión para dar like.'); return; }
-    if (!this.authService.hasRole('Programador')) { alert('⛔ Solo programadores pueden votar.'); return; }
+    if (!user || !user.uid) { alert('Inicia sesión para dar like.'); return; }
+    if (!this.authService.hasRole('PROGRAMADOR')) { alert('⛔ Solo programadores pueden votar.'); return; }
     if (!project.id) return;
     const ref = doc(this.firestore, 'projects', project.id);
     const liked = project.likes?.includes(user.uid);
     try { liked ? await updateDoc(ref, { likes: arrayRemove(user.uid) }) : await updateDoc(ref, { likes: arrayUnion(user.uid) }); } catch (error) { console.error(error); }
   }
 
-  isLikedByMe(project: Project): boolean { return project.likes?.includes(this.authService.currentUser()?.uid || '') || false; }
+  isLikedByMe(project: Project): boolean { 
+    const uid = this.authService.currentUser()?.uid;
+    return uid ? project.likes?.includes(uid) || false : false; 
+  }
   async deleteProject(id: string) { if (!this.isOwner() || !confirm('¿Borrar?')) return; await deleteDoc(doc(this.firestore, 'projects', id)); }
 }

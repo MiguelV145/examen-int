@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, HostListener } from
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/firebase/authservice';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
@@ -47,7 +47,7 @@ export class LoginPage {
     }
   }
 
-  // --- LOGIN CON CORREO ---
+  // --- LOGIN CON CORREO (JWT) ---
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -61,6 +61,7 @@ export class LoginPage {
 
     const { email, password } = this.loginForm.value;
 
+    // Usar email como usernameOrEmail
     this.authService.login(email, password).subscribe({
       next: () => {
         // 2. Login exitoso: Desactivamos el bloqueo para poder navegar
@@ -72,40 +73,45 @@ export class LoginPage {
         // 3. Error: Desactivamos el bloqueo para que el usuario pueda reintentar
         this.isLoggingIn = false;
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error.code));
+        this.errorMessage.set(this.getErrorMessage(error));
       }
     });
   }
 
   // --- LOGIN CON GOOGLE ---
   onGoogleLogin() {
-    // NOTA: Para Google NO activamos 'isLoggingIn' porque este método
-    // NECESITA recargar la página para ir a Google (signInWithRedirect).
-    // Si lo bloqueamos aquí, el usuario no podría ir a la web de Google.
-    
     this.loading.set(true);
     this.errorMessage.set(null);
-
-    this.authService.loginWithGoogle().subscribe({
-      next: () => {
-        console.log('Redirigiendo a Google...');
-      },
-      error: (err: any) => {
-        console.error('Error Google:', err);
-        this.loading.set(false);
-        this.errorMessage.set('No se pudo conectar con Google.');
-      }
-    });
+    
+    // TODO: Implementar login con Google desde el backend
+    // Por ahora solo показываем un mensaje
+    this.errorMessage.set('Login con Google será disponible próximamente. Por favor, usa registro tradicional.');
+    this.loading.set(false);
   }
 
-  private getErrorMessage(code: string): string {
-    const messages: { [key: string]: string } = {
-      'auth/user-not-found': 'No encontramos una cuenta con este correo.',
-      'auth/wrong-password': 'La contraseña es incorrecta.',
-      'auth/invalid-email': 'El formato del correo no es válido.',
-      'auth/too-many-requests': 'Demasiados intentos fallidos. Espera un momento.',
-      'auth/popup-closed-by-user': 'Cancelaste el inicio de sesión.'
-    };
-    return messages[code] || `Error desconocido: ${code}`;
+  private getErrorMessage(error: any): string {
+    // Si es un error HTTP del backend
+    if (error?.status) {
+      switch (error.status) {
+        case 401:
+          return 'Credenciales inválidas. Verifica tu usuario/email y contraseña.';
+        case 400:
+          return error.error?.message || 'Datos inválidos. Por favor, revisa los campos.';
+        case 404:
+          return 'Usuario no encontrado. Por favor, regístrate primero.';
+        case 500:
+          return 'Error del servidor. Intenta más tarde.';
+        default:
+          return error.error?.message || `Error: ${error.statusText || 'Error desconocido'}`;
+      }
+    }
+
+    // Si es un error de red
+    if (error?.message?.includes('Network')) {
+      return 'Error de conexión. Verifica tu conexión a internet.';
+    }
+
+    // Error genérico
+    return error?.message || 'Error desconocido. Intenta de nuevo.';
   }
 }

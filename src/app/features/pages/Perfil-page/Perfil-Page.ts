@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common'; 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Firestore, doc, updateDoc, docData } from '@angular/fire/firestore';
-import { AuthService } from '../../../core/services/firebase/authservice';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { from, tap, finalize, take, of, catchError } from 'rxjs';
 import { FormUtils } from '../../share/Formutils/Formutils';

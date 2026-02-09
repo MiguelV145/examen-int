@@ -4,10 +4,11 @@ import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
@@ -22,7 +23,10 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
         scrollPositionRestoration: 'enabled'
       })),
-    provideHttpClient(withFetch()), // habilita HttpClient usando la API Fetch
+    provideHttpClient(
+      withFetch(), // habilita HttpClient usando la API Fetch
+      withInterceptors([authInterceptor]) // Agrega el interceptor de autenticación
+    ),
     provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),

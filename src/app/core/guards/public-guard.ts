@@ -1,20 +1,19 @@
 import { inject } from '@angular/core';
-import { Auth, authState } from '@angular/fire/auth';
 import { CanActivateFn, Router } from '@angular/router';
-import { map, take } from 'rxjs';
+import { AuthService } from '../services/auth/auth.service';
 
+/**
+ * Guard que bloquea el acceso a rutas públicas (login, register)
+ * si el usuario ya está autenticado
+ * Redirige a /home si intenta acceder a /login estando logueado
+ */
 export const publicGuard: CanActivateFn = (route, state) => {
-  
-  const auth = inject(Auth);
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authState(auth).pipe(
-    take(1),
-    map(user => {
-      if (user) {
-        return router.createUrlTree(['/home']);
-      }
-      return true;
-    })
-  );
+  if (authService.isAuthenticated()) {
+    return router.createUrlTree(['/home']);
+  }
+
+  return true;
 };

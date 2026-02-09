@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/services/firebase/authservice';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
@@ -28,6 +28,7 @@ export class RegisterPage {
 
   constructor() {
     this.registerForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
@@ -57,27 +58,45 @@ export class RegisterPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password } = this.registerForm.value;
+    const { username, email, password } = this.registerForm.value;
 
-    this.authService.register(email, password).subscribe({
-      next: () => {
+    this.authService.register(username, email, password).subscribe({
+      next: (response) => {
+        // Después del registro éxitoso, opcionalmente loguear al usuario automáticamente
+        // o redirigir a login para que complete el proceso manualmente
         this.loading.set(false);
-        this.router.navigate(['/home']);
+        this.router.navigate(['/login'], {
+          queryParams: { registered: 'true' }
+        });
       },
       error: (error: any) => {
         this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error.code));
+        this.errorMessage.set(this.getErrorMessage(error));
       }
     });
   }
 
-  private getErrorMessage(code: string): string {
-    const messages: { [key: string]: string } = {
-      'auth/email-already-in-use': 'Este correo ya está registrado.',
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/weak-password': 'La contraseña es muy débil (mínimo 6 caracteres).',
-      'auth/network-request-failed': 'Error de conexión. Revisa tu internet.'
-    };
-    return messages[code] || `Error desconocido: ${code}`;
+  private getErrorMessage(error: any): string {
+    // Si es un error HTTP del backend
+    if (error?.status) {
+      switch (error.status) {
+        case 400:
+          return error.error?.message || 'Datos de registro inválidos.';
+        case 409:
+          return 'Este correo ya está registrado. Intenta con otro o ve a login.';
+        case 500:
+          return 'Error del servidor. Intenta más tarde.';
+        default:
+          return error.error?.message || `Error: ${error.statusText || 'Error desconocido'}`;
+      }
+    }
+
+    // Si es un error de red
+    if (error?.message?.includes('Network')) {
+      return 'Error de conexión. Verifica tu conexión a internet.';
+    }
+
+    // Error genérico
+    return error?.message || 'Error en el registro. Intenta de nuevo.';
   }
 }
