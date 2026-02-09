@@ -108,6 +108,23 @@ export class AuthService {
   }
 
   /**
+   * Login con Google usando el token de Google Sign-In
+   */
+  loginWithGoogle(googleToken: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/google`, { token: googleToken })
+      .pipe(
+        tap((response) => {
+          this._saveAuthData(response);
+        }),
+        catchError((error) => {
+          console.error('Google login error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
    * Logout: limpia localStorage y actualiza signals
    */
   logout(): void {

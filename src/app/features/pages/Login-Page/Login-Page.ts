@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { FormUtils } from '../../share/Formutils/Formutils';
+
+// Declarar el tipo de Google globalmente
+declare var google: any;
 
 @Component({
   selector: 'app-login-page',
@@ -12,7 +15,7 @@ import { FormUtils } from '../../share/Formutils/Formutils';
   templateUrl: './Login-Page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -32,6 +35,11 @@ export class LoginPage {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  ngOnInit() {
+    // Cargar el script de Google Sign-In si no está cargado
+    this.loadGoogleSignInScript();
   }
 
   /**
@@ -80,13 +88,98 @@ export class LoginPage {
 
   // --- LOGIN CON GOOGLE ---
   onGoogleLogin() {
+    if (this.loading()) return; // Evitar múltiples clics
+    
+    // Usar credentialUserSelect para permitir que el usuario seleccione una cuenta
+    google?.accounts?.id?.signIn();
+  }
+
+  /**
+   * Carga el script de Google Sign-In si no está cargado
+   */
+  private loadGoogleSignInScript() {
+    if (!document.querySelector('script[src*="google"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => this.initializeGoogleSignIn();
+      document.head.appendChild(script);
+    } else if (google?.accounts?.id) {
+      this.initializeGoogleSignIn();
+    }
+  }
+
+  /**
+   * Inicializa Google Sign-In con el ID de cliente de Google
+   */
+  private initializeGoogleSignIn() {
+    try {
+      if (!google?.accounts?.id) {
+        console.warn('Google Sign-In script not loaded yet');
+        return;
+      }
+
+      // 🔑 IMPORTANTE: Reemplaza 'TU_GOOGLE_CLIENT_ID' con tu ID de cliente real
+      const clientId = 'YOUR_GOOGLE_CLIENT_ID';
+
+      if (clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+        console.warn('⚠️ Google Client ID no configurado. Reemplaza YOUR_GOOGLE_CLIENT_ID con el tuyo.');
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response: any) => this.handleGoogleLogin(response)
+      });
+
+      // Renderizar el botón de Google Sign-In
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'dark',
+          size: 'large',
+          width: '100%'
+        }
+      );
+
+      // También permitir One Tap
+      google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // El usuario desactivó el One Tap o ya inició sesión
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing Google Sign-In:', error);
+    }
+  }
+
+  /**
+   * Maneja la respuesta de Google Sign-In
+   */
+  private handleGoogleLogin(response: any) {
+    if (!response.credential) {
+      this.errorMessage.set('Error al autenticar con Google. Por favor, intenta de nuevo.');
+      return;
+    }
+
+    this.isLoggingIn = true;
     this.loading.set(true);
     this.errorMessage.set(null);
-    
-    // TODO: Implementar login con Google desde el backend
-    // Por ahora solo показываем un mensaje
-    this.errorMessage.set('Login con Google será disponible próximamente. Por favor, usa registro tradicional.');
-    this.loading.set(false);
+
+    // Enviar el JWT token de Google al backend
+    this.authService.loginWithGoogle(response.credential).subscribe({
+      next: () => {
+        this.isLoggingIn = false;
+        this.loading.set(false);
+        this.router.navigate(['/home']);
+      },
+      error: (error: any) => {
+        this.isLoggingIn = false;
+        this.loading.set(false);
+        this.errorMessage.set(this.getErrorMessage(error));
+      }
+    });
   }
 
   private getErrorMessage(error: any): string {
