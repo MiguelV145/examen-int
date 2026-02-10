@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthApiService } from '../../../core/services/api/auth-api.service';
 import { AuthStoreService } from '../../../core/services/auth/auth-store.service';
 import { AuthLoginRequest } from '../../../core/models/auth.models';
 import { FormUtils } from '../../share/Formutils/Formutils';
 import { environment } from '../../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login-page',
@@ -21,6 +22,8 @@ export class LoginPage {
   private authApiService = inject(AuthApiService);
   private authStore = inject(AuthStoreService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toastr = inject(ToastrService);
   
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -34,6 +37,15 @@ export class LoginPage {
     this.loginForm = this.fb.group({
       identifier: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  ngOnInit() {
+    // Verificar si viene desde registro exitoso
+    this.route.queryParams.subscribe(params => {
+      if (params['registered'] === 'true' && params['message']) {
+        this.toastr.info(params['message'], 'Registro Exitoso', { timeOut: 5000 });
+      }
     });
   }
 

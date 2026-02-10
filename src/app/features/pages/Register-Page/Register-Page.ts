@@ -76,18 +76,33 @@ export class RegisterPage {
     this.authApiService.register(registerRequest).subscribe({
       next: (response: any) => {
         console.log('✅ Respuesta del registro:', response);
-        this.loading.set(false);
         
-        // Si el backend devuelve token (AuthResponse completo)
+        // Si el backend devuelve token directamente (AuthResponse completo)
         if (response.token && response.userId) {
           // Guardar en store y navegar a home
           this.authStore.setAuth(response);
+          this.loading.set(false);
           this.router.navigate(['/home']);
         } else {
-          // Si solo devuelve mensaje, ir a login
-          console.log('📝 Mensaje del servidor:', response.message);
-          this.router.navigate(['/login'], { 
-            queryParams: { registered: 'true' }
+          // Si solo devuelve mensaje de éxito, hacer login automático
+          console.log('📝 Registro exitoso, iniciando sesión automática...');
+          
+          // Hacer login automático con las mismas credenciales
+          this.authApiService.login({ email, password }).subscribe({
+            next: (loginResponse) => {
+              console.log('✅ Login automático exitoso:', loginResponse);
+              this.authStore.setAuth(loginResponse);
+              this.loading.set(false);
+              this.router.navigate(['/home']);
+            },
+            error: (loginError) => {
+              console.error('❌ Error en login automático:', loginError);
+              this.loading.set(false);
+              // Si falla el login automático, redirigir a login manual
+              this.router.navigate(['/login'], { 
+                queryParams: { registered: 'true', message: 'Registro exitoso. Por favor inicia sesión.' }
+              });
+            }
           });
         }
       },
