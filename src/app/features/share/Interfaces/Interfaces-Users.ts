@@ -9,7 +9,7 @@ export interface UserProfile {
   // Datos de Autenticación
   uid: string;
   email: string;
-  role: 'admin' | 'user' | 'Programador';
+  roles: string[];
   // Datos Básicos
   displayName?: string;
   photoURL?: string;

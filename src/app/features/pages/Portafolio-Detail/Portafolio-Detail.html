@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-gray-300 font-sans pb-20 relative selection:bg-primary selection:text-white">
 
   @if (authService.currentUser()) {
-    @if ((currentUser$ | async)?.role !== 'admin') {
+    @if (!authService.hasRole('ADMIN')) {
       <div class="fixed top-24 right-4 z-50 animate-bounce-in">
         <button (click)="openMyRequestsModal()" 
                 class="btn btn-circle btn-primary btn-lg shadow-2xl border-2 border-white/20 tooltip tooltip-left transition-transform hover:scale-110" 
@@ -67,14 +67,14 @@
                 </div>
               }
 
-              @if (currentUser$ | async; as currentUser) {
-                @if (currentUser.role === 'admin') {
+              @if (authService.currentUser()) {
+                @if (authService.hasRole('ADMIN')) {
                   <button class="btn btn-wide btn-disabled bg-white/5 text-gray-500 border-white/5 cursor-not-allowed gap-2">
                     🛡️ Vista de Admin
                   </button>
                 } @else {
                   <button 
-                    (click)="openBookingModal(profile, currentUser.role)" 
+                    (click)="openBookingModal(profile, 'USER')" 
                     class="btn btn-primary btn-wide font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 gap-2 disabled:bg-white/5 disabled:text-gray-600 disabled:border-white/5 disabled:shadow-none"
                     [disabled]="!isAvailableNow(profile)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>

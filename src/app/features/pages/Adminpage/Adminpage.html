@@ -104,15 +104,17 @@
                   </td>
 
                   <td class="text-center">
-                    @switch (user.role) {
-                      @case ('admin') { <div class="badge badge-error gap-1 text-red-200 font-bold bg-red-500/10 border-red-500/20 text-xs py-3">🛡️ Admin</div> }
-                      @case ('Programador') { <div class="badge badge-info gap-1 text-cyan-200 font-bold bg-cyan-500/10 border-cyan-500/20 text-xs py-3">💻 Dev</div> }
-                      @default { <div class="badge badge-ghost text-gray-400 border-white/10 text-xs py-3">User</div> }
+                    @if (user.roles?.includes('ADMIN')) {
+                      <div class="badge badge-error gap-1 text-red-200 font-bold bg-red-500/10 border-red-500/20 text-xs py-3">🛡️ Admin</div>
+                    } @else if (user.roles?.includes('PROGRAMADOR')) {
+                      <div class="badge badge-info gap-1 text-cyan-200 font-bold bg-cyan-500/10 border-cyan-500/20 text-xs py-3">💻 Dev</div>
+                    } @else {
+                      <div class="badge badge-ghost text-gray-400 border-white/10 text-xs py-3">User</div>
                     }
                   </td>
 
                   <td class="text-center">
-                    @if (user.role === 'Programador') {
+                    @if (user.roles?.includes('PROGRAMADOR')) {
                       <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border border-white/10 hover:border-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-400 transition-all group/btn h-8 px-3 rounded-lg font-normal">
                         @if (user.availability) {
                           <span class="text-emerald-400 font-medium flex items-center gap-2 text-xs">
@@ -128,11 +130,11 @@
                   </td>
 
                   <td class="text-right pr-8">
-                    @if (user.role !== 'admin') {
+                    @if (!user.roles?.includes('ADMIN')) {
                       <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <div class="tooltip tooltip-left" [attr.data-tip]="user.role === 'Programador' ? 'Degradar' : 'Ascender'">
+                        <div class="tooltip tooltip-left" [attr.data-tip]="user.roles?.includes('PROGRAMADOR') ? 'Degradar' : 'Ascender'">
                            <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10 text-gray-400 hover:text-white">
-                             @if(user.role === 'Programador') {⬇️} @else {⬆️}
+                             @if(user.roles?.includes('PROGRAMADOR')) {⬇️} @else {⬆️}
                            </button>
                         </div>
                         <div class="tooltip tooltip-left" data-tip="Eliminar">
