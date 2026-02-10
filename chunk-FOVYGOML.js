@@ -1,1 +1,0 @@
-import{C as r,G as i,lb as o,yb as s}from"./chunk-XLQOBEAY.js";var p=class e{http=i(o);apiUrl=`${s.apiBaseUrl}/api/auth`;login(t){return this.http.post(`${this.apiUrl}/login`,t)}register(t){return this.http.post(`${this.apiUrl}/register`,t)}static \u0275fac=function(n){return new(n||e)};static \u0275prov=r({token:e,factory:e.\u0275fac,providedIn:"root"})};export{p as a};
