@@ -107,11 +107,33 @@ export class RegisterPage {
         }
       },
       error: (error: any) => {
-        this.loading.set(false);
         console.error('❌ Error completo del backend:', error);
         console.error('❌ Status:', error.status);
         console.error('❌ Error body:', error.error);
         console.error('❌ Message:', error.error?.message);
+
+        const rawError = typeof error?.error === 'string' ? error.error : (error?.error?.message || '');
+        const isAlreadyRegistered = error?.status === 400 && rawError.toLowerCase().includes('ya está registrado');
+
+        if (isAlreadyRegistered) {
+          // Si ya está registrado, iniciar sesión automáticamente
+          this.authApiService.login({ email, password }).subscribe({
+            next: (loginResponse) => {
+              console.log('✅ Login automático exitoso:', loginResponse);
+              this.authStore.setAuth(loginResponse);
+              this.loading.set(false);
+              this.router.navigate(['/home']);
+            },
+            error: (loginError) => {
+              console.error('❌ Error en login automático:', loginError);
+              this.loading.set(false);
+              this.errorMessage.set('El email ya está registrado. Inicia sesión manualmente.');
+            }
+          });
+          return;
+        }
+
+        this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
       }
     });
