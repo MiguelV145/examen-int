@@ -104,6 +104,21 @@ export class Adminpage implements OnInit {
                     currentUser?.roles?.includes('ROLE_ADMIN');
     console.log('🛡️ ¿Tiene rol ADMIN?:', isAdmin);
     
+    // IMPORTANTE: Decodificar el token JWT para ver qué roles tiene realmente
+    const token = this.authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('🎫 TOKEN JWT DECODIFICADO:', payload);
+        console.log('🎫 Roles en el token:', payload.roles || payload.authorities || payload.role);
+        console.log('🎫 Token completo (primeros 100 chars):', token.substring(0, 100) + '...');
+      } catch (e) {
+        console.error('❌ Error al decodificar token:', e);
+      }
+    } else {
+      console.error('❌ No hay token en localStorage!');
+    }
+    
     if (!isAdmin) {
       this.toastr.warning('Tu usuario no tiene el rol ADMIN asignado. Contacta al administrador del sistema.', 'Sin permisos', { timeOut: 8000 });
     }

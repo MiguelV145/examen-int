@@ -102,6 +102,11 @@ export class RegisterPage {
   }
 
   private getErrorMessage(error: any): string {
+    // Si error.error es un string directo, devolverlo
+    if (typeof error.error === 'string') {
+      return error.error;
+    }
+
     if (error?.status) {
       switch (error.status) {
         case 400:
