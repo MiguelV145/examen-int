@@ -100,8 +100,7 @@ export class Adminpage implements OnInit {
     console.log('📧 Email:', currentUser?.email);
     
     // Verificar si tiene rol ADMIN
-    const isAdmin = currentUser?.roles?.includes('ADMIN') || 
-                    currentUser?.roles?.includes('ROLE_ADMIN');
+    const isAdmin = currentUser?.roles?.includes('ROLE_ADMIN');
     console.log('🛡️ ¿Tiene rol ADMIN?:', isAdmin);
     
     // IMPORTANTE: Decodificar el token JWT para ver qué roles tiene realmente
