@@ -5,7 +5,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
-import emailjs from '@emailjs/browser';
 import { LinkPreviewService } from '../../../core/services/link-preview.service.ts';
 import { Observable, of } from 'rxjs';
 

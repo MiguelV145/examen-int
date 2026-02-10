@@ -61,6 +61,20 @@ export class AsesoriasApiService {
   }
 
   /**
+   * Obtener todas las asesorías (admin)
+   */
+  getAllAsesorias(filters?: { programmerId?: number; clientId?: number }): Observable<AsesoriaResponse[]> {
+    let params = new HttpParams();
+    if (filters?.programmerId !== undefined) {
+      params = params.set('programmerId', filters.programmerId.toString());
+    }
+    if (filters?.clientId !== undefined) {
+      params = params.set('clientId', filters.clientId.toString());
+    }
+    return this.http.get<AsesoriaResponse[]>(this.baseUrl, { params });
+  }
+
+  /**
    * Obtener detalle de una asesoría específica
    */
   getAsesoriaById(id: number): Observable<AsesoriaResponse> {

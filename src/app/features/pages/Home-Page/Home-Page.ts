@@ -6,7 +6,6 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile, Project } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
 import { ToastrService } from 'ngx-toastr';
-import emailjs from '@emailjs/browser';
 import { Observable, of } from 'rxjs';
 @Component({
   selector: 'app-home-page',
