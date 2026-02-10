@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { AuthLoginRequest, AuthResponse } from '../../models/auth.models';
-import { Observable, map, catchError, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
@@ -22,14 +22,19 @@ export class AuthApiService {
    */
   register(body: any): Observable<AuthResponse | { message: string }> {
     const url = `${this.baseUrl}/api/auth/register`;
-    
-    // Intentar primero como JSON (AuthResponse)
-    return this.http.post<AuthResponse>(url, body).pipe(
-      catchError((error) => {
-        // Si falla el parseo JSON, intentar como texto
-        return this.http.post(url, body, { responseType: 'text' }).pipe(
-          map(message => ({ message } as any))
-        );
+
+    // Hacer una sola petición y decidir por el contenido
+    return this.http.post(url, body, { responseType: 'text' }).pipe(
+      map((raw) => {
+        try {
+          const parsed = JSON.parse(raw) as AuthResponse;
+          if (parsed?.token && parsed?.userId) {
+            return parsed;
+          }
+        } catch {
+          // Respuesta no es JSON, continuar como texto
+        }
+        return { message: raw } as { message: string };
       })
     );
   }
