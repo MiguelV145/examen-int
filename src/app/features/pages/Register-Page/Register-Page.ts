@@ -68,6 +68,10 @@ export class RegisterPage {
       password: password
     };
 
+    console.log('📤 Enviando al backend:', registerRequest);
+    console.log('📝 Email:', email);
+    console.log('📝 Password length:', password?.length);
+
     this.authApiService.register(registerRequest).subscribe({
       next: (response: any) => {
         console.log('✅ Respuesta del registro:', response);
