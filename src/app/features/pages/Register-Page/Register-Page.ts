@@ -31,7 +31,6 @@ export class RegisterPage {
 
   constructor() {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       passwordConfirm: ['', [Validators.required]]
@@ -61,13 +60,12 @@ export class RegisterPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { username, email, password } = this.registerForm.value;
+    const { email, password } = this.registerForm.value;
     
-    const registerRequest: AuthRegisterRequest = {
-      username: username,
+    // El backend SOLO espera email y password (sin username ni passwordConfirm)
+    const registerRequest = {
       email: email,
-      password: password,
-      passwordConfirm: password
+      password: password
     };
 
     this.authApiService.register(registerRequest).subscribe({
@@ -99,7 +97,7 @@ export class RegisterPage {
     if (error?.status) {
       switch (error.status) {
         case 400:
-          return error.error?.message || 'Datos de registro inválidos.';
+          return error.error?.message || 'Email inválido o contraseña muy corta (mín 6 caracteres).';
         case 409:
           return 'Este correo ya está registrado. Intenta con otro o ve a login.';
         case 500:
