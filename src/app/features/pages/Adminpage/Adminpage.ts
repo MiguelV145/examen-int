@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, combineLatest, of } from 'rxjs';
-import { catchError, map, shareReplay, tap, switchMap } from 'rxjs/operators';
+import { Observable, combineLatest, of, Subject } from 'rxjs';
+import { catchError, map, shareReplay, tap, switchMap, startWith } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 
 // Servicios
@@ -28,12 +28,10 @@ export class Adminpage {
   private asesoriasApi = inject(AsesoriasApiService);
   private toastr = inject(ToastrService);
 
-  private refetchTrigger = signal(0);
+  private refetchTrigger$ = new Subject<void>();
 
-  users$: Observable<UserProfile[]> = combineLatest([
-    of(null),
-    this.refetchTrigger
-  ]).pipe(
+  users$: Observable<UserProfile[]> = this.refetchTrigger$.pipe(
+    startWith(null),
     switchMap(() => this.usersApi.getUsers()),
     map((users) => users.map((user) => this.mapUser(user))),
     catchError((error) => {
@@ -96,7 +94,7 @@ export class Adminpage {
     this.usersApi.updateUserRoles(userId, newRoles).subscribe({
       next: () => {
         this.toastr.success(`Rol actualizado exitosamente`, 'Éxito');
-        this.refetchTrigger.set(this.refetchTrigger() + 1);
+        this.refetchTrigger$.next();
       },
       error: (err) => {
         const msg = err?.error?.message || 'No se pudo actualizar el rol';
@@ -120,7 +118,7 @@ export class Adminpage {
     this.usersApi.deleteUser(userId).subscribe({
       next: () => {
         this.toastr.success('Usuario eliminado exitosamente', 'Éxito');
-        this.refetchTrigger.set(this.refetchTrigger() + 1);
+        this.refetchTrigger$.next();
       },
       error: (err) => {
         const msg = err?.error?.message || 'No se pudo eliminar el usuario';
