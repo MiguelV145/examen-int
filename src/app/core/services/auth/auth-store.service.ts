@@ -42,11 +42,12 @@ export class AuthStoreService {
    */
   setAuth(response: AuthResponse): void {
     this.token.set(response.token);
+    const normalizedRoles = this.normalizeRoles(response.roles || []);
     this.user.set({
       id: response.userId,
       username: response.username,
       email: response.email,
-      roles: response.roles,
+      roles: normalizedRoles,
       photoURL: response.photoURL,
       displayName: response.displayName,
       uid: response.userId.toString(), // Compatibilidad con código legado
@@ -76,7 +77,13 @@ export class AuthStoreService {
    * Verifica si usuario tiene un rol específico
    */
   hasRole(role: string): boolean {
-    return this.roles().includes(role);
+    const roles = this.roles();
+    if (roles.includes(role)) return true;
+    if (role.startsWith('ROLE_')) {
+      const legacy = role.replace(/^ROLE_/, '');
+      return roles.includes(legacy);
+    }
+    return roles.includes(`ROLE_${role}`);
   }
 
   /**
@@ -123,11 +130,20 @@ export class AuthStoreService {
     if (userStr) {
       try {
         const user = JSON.parse(userStr) as User;
+        if (user?.roles?.length) {
+          user.roles = this.normalizeRoles(user.roles);
+        }
         this.user.set(user);
       } catch (error) {
         console.error('Error parsing user from storage:', error);
         this.logout();
       }
     }
+  }
+
+  private normalizeRoles(roles: string[]): string[] {
+    return roles
+      .filter((role) => !!role)
+      .map((role) => (role.startsWith('ROLE_') ? role : `ROLE_${role}`));
   }
 }
