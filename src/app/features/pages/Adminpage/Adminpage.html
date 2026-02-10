@@ -11,6 +11,34 @@
         Panel de Control
       </h1>
       <p class="text-gray-400 font-medium text-lg">Administración integral del sistema</p>
+      
+      <!-- Debug: Mostrar roles del usuario actual -->
+      @if (authService.currentUser()?.roles && authService.currentUser()!.roles.length > 0) {
+        <div class="mt-3 flex flex-wrap gap-2">
+          <span class="text-xs text-gray-500 font-semibold">Roles actuales:</span>
+          @for (role of authService.currentUser()!.roles; track role) {
+            <span class="text-xs font-bold px-2 py-1 rounded-lg"
+                  [class.bg-red-900/30]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
+                  [class.text-red-400]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
+                  [class.border-red-500/30]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
+                  [class.bg-blue-900/30]="role === 'PROGRAMADOR'"
+                  [class.text-blue-400]="role === 'PROGRAMADOR'"
+                  [class.border-blue-500/30]="role === 'PROGRAMADOR'"
+                  [class.bg-gray-700/30]="role === 'USER'"
+                  [class.text-gray-400]="role === 'USER'"
+                  [class.border-gray-500/30]="role === 'USER'"
+                  class="border">
+              {{ role }}
+            </span>
+          }
+        </div>
+      } @else {
+        <div class="mt-3">
+          <span class="text-xs font-bold px-3 py-1.5 rounded-lg bg-yellow-900/30 text-yellow-400 border border-yellow-500/30">
+            ⚠️ No se detectaron roles asignados
+          </span>
+        </div>
+      }
     </div>
     
     <div class="flex items-center gap-4 bg-[#1e293b]/60 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-xl border border-white/5 hover:border-cyan-500/30 transition-all duration-300 group">
@@ -80,8 +108,9 @@
           </thead>
           <tbody class="divide-y divide-white/5">
             @if (users$ | async; as users) {
-              @for (user of users; track user.uid) {
-                <tr class="hover:bg-white/5 transition-colors group">
+              @if (users.length > 0) {
+                @for (user of users; track user.uid) {
+                  <tr class="hover:bg-white/5 transition-colors group">
                   
                   <td class="pl-8 py-4">
                     <div class="flex items-center gap-4">
@@ -142,6 +171,30 @@
                         </div>
                       </div>
                     }
+                  </td>
+                </tr>
+              }
+              } @else {
+                <tr>
+                  <td colspan="4" class="text-center py-16">
+                    <div class="flex flex-col items-center gap-4">
+                      <div class="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-lg font-bold text-gray-300 mb-2">No se pudieron cargar los usuarios</p>
+                        <p class="text-sm text-gray-500 max-w-md">
+                          Posibles causas:<br>
+                          • Tu usuario no tiene el rol ADMIN asignado en el backend<br>
+                          • El token de sesión expiró<br>
+                          • El backend no está disponible<br>
+                          <br>
+                          <span class="text-cyan-400 font-semibold">Revisa la consola del navegador (F12) para más detalles</span>
+                        </p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               }

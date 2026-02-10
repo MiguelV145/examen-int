@@ -92,6 +92,10 @@ export class RegisterPage {
       },
       error: (error: any) => {
         this.loading.set(false);
+        console.error('❌ Error completo del backend:', error);
+        console.error('❌ Status:', error.status);
+        console.error('❌ Error body:', error.error);
+        console.error('❌ Message:', error.error?.message);
         this.errorMessage.set(this.getErrorMessage(error));
       }
     });

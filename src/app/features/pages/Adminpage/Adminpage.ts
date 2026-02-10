@@ -31,12 +31,33 @@ export class Adminpage implements OnInit {
   private refetchTrigger$ = new BehaviorSubject<void>(undefined);
 
   users$: Observable<UserProfile[]> = this.refetchTrigger$.pipe(
-    switchMap(() => this.usersApi.getUsers()),
-    map((users) => users.map((user) => this.mapUser(user))),
+    switchMap(() => {
+      console.log('🔄 Cargando usuarios desde el backend...');
+      return this.usersApi.getUsers();
+    }),
+    map((users) => {
+      console.log('✅ Usuarios obtenidos del backend:', users);
+      return users.map((user) => this.mapUser(user));
+    }),
     catchError((error) => {
-      console.error('No se pudieron cargar usuarios.', error);
+      console.error('❌ Error al cargar usuarios:', error);
+      console.error('❌ Status:', error.status);
+      console.error('❌ Error body:', error.error);
+      console.error('❌ Headers:', error.headers);
+      
       if (error.status === 403) {
-        this.toastr.error('No tienes permisos de administrador', 'Error 403');
+        this.toastr.error(
+          'Tu usuario no tiene el rol ADMIN en el backend. El token está correcto pero el rol no está asignado.', 
+          'Error 403 - Sin permisos',
+          { timeOut: 10000 }
+        );
+      } else if (error.status === 401) {
+        this.toastr.error('Tu sesión expiró o el token no es válido. Intenta hacer logout y login de nuevo.', 'Error 401');
+      } else {
+        this.toastr.error(
+          error.error?.message || 'No se pudieron cargar los usuarios. Verifica la consola para más detalles.', 
+          `Error ${error.status}`
+        );
       }
       return of([]);
     }),
@@ -72,6 +93,21 @@ export class Adminpage implements OnInit {
   constructor() {}
 
   ngOnInit() {
+    // Mostrar información del usuario logueado
+    const currentUser = this.authService.currentUser();
+    console.log('👤 Usuario actual:', currentUser);
+    console.log('🔑 Roles del usuario:', currentUser?.roles);
+    console.log('📧 Email:', currentUser?.email);
+    
+    // Verificar si tiene rol ADMIN
+    const isAdmin = currentUser?.roles?.includes('ADMIN') || 
+                    currentUser?.roles?.includes('ROLE_ADMIN');
+    console.log('🛡️ ¿Tiene rol ADMIN?:', isAdmin);
+    
+    if (!isAdmin) {
+      this.toastr.warning('Tu usuario no tiene el rol ADMIN asignado. Contacta al administrador del sistema.', 'Sin permisos', { timeOut: 8000 });
+    }
+    
     // Cargar usuarios automáticamente al entrar al panel
     this.refetchTrigger$.next();
   }
@@ -93,17 +129,21 @@ export class Adminpage implements OnInit {
       : ['PROGRAMADOR', 'USER'];
 
     const action = isProgramador ? 'Degradando' : 'Ascendiendo';
+    console.log(`🔄 ${action} rol de usuario ${userId}:`, { from: user.roles, to: newRoles });
     this.toastr.info(`${action} a ${user.displayName || user.email}...`);
 
     this.usersApi.updateUserRoles(userId, newRoles).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Rol actualizado:', response);
         this.toastr.success(`Rol actualizado exitosamente`, 'Éxito');
         this.refetchTrigger$.next();
       },
       error: (err) => {
+        console.error('❌ Error al cambiar rol:', err);
+        console.error('❌ Status:', err.status);
+        console.error('❌ Error body:', err.error);
         const msg = err?.error?.message || 'No se pudo actualizar el rol';
         this.toastr.error(msg, 'Error');
-        console.error('Error al cambiar rol:', err);
       }
     });
   }

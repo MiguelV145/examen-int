@@ -33,12 +33,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let authReq = req;
 
   if (token) {
+    // Log solo para peticiones a /api/users (debugging)
+    if (req.url.includes('/api/users')) {
+      console.log('🔐 Interceptor: Agregando token a petición:', req.url);
+      console.log('🎫 Token (primeros 50 chars):', token.substring(0, 50) + '...');
+    }
+    
     // Clonar request y agregar header Authorization
     authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,
       },
     });
+  } else {
+    // Log de warning si no hay token pero se intenta acceder a una ruta protegida
+    if (req.url.includes('/api/')) {
+      console.warn('⚠️ Interceptor: No hay token disponible para:', req.url);
+    }
   }
 
   // Manejar errores 401
