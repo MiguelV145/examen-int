@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
@@ -12,7 +12,7 @@ import { Observable, of } from 'rxjs';
 @Component({
   selector: 'app-portfolio-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './Portafolio-Detail.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

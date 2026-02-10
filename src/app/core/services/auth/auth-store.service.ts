@@ -47,6 +47,9 @@ export class AuthStoreService {
       username: response.username,
       email: response.email,
       roles: response.roles,
+      photoURL: response.photoURL,
+      displayName: response.displayName,
+      uid: response.userId.toString(), // Compatibilidad con código legado
     });
     this.persistToStorage();
   }

@@ -20,6 +20,8 @@ export interface AuthResponse {
   username: string;
   email: string;
   roles: string[]; // ["ADMIN"] | ["USER"] | ["ADMIN", "USER"]
+  photoURL?: string;
+  displayName?: string;
 }
 
 export interface User {
@@ -27,4 +29,7 @@ export interface User {
   username: string;
   email: string;
   roles: string[];
+  photoURL?: string;
+  displayName?: string;
+  uid?: string; // Para compatibilidad: id como string
 }

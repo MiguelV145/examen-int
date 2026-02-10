@@ -7,6 +7,9 @@ import { AuthLoginRequest, AuthRegisterRequest, AuthResponse } from '../../model
 /**
  * Servicio API para autenticación con backend Spring Boot
  * Solo se encarga de hacer HTTP calls, NO gestiona estado
+ * 
+ * Nota: El backend espera {email, password} pero recibimos {identifier}
+ * Transformamos identifier → email para compatibilidad con backend
  */
 @Injectable({
   providedIn: 'root',
@@ -17,11 +20,22 @@ export class AuthApiService {
 
   /**
    * POST /api/auth/login
+   * 
+   * Recibe: {identifier, password}
+   * Envía al backend: {email, password} (identifier se convierte a email)
+   * 
    * @param dto Credenciales con identifier (email o username) y password
    * @returns Observable<AuthResponse> con token, userId, username, email, roles
    */
   login(dto: AuthLoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, dto);
+    // Transformar identifier → email para que el backend lo entienda
+    // El backend espera {email, password}, no {identifier, password}
+    const backendPayload = {
+      email: dto.identifier,
+      password: dto.password
+    };
+    
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, backendPayload);
   }
 
   /**
@@ -33,3 +47,4 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, dto);
   }
 }
+
