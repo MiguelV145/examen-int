@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable, combineLatest, of, BehaviorSubject } from 'rxjs';
@@ -20,7 +20,7 @@ import { FormUtils } from '../../share/Formutils/Formutils';
   templateUrl: './Adminpage.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Adminpage { 
+export class Adminpage implements OnInit { 
   
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
@@ -70,6 +70,11 @@ export class Adminpage {
   });
 
   constructor() {}
+
+  ngOnInit() {
+    // Cargar usuarios automáticamente al entrar al panel
+    this.refetchTrigger$.next();
+  }
 
   switchTab(tab: 'users' | 'asesorias') {
     this.activeTab.set(tab);
