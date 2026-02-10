@@ -71,14 +71,22 @@ export class RegisterPage {
     };
 
     this.authApiService.register(registerRequest).subscribe({
-      next: (response) => {
-        // Registro exitoso: mostrar mensaje y redirigir a login
-        console.log('✅ Registro exitoso:', response.message);
+      next: (response: any) => {
+        console.log('✅ Respuesta del registro:', response);
         this.loading.set(false);
-        // Navegar a login para que el usuario inicie sesión
-        this.router.navigate(['/login'], { 
-          queryParams: { registered: 'true' }
-        });
+        
+        // Si el backend devuelve token (AuthResponse completo)
+        if (response.token && response.userId) {
+          // Guardar en store y navegar a home
+          this.authStore.setAuth(response);
+          this.router.navigate(['/home']);
+        } else {
+          // Si solo devuelve mensaje, ir a login
+          console.log('📝 Mensaje del servidor:', response.message);
+          this.router.navigate(['/login'], { 
+            queryParams: { registered: 'true' }
+          });
+        }
       },
       error: (error: any) => {
         this.loading.set(false);

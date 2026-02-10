@@ -1,0 +1,188 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Panel de Reportes</h1>
+
+  <!-- Filtros -->
+  <div class="card bg-base-200 mb-6">
+    <div class="card-body">
+      <h2 class="card-title">Filtros</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <input 
+          type="date"
+          placeholder="Fecha inicio"
+          class="input input-bordered"
+          #startDate>
+        <input 
+          type="date"
+          placeholder="Fecha fin"
+          class="input input-bordered"
+          #endDate>
+        <select class="select select-bordered" #statusFilter>
+          <option value="">Todos los estados</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="CONFIRMADA">Confirmada</option>
+          <option value="COMPLETADA">Completada</option>
+          <option value="CANCELADA">Cancelada</option>
+        </select>
+        <button 
+          class="btn btn-primary"
+          (click)="applyFilters()">
+          Aplicar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-8">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (dashboardData()) {
+    <!-- Estadísticas Principales -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-figure text-primary">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="stat-title">Total de Asesorías</div>
+        <div class="stat-value">{{ dashboardData()!.totalAsesorias }}</div>
+      </div>
+
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-figure text-success">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292m0 0H8.646m3.354 0H16m-4-8a4 4 0 110 5.292m0 0H8.646m3.354 0H16"></path>
+          </svg>
+        </div>
+        <div class="stat-title">Programadores</div>
+        <div class="stat-value">{{ dashboardData()!.totalProgrammers }}</div>
+      </div>
+
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-figure text-info">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 6a3 3 0 11-6 0 3 3 0 016 0zM6 20a3 3 0 003-3v-2a3 3 0 00-3-3"></path>
+          </svg>
+        </div>
+        <div class="stat-title">Total de Usuarios</div>
+        <div class="stat-value">{{ dashboardData()!.totalUsers }}</div>
+      </div>
+    </div>
+
+    <!-- Tablas de datos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Asesorías por Estado -->
+      <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+          <h2 class="card-title">Asesorías por Estado</h2>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of dashboardData()!.asesoriasBySatus; track item.status) {
+                  <tr>
+                    <td>{{ item.status }}</td>
+                    <td><span class="badge">{{ item.count }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asesorías por Programador -->
+      <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+          <h2 class="card-title">Asesorías por Programador</h2>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Programador</th>
+                  <th>Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of dashboardData()!.asesoriasByProgrammer; track item.programmerId) {
+                  <tr>
+                    <td>{{ item.programmerName }}</td>
+                    <td><span class="badge">{{ item.count }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proyectos por Usuario -->
+      <div class="card bg-base-100 shadow-lg lg:col-span-2">
+        <div class="card-body">
+          <h2 class="card-title">Proyectos por Usuario</h2>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Total</th>
+                  <th>Activos</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of dashboardData()!.projectsByUser; track item.userId) {
+                  <tr>
+                    <td>{{ item.userName }}</td>
+                    <td>{{ item.email }}</td>
+                    <td><span class="badge">{{ item.totalProjects }}</span></td>
+                    <td><span class="badge badge-primary">{{ item.activeProjects }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de descarga -->
+    <div class="card bg-base-100 shadow-lg mt-6">
+      <div class="card-body">
+        <h2 class="card-title">Descargar Reportes</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button 
+            class="btn btn-outline"
+            (click)="downloadReport('asesorias-pdf')"
+            [disabled]="downloadingReport()">
+            PDF Asesorías
+          </button>
+          <button 
+            class="btn btn-outline"
+            (click)="downloadReport('asesorias-xlsx')"
+            [disabled]="downloadingReport()">
+            XLSX Asesorías
+          </button>
+          <button 
+            class="btn btn-outline"
+            (click)="downloadReport('projects-pdf')"
+            [disabled]="downloadingReport()">
+            PDF Proyectos
+          </button>
+          <button 
+            class="btn btn-outline"
+            (click)="downloadReport('projects-xlsx')"
+            [disabled]="downloadingReport()">
+            XLSX Proyectos
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

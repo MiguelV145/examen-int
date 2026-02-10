@@ -1,0 +1,90 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Asesorías Recibidas</h1>
+
+  @if (loading()) {
+    <div class="flex justify-center py-8">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else if (asesorias().length === 0) {
+    <div class="alert alert-info">
+      <span>No tienes asesorías pendientes.</span>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @for (asesoria of asesorias(); track asesoria.id) {
+        <div class="card bg-base-100 shadow-lg">
+          <div class="card-body">
+            <div class="badge" [class]="getStatusBadgeClass(asesoria.status)">
+              {{ asesoria.status }}
+            </div>
+            
+            <p class="font-semibold text-lg">{{ asesoria.topic || 'Sin tema' }}</p>
+            
+            <div class="divider my-2"></div>
+            
+            <div class="space-y-2 text-sm">
+              <p>
+                <span class="font-semibold">Cliente:</span>
+                {{ asesoria.client?.username }}
+              </p>
+              <p>
+                <span class="font-semibold">Email:</span>
+                {{ asesoria.client?.email }}
+              </p>
+              <p>
+                <span class="font-semibold">Fecha:</span>
+                {{ formatDateTime(asesoria.startAt) }}
+              </p>
+              <p>
+                <span class="font-semibold">Duración:</span>
+                {{ asesoria.durationMinutes }} minutos
+              </p>
+              <p>
+                <span class="font-semibold">Modalidad:</span>
+                {{ asesoria.modality }}
+              </p>
+            </div>
+
+            @if (asesoria.notes) {
+              <div class="mt-3">
+                <p class="text-xs opacity-75">Notas del cliente:</p>
+                <p class="text-sm">{{ asesoria.notes }}</p>
+              </div>
+            }
+
+            <div class="card-actions mt-4 gap-2">
+              @if (asesoria.status === 'PENDIENTE') {
+                <button 
+                  class="btn btn-sm btn-success"
+                  (click)="updateStatus(asesoria.id, 'CONFIRMADA')"
+                  [disabled]="updatingId() === asesoria.id">
+                  Confirmar
+                </button>
+                <button 
+                  class="btn btn-sm btn-error"
+                  (click)="updateStatus(asesoria.id, 'RECHAZADA')"
+                  [disabled]="updatingId() === asesoria.id">
+                  Rechazar
+                </button>
+              } @else if (asesoria.status === 'CONFIRMADA') {
+                <button 
+                  class="btn btn-sm btn-primary"
+                  (click)="updateStatus(asesoria.id, 'EN_CURSO')"
+                  [disabled]="updatingId() === asesoria.id">
+                  Iniciar
+                </button>
+              } @else if (asesoria.status === 'EN_CURSO') {
+                <button 
+                  class="btn btn-sm btn-success"
+                  (click)="updateStatus(asesoria.id, 'COMPLETADA')"
+                  [disabled]="updatingId() === asesoria.id">
+                  Marcar Completada
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

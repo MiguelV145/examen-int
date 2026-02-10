@@ -1,0 +1,126 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Reservar Asesoría</h1>
+
+  @if (loading()) {
+    <div class="flex justify-center py-8">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Panel de selección -->
+      <div class="space-y-6">
+        <!-- Seleccionar programador -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Seleccionar Programador</span>
+          </label>
+          <select 
+            class="select select-bordered"
+            (change)="onProgrammerSelected($event)"
+            [(ngModel)]="selectedProgrammerId">
+            <option value="" disabled selected>Elige un programador</option>
+            @for (prog of programmers(); track prog.id) {
+              <option [value]="prog.id">{{ prog.displayName || prog.username }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Seleccionar modalidad -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-semibold">Modalidad</span>
+          </label>
+          <select 
+            class="select select-bordered"
+            [(ngModel)]="selectedModality"
+            (change)="onModalitySelected()">
+            <option>PRESENCIAL</option>
+            <option>VIRTUAL</option>
+            <option>HIBRIDA</option>
+          </select>
+        </div>
+
+        <!-- Mostrar disponibilidad -->
+        @if (availableSlots().length > 0) {
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Horarios Disponibles</span>
+            </label>
+            <div class="space-y-2 max-h-60 overflow-y-auto">
+              @for (slot of availableSlots(); track slot.id) {
+                <button
+                  type="button"
+                  class="btn btn-outline w-full justify-start"
+                  [class.btn-primary]="selectedSlotId() === slot.id"
+                  (click)="onSlotSelected(slot)">
+                  <span>{{ getDayName(slot.dayOfWeek) }} - {{ slot.startTime }} a {{ slot.endTime }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        } @else if (selectedProgrammerId) {
+          <div class="alert alert-warning">
+            <span>No hay horarios disponibles para este programador.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Panel de confirmación -->
+      <div class="card bg-base-200">
+        <div class="card-body">
+          <h2 class="card-title">Resumen de la Reserva</h2>
+          
+          @if (selectedProgrammerName()) {
+            <div>
+              <p class="text-sm opacity-75">Programador</p>
+              <p class="font-semibold">{{ selectedProgrammerName() }}</p>
+            </div>
+          }
+
+          @if (selectedSlot()) {
+            <div>
+              <p class="text-sm opacity-75">Fecha y Hora</p>
+              <p class="font-semibold">{{ getDayName(selectedSlot()!.dayOfWeek) }} - {{ selectedSlot()!.startTime }} a {{ selectedSlot()!.endTime }}</p>
+            </div>
+          }
+
+          <div>
+            <p class="text-sm opacity-75">Modalidad</p>
+            <p class="font-semibold">{{ selectedModality }}</p>
+          </div>
+
+          <form [formGroup]="reservaForm" class="space-y-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Tema de la asesoría</span>
+              </label>
+              <input 
+                type="text"
+                placeholder="Ej: Dudas sobre Angular"
+                class="input input-bordered"
+                formControlName="topic">
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Notas adicionales</span>
+              </label>
+              <textarea 
+                placeholder="Información adicional..."
+                class="textarea textarea-bordered"
+                formControlName="notes"></textarea>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary w-full"
+              (click)="onSubmit()"
+              [disabled]="!canSubmit() || reservaForm.invalid">
+              Confirmar Reserva
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

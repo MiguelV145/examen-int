@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';       // Protege rutas para usuarios logueados
 import { publicGuard } from './core/guards/public-guard';   // Bloquea rutas si ya estás logueado
 import { adminGuard } from './core/guards/admin-guard';     // Solo para admins
+import { programadorGuard } from './core/guards/programador-guard'; // Solo para programadores
 
 export const routes: Routes = [
 
@@ -33,6 +34,11 @@ export const routes: Routes = [
         canActivate: [adminGuard]
     },
 
+    {
+        path: 'admin/reportes',
+        loadComponent: () => import('./features/admin/reportes-dashboard/reportes-dashboard.component').then(m => m.AdminReportesDashboardComponent),
+        canActivate: [adminGuard]
+    },
 
     {
         path: 'panel',
@@ -40,13 +46,36 @@ export const routes: Routes = [
         loadComponent: () => import('./features/pages/Perfil-page/Perfil-Page').then(m => m.ProgrammerPage),
         canActivate: [authGuard] // Solo usuarios logueados pueden entrar aquí
     },
-    
+
+    // ========== RUTAS DE ASESORÍAS ==========
 
     {
-        
+        path: 'asesorias',
+        loadComponent: () => import('./features/asesorias/reservar-asesoria/reservar-asesoria.component').then(m => m.ReservarAsesoriaComponent),
+        canActivate: [authGuard]
+    },
+
+    {
+        path: 'mis-asesorias',
+        loadComponent: () => import('./features/asesorias/mis-asesorias/mis-asesorias.component').then(m => m.MisAsesoriasComponent),
+        canActivate: [authGuard]
+    },
+
+    {
+        path: 'programador/disponibilidad',
+        loadComponent: () => import('./features/asesorias/disponibilidad-programador/disponibilidad-programador.component').then(m => m.DisponibilidadProgramadorComponent),
+        canActivate: [programadorGuard]
+    },
+
+    {
+        path: 'programador/asesorias',
+        loadComponent: () => import('./features/asesorias/asesorias-recibidas/asesorias-recibidas.component').then(m => m.AsesoriasRecibidasprogComponent),
+        canActivate: [programadorGuard]
+    },
+
+    {
         path: 'portfolio/:id',
         loadComponent: () => import('./features/pages/Portafolio-Detail/Portafolio-Detail').then(m => m.PortfolioDetail)
-    
     },
     
 

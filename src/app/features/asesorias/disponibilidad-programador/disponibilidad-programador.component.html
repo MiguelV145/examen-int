@@ -1,0 +1,129 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Formulario de creación -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title">Agregar Horario</h2>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Día de la semana</span>
+            </label>
+            <select formControlName="dayOfWeek" class="select select-bordered">
+              <option value="" disabled>Selecciona un día</option>
+              @for (day of daysOfWeek; track day) {
+                <option [value]="day">{{ day }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Hora inicio (HH:MM)</span>
+            </label>
+            <input 
+              type="time"
+              formControlName="startTime"
+              class="input input-bordered">
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Hora fin (HH:MM)</span>
+            </label>
+            <input 
+              type="time"
+              formControlName="endTime"
+              class="input input-bordered">
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Modalidad</span>
+            </label>
+            <select formControlName="modality" class="select select-bordered">
+              <option value="" disabled>Selecciona una modalidad</option>
+              <option value="PRESENCIAL">Presencial</option>
+              <option value="VIRTUAL">Virtual</option>
+              <option value="HIBRIDA">Híbrida</option>
+            </select>
+          </div>
+
+          <button 
+            type="submit"
+            class="btn btn-primary w-full"
+            [disabled]="form.invalid || creatingSlot()">
+            @if (creatingSlot()) {
+              <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+              Agregar Horario
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de horarios -->
+    <div class="lg:col-span-2">
+      <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+          <h2 class="card-title">Mis Horarios de Disponibilidad</h2>
+          
+          @if (loadingSlots()) {
+            <div class="flex justify-center py-8">
+              <span class="loading loading-spinner loading-lg"></span>
+            </div>
+          } @else if (slots().length === 0) {
+            <div class="alert alert-info">
+              <span>No tienes horarios configurados aún.</span>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Día</th>
+                    <th>Hora inicio</th>
+                    <th>Hora fin</th>
+                    <th>Modalidad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (slot of slots(); track slot.id) {
+                    <tr>
+                      <td>{{ slot.dayOfWeek }}</td>
+                      <td>{{ slot.startTime }}</td>
+                      <td>{{ slot.endTime }}</td>
+                      <td>{{ slot.modality }}</td>
+                      <td>
+                        <div class="badge" [class]="slot.enabled ? 'badge-success' : 'badge-error'">
+                          {{ slot.enabled ? 'Activo' : 'Inactivo' }}
+                        </div>
+                      </td>
+                      <td class="space-x-2">
+                        <button 
+                          class="btn btn-xs"
+                          [class.btn-success]="!slot.enabled"
+                          [class.btn-warning]="slot.enabled"
+                          (click)="toggleSlot(slot)">
+                          {{ slot.enabled ? 'Desactivar' : 'Activar' }}
+                        </button>
+                        <button 
+                          class="btn btn-xs btn-error"
+                          (click)="deleteSlot(slot.id)">
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

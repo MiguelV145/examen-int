@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { AuthLoginRequest, AuthResponse } from '../../models/auth.models';
-import { Observable, map } from 'rxjs';
+import { Observable, map, catchError, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
@@ -16,15 +16,22 @@ export class AuthApiService {
   }
 
   /**
-   * Register: El backend devuelve texto plano, no JSON
-   * Ejemplo: "Usuario registrado correctamente"
-   * Transformamos a { message: "..." } para uniformidad
+   * Register: Intenta parsear respuesta como AuthResponse
+   * Si el backend devuelve JSON: retorna AuthResponse
+   * Si el backend devuelve texto plano: retorna { message: "..." }
    */
-  register(body: any): Observable<{ message: string }> {
+  register(body: any): Observable<AuthResponse | { message: string }> {
     const url = `${this.baseUrl}/api/auth/register`;
-    return this.http.post(url, body, { responseType: 'text' })
-      .pipe(
-        map(message => ({ message }))
-      );
+    
+    // Intentar primero como JSON (AuthResponse)
+    return this.http.post<AuthResponse>(url, body).pipe(
+      catchError((error) => {
+        // Si falla el parseo JSON, intentar como texto
+        return this.http.post(url, body, { responseType: 'text' }).pipe(
+          map(message => ({ message } as any))
+        );
+      })
+    );
   }
 }
+
