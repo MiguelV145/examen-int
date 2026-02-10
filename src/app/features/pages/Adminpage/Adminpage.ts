@@ -135,12 +135,12 @@ export class Adminpage implements OnInit {
     if (!user.uid) return;
 
     const userId = Number(user.uid);
-    const isProgramador = user.roles.includes('PROGRAMADOR');
+    const isProgramador = user.roles.includes('ROLE_PROGRAMADOR');
 
     // Si es programador, degradar a USER; si no, ascender a PROGRAMADOR
     const newRoles = isProgramador 
-      ? ['USER'] 
-      : ['PROGRAMADOR', 'USER'];
+      ? ['ROLE_USER'] 
+      : ['ROLE_PROGRAMADOR', 'ROLE_USER'];
 
     const action = isProgramador ? 'Degradando' : 'Ascendiendo';
     console.log(`🔄 ${action} rol de usuario ${userId}:`, { from: user.roles, to: newRoles });

@@ -21,12 +21,12 @@
                   [class.bg-red-900/30]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
                   [class.text-red-400]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
                   [class.border-red-500/30]="role === 'ADMIN' || role === 'ROLE_ADMIN'"
-                  [class.bg-blue-900/30]="role === 'PROGRAMADOR'"
-                  [class.text-blue-400]="role === 'PROGRAMADOR'"
-                  [class.border-blue-500/30]="role === 'PROGRAMADOR'"
-                  [class.bg-gray-700/30]="role === 'USER'"
-                  [class.text-gray-400]="role === 'USER'"
-                  [class.border-gray-500/30]="role === 'USER'"
+                  [class.bg-blue-900/30]="role === 'PROGRAMADOR' || role === 'ROLE_PROGRAMADOR'"
+                  [class.text-blue-400]="role === 'PROGRAMADOR' || role === 'ROLE_PROGRAMADOR'"
+                  [class.border-blue-500/30]="role === 'PROGRAMADOR' || role === 'ROLE_PROGRAMADOR'"
+                  [class.bg-gray-700/30]="role === 'USER' || role === 'ROLE_USER'"
+                  [class.text-gray-400]="role === 'USER' || role === 'ROLE_USER'"
+                  [class.border-gray-500/30]="role === 'USER' || role === 'ROLE_USER'"
                   class="border">
               {{ role }}
             </span>
@@ -133,9 +133,9 @@
                   </td>
 
                   <td class="text-center">
-                    @if (user.roles?.includes('ADMIN')) {
-                      <div class="badge badge-error gap-1 text-red-200 font-bold bg-red-500/10 border-red-500/20 text-xs py-3">🛡️ Admin</div>
-                    } @else if (user.roles?.includes('PROGRAMADOR')) {
+                    @if (user.roles?.includes('ROLE_ADMIN')) {
+                      <div class="badge badge-error gap-1 text-red-200 font-bold bg-red-500/10 border-red-500/20 text-xs py-3">🛡️ ADMIN</div>
+                    } @else if (user.roles?.includes('ROLE_PROGRAMADOR')) {
                       <div class="badge badge-info gap-1 text-cyan-200 font-bold bg-cyan-500/10 border-cyan-500/20 text-xs py-3">💻 Dev</div>
                     } @else {
                       <div class="badge badge-ghost text-gray-400 border-white/10 text-xs py-3">User</div>
@@ -143,7 +143,7 @@
                   </td>
 
                   <td class="text-center">
-                    @if (user.roles?.includes('PROGRAMADOR')) {
+                    @if (user.roles?.includes('ROLE_PROGRAMADOR')) {
                       <button (click)="openAvailabilityModal(user)" class="btn btn-xs btn-ghost border border-white/10 hover:border-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-400 transition-all group/btn h-8 px-3 rounded-lg font-normal">
                         @if (user.availability) {
                           <span class="text-emerald-400 font-medium flex items-center gap-2 text-xs">
@@ -159,11 +159,11 @@
                   </td>
 
                   <td class="text-right pr-8">
-                    @if (!user.roles?.includes('ADMIN')) {
+                    @if (!user.roles?.includes('ROLE_ADMIN')) {
                       <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                        <div class="tooltip tooltip-left" [attr.data-tip]="user.roles?.includes('PROGRAMADOR') ? 'Degradar' : 'Ascender'">
+                        <div class="tooltip tooltip-left" [attr.data-tip]="user.roles?.includes('ROLE_PROGRAMADOR') ? 'Degradar' : 'Ascender'">
                            <button (click)="toggleRole(user)" class="btn btn-sm btn-square btn-ghost hover:bg-white/10 text-gray-400 hover:text-white">
-                             @if(user.roles?.includes('PROGRAMADOR')) {⬇️} @else {⬆️}
+                             @if(user.roles?.includes('ROLE_PROGRAMADOR')) {⬇️} @else {⬆️}
                            </button>
                         </div>
                         <div class="tooltip tooltip-left" data-tip="Eliminar">
