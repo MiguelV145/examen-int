@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { ProfileApiService } from '../../../core/services/api/profile.api';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
@@ -17,6 +19,7 @@ export class ProgrammerPage implements OnInit {
   
   private fb = inject(FormBuilder);
   public authService = inject(AuthService);
+  private profileApi = inject(ProfileApiService);
 
   // Signals UI
   loading = signal(false);
@@ -28,6 +31,8 @@ export class ProgrammerPage implements OnInit {
   skills = signal<string[]>([]);
   previewUrl = signal<string | null>(null);
   user = this.authService.currentUser;
+  
+  skillInputCtrl = new FormControl<string>('', { nonNullable: true });
 
   formUtils = FormUtils;
 
@@ -40,19 +45,47 @@ export class ProgrammerPage implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadProfile();
+  }
 
-  addSkill(event: any) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value.trim();
-    if (value && !this.skills().includes(value)) {
-      this.skills.update(s => [...s, value]);
-      input.value = ''; 
-    }
+  private loadProfile() {
+    this.profileApi.getMyProfile().subscribe({
+      next: (profile) => {
+        if (profile) {
+          this.profileForm.patchValue({
+            displayName: profile.displayName || '',
+            specialty: profile.specialty || '',
+            description: profile.description || '',
+            photoURL: profile.photoURL || ''
+          });
+          this.skills.set(profile.skills || []);
+          if (profile.photoURL) {
+            this.previewUrl.set(profile.photoURL);
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar perfil:', err);
+      }
+    });
+  }
+
+  addSkill(event: KeyboardEvent) {
+    event.preventDefault();
+    const value = (this.skillInputCtrl.value ?? '').trim();
+    if (!value) return;
+
+    this.skills.update((list) => {
+      const exists = list.some((x) => x.toLowerCase() === value.toLowerCase());
+      return exists ? list : [...list, value];
+    });
+
+    this.skillInputCtrl.setValue('');
   }
 
   removeSkill(skill: string) {
-    this.skills.update(s => s.filter(x => x !== skill));
+    this.skills.update((list) => list.filter((x) => x !== skill));
   }
 
   onFileSelected(event: any) {
@@ -73,7 +106,41 @@ export class ProgrammerPage implements OnInit {
   }
 
   saveProfile() {
-    this.successMessage.set('Funcionalidad en construcción - Conectar con backend cuando esté listo.');
-    setTimeout(() => this.successMessage.set(''), 3000);
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      this.errorMessage.set('Por favor completa todos los campos requeridos.');
+      setTimeout(() => this.errorMessage.set(''), 3000);
+      return;
+    }
+
+    const payload = {
+      displayName: this.profileForm.value.displayName || '',
+      specialty: this.profileForm.value.specialty || '',
+      description: this.profileForm.value.description || '',
+      skills: this.skills(),
+      photoURL: this.profileForm.value.photoURL || undefined,
+    };
+
+    this.loading.set(true);
+
+    this.profileApi
+      .updateMyProfile(payload)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (res) => {
+          this.successMessage.set('✅ Perfil actualizado exitosamente');
+          if (res.photoURL) {
+            this.previewUrl.set(res.photoURL);
+            this.profileForm.patchValue({ photoURL: res.photoURL });
+          }
+          setTimeout(() => this.successMessage.set(''), 4000);
+        },
+        error: (err) => {
+          const msg = err?.error?.message || 'Error al guardar el perfil. Intenta de nuevo.';
+          this.errorMessage.set(`❌ ${msg}`);
+          console.error('Error al guardar perfil:', err);
+          setTimeout(() => this.errorMessage.set(''), 4000);
+        },
+      });
   }
 }

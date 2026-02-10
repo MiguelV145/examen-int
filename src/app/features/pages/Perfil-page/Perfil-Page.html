@@ -108,9 +108,10 @@
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors">⚡</span>
               <input 
                 type="text" 
+                [formControl]="skillInputCtrl"
                 placeholder="Escribe y presiona Enter (Ej: React, AWS, Docker)" 
                 class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-primary focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl font-medium"
-                (keydown.enter)="$event.preventDefault(); addSkill($event)" 
+                (keydown.enter)="addSkill($event)" 
               />
             </div>
             <div class="flex flex-wrap gap-2 min-h-[60px] p-4 bg-[#0f172a]/30 rounded-xl border border-white/5 shadow-inner">
