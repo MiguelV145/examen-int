@@ -72,10 +72,13 @@ export class RegisterPage {
 
     this.authApiService.register(registerRequest).subscribe({
       next: (response) => {
-        // Registro exitoso: guardar en store y navegar
-        this.authStore.setAuth(response);
+        // Registro exitoso: mostrar mensaje y redirigir a login
+        console.log('✅ Registro exitoso:', response.message);
         this.loading.set(false);
-        this.router.navigate(['/home']);
+        // Navegar a login para que el usuario inicie sesión
+        this.router.navigate(['/login'], { 
+          queryParams: { registered: 'true' }
+        });
       },
       error: (error: any) => {
         this.loading.set(false);

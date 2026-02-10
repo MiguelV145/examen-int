@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { AuthLoginRequest, AuthResponse } from '../../models/auth.models';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
@@ -15,8 +15,16 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(url, body);
   }
 
-  register(body: any): Observable<any> {
+  /**
+   * Register: El backend devuelve texto plano, no JSON
+   * Ejemplo: "Usuario registrado correctamente"
+   * Transformamos a { message: "..." } para uniformidad
+   */
+  register(body: any): Observable<{ message: string }> {
     const url = `${this.baseUrl}/api/auth/register`;
-    return this.http.post(url, body);
+    return this.http.post(url, body, { responseType: 'text' })
+      .pipe(
+        map(message => ({ message }))
+      );
   }
 }
