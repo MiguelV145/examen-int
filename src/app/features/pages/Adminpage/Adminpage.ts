@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable, combineLatest, of } from 'rxjs';
-import { catchError, map, shareReplay } from 'rxjs/operators';
+import { catchError, map, shareReplay, tap, switchMap } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 // Servicios
 import { AuthService } from '../../../core/services/auth/auth.service';
@@ -25,11 +26,21 @@ export class Adminpage {
   private fb = inject(FormBuilder);
   private usersApi = inject(UsersApiService);
   private asesoriasApi = inject(AsesoriasApiService);
+  private toastr = inject(ToastrService);
 
-  users$: Observable<UserProfile[]> = this.usersApi.getUsers().pipe(
+  private refetchTrigger = signal(0);
+
+  users$: Observable<UserProfile[]> = combineLatest([
+    of(null),
+    this.refetchTrigger
+  ]).pipe(
+    switchMap(() => this.usersApi.getUsers()),
     map((users) => users.map((user) => this.mapUser(user))),
     catchError((error) => {
       console.error('No se pudieron cargar usuarios.', error);
+      if (error.status === 403) {
+        this.toastr.error('No tienes permisos de administrador', 'Error 403');
+      }
       return of([]);
     }),
     shareReplay({ bufferSize: 1, refCount: true })
@@ -68,8 +79,57 @@ export class Adminpage {
   }
 
   // Placeholder methods
-  async toggleRole(user: UserProfile) {}
-  async deleteUser(user: UserProfile) {}
+  async toggleRole(user: UserProfile) {
+    if (!user.uid) return;
+
+    const userId = Number(user.uid);
+    const isProgramador = user.roles.includes('PROGRAMADOR');
+
+    // Si es programador, degradar a USER; si no, ascender a PROGRAMADOR
+    const newRoles = isProgramador 
+      ? ['USER'] 
+      : ['PROGRAMADOR', 'USER'];
+
+    const action = isProgramador ? 'Degradando' : 'Ascendiendo';
+    this.toastr.info(`${action} a ${user.displayName || user.email}...`);
+
+    this.usersApi.updateUserRoles(userId, newRoles).subscribe({
+      next: () => {
+        this.toastr.success(`Rol actualizado exitosamente`, 'Éxito');
+        this.refetchTrigger.set(this.refetchTrigger() + 1);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'No se pudo actualizar el rol';
+        this.toastr.error(msg, 'Error');
+        console.error('Error al cambiar rol:', err);
+      }
+    });
+  }
+
+  async deleteUser(user: UserProfile) {
+    if (!user.uid) return;
+
+    const confirmed = confirm(
+      `¿Estás seguro de eliminar a ${user.displayName || user.email}?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmed) return;
+
+    const userId = Number(user.uid);
+
+    this.usersApi.deleteUser(userId).subscribe({
+      next: () => {
+        this.toastr.success('Usuario eliminado exitosamente', 'Éxito');
+        this.refetchTrigger.set(this.refetchTrigger() + 1);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || 'No se pudo eliminar el usuario';
+        this.toastr.error(msg, 'Error');
+        console.error('Error al eliminar usuario:', err);
+      }
+    });
+  }
+
   openAvailabilityModal(user: UserProfile) {}
   closeAvailabilityModal() {}
   async saveAvailability() {}

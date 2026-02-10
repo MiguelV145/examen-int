@@ -23,4 +23,12 @@ export class UsersApiService {
   getUsers(): Observable<UserResponseDto[]> {
     return this.http.get<UserResponseDto[]>(this.baseUrl);
   }
+
+  updateUserRoles(userId: number, roleNames: string[]): Observable<UserResponseDto> {
+    return this.http.put<UserResponseDto>(`${this.baseUrl}/${userId}/roles`, { roleNames });
+  }
+
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${userId}`);
+  }
 }
