@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, combineLatest, of, Subject } from 'rxjs';
-import { catchError, map, shareReplay, tap, switchMap, startWith } from 'rxjs/operators';
+import { Observable, combineLatest, of, BehaviorSubject } from 'rxjs';
+import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 
 // Servicios
@@ -28,10 +28,9 @@ export class Adminpage {
   private asesoriasApi = inject(AsesoriasApiService);
   private toastr = inject(ToastrService);
 
-  private refetchTrigger$ = new Subject<void>();
+  private refetchTrigger$ = new BehaviorSubject<void>(undefined);
 
   users$: Observable<UserProfile[]> = this.refetchTrigger$.pipe(
-    startWith(null),
     switchMap(() => this.usersApi.getUsers()),
     map((users) => users.map((user) => this.mapUser(user))),
     catchError((error) => {
