@@ -71,7 +71,7 @@ onSubmit() {
   console.log('🔐 Enviando login request:', {
     email: loginRequest.email,
     passwordLength: loginRequest.password.length,
-    url: `${environment.apiUrl.replace(/\/$/, '')}/api/auth/login`
+    url: `${environment.apiUrl}/api/auth/login`
   });
 
   this.authApiService.login(loginRequest).subscribe({
