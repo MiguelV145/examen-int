@@ -102,12 +102,18 @@
                     
                     @if (loading()) {
                         <span class="loading loading-spinner loading-sm"></span>
-                        Registrando...
+                        Creando cuenta...
                     } @else {
                         Crear Cuenta
                         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     }
                 </button>
+                
+                @if (loading()) {
+                    <p class="text-xs text-gray-400 mt-2 text-center">
+                        ⏳ Esto puede tardar hasta 60 segundos si el servidor está iniciándose...
+                    </p>
+                }
             </div>
 
         </form>

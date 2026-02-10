@@ -71,6 +71,7 @@ export class RegisterPage {
     console.log('📤 Enviando al backend:', registerRequest);
     console.log('📝 Email:', email);
     console.log('📝 Password length:', password?.length);
+    console.log('⏳ Nota: Si es la primera petición, Render puede tardar 30-60 segundos en despertar...');
 
     this.authApiService.register(registerRequest).subscribe({
       next: (response: any) => {

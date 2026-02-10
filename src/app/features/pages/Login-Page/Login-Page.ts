@@ -73,6 +73,7 @@ onSubmit() {
     passwordLength: loginRequest.password.length,
     url: `${environment.apiUrl}/api/auth/login`
   });
+  console.log('⏳ Nota: Si es la primera petición, Render puede tardar 30-60 segundos en despertar...');
 
   this.authApiService.login(loginRequest).subscribe({
     next: (response) => {

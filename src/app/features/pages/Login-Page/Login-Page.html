@@ -86,11 +86,18 @@
             
             @if (loading()) {
               <span class="loading loading-spinner loading-sm"></span>
+              Iniciando sesión...
             } @else {
               Iniciar Sesión
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             }
           </button>
+          
+          @if (loading()) {
+            <p class="text-xs text-gray-400 mt-2 text-center">
+              ⏳ Esto puede tardar hasta 60 segundos si el servidor está iniciándose...
+            </p>
+          }
         </div>
 
       </form>

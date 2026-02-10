@@ -17,7 +17,7 @@ export const programadorGuard: CanActivateFn = (route, state) => {
   }
 
   // Si está autenticado, verificar si tiene rol PROGRAMADOR
-  if (authStore.hasRole('PROGRAMADOR')) {
+  if (authStore.hasRole('ROLE_PROGRAMADOR')) {
     return true;
   }
 

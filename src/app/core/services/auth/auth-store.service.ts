@@ -83,7 +83,7 @@ export class AuthStoreService {
    * Verifica si usuario es ADMIN
    */
   isAdmin(): boolean {
-    return this.hasRole('ADMIN');
+    return this.hasRole('ROLE_ADMIN');
   }
 
   /**
