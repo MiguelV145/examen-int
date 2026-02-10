@@ -1,10 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Firestore, doc, updateDoc, docData } from '@angular/fire/firestore';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
-import { from, tap, finalize, take, of, catchError } from 'rxjs';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
@@ -19,19 +17,18 @@ export class ProgrammerPage implements OnInit {
   
   private fb = inject(FormBuilder);
   public authService = inject(AuthService);
-  private firestore = inject(Firestore);
 
   // Signals UI
   loading = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  message = signal('Perfil - Funcionalidad en construcción. Conectar con backend cuando esté listo.');
   
   // Datos
   skills = signal<string[]>([]);
   previewUrl = signal<string | null>(null);
   user = this.authService.currentUser;
 
-  // 3. EXPONEMOS FORMUTILS AL HTML
   formUtils = FormUtils;
 
   profileForm = this.fb.group({
@@ -43,35 +40,7 @@ export class ProgrammerPage implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {
-    this.loadCurrentData();
-  }
-
-  loadCurrentData() {
-    const user = this.authService.currentUser();
-    if (user && user.uid) {
-      this.loading.set(true);
-      const docRef = doc(this.firestore, 'users', user.uid);
-      
-      docData(docRef).pipe(
-        take(1), 
-        tap(() => this.loading.set(false))
-      ).subscribe((data: any) => {
-        if (data) {
-          const profile = data as UserProfile;
-          this.profileForm.patchValue({
-            displayName: profile.displayName || '',
-            specialty: profile.specialty || '',
-            description: profile.description || '',
-            photoURL: profile.photoURL || ''
-          });
-          if (profile['skills'] && Array.isArray(profile['skills'])) {
-            this.skills.set(profile['skills']);
-          }
-        }
-      });
-    }
-  }
+  ngOnInit() {}
 
   addSkill(event: any) {
     const input = event.target as HTMLInputElement;
@@ -86,60 +55,25 @@ export class ProgrammerPage implements OnInit {
     this.skills.update(s => s.filter(x => x !== skill));
   }
 
-  // Lógica para guardar la imagen como texto (Base64)
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      if (file.size > 500000) { // Límite 500KB
+      if (file.size > 500000) {
         alert('La imagen es muy grande (Máx 500KB).');
         return;
       }
-
       const reader = new FileReader();
       reader.onload = (e) => { 
         const base64Image = e.target?.result as string;
         this.previewUrl.set(base64Image); 
         this.profileForm.patchValue({ photoURL: base64Image });
-        this.profileForm.get('photoURL')?.markAsDirty();
       };
       reader.readAsDataURL(file);
     }
   }
 
   saveProfile() {
-    if (this.profileForm.invalid) {
-      this.profileForm.markAllAsTouched();
-      return;
-    }
-    
-    const user = this.authService.currentUser();
-    if (!user || !user.uid) return;
-
-    this.loading.set(true);
-    this.successMessage.set('');
-    this.errorMessage.set('');
-
-    const docRef = doc(this.firestore, 'users', user.uid);
-    
-    // Unimos los datos del form con los skills
-    const dataToUpdate = { 
-      ...this.profileForm.value, 
-      skills: this.skills(),
-      // Aseguramos que la foto vaya, si no hay nueva, va la que ya estaba
-      photoURL: this.profileForm.value.photoURL || '' 
-    };
-
-    from(updateDoc(docRef, dataToUpdate)).pipe(
-      tap(() => {
-        this.successMessage.set('¡Perfil actualizado con éxito!');
-        setTimeout(() => this.successMessage.set(''), 3000);
-      }),
-      catchError((error) => {
-        console.error(error);
-        this.errorMessage.set('Error al guardar. Intenta con una imagen más liviana.');
-        return of(null);
-      }),
-      finalize(() => this.loading.set(false))
-    ).subscribe();
+    this.successMessage.set('Funcionalidad en construcción - Conectar con backend cuando esté listo.');
+    setTimeout(() => this.successMessage.set(''), 3000);
   }
 }

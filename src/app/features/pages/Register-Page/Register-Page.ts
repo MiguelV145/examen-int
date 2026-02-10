@@ -31,9 +31,10 @@ export class RegisterPage {
 
   constructor() {
     this.registerForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]]
+      passwordConfirm: ['', [Validators.required]]
     }, {
       validators: this.passwordMatchValidator
     });
@@ -42,10 +43,10 @@ export class RegisterPage {
   // Validador personalizado para contraseñas
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
-    const confirmPassword = form.get('confirmPassword');
+    const passwordConfirm = form.get('passwordConfirm');
 
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
+    if (password && passwordConfirm && password.value !== passwordConfirm.value) {
+      passwordConfirm.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
     return null;
@@ -60,15 +61,13 @@ export class RegisterPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password } = this.registerForm.value;
-    
-    // Generar username a partir del email (parte antes de @)
-    const username = email.split('@')[0];
+    const { username, email, password } = this.registerForm.value;
     
     const registerRequest: AuthRegisterRequest = {
       username: username,
       email: email,
-      password: password
+      password: password,
+      passwordConfirm: password
     };
 
     this.authApiService.register(registerRequest).subscribe({

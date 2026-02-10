@@ -52,14 +52,20 @@ export class AuthStoreService {
   }
 
   /**
-   * Logout: limpia señales y localStorage
+   * Logout: limpia señales y localStorage (ambas keys)
    */
   logout(): void {
     this.token.set(null);
     this.user.set(null);
     this.roles.set([]);
+    
+    // Borrar todas las variaciones de token y user
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('current_user');
+    localStorage.removeItem('refresh_token'); // Limpieza adicional si existe
+    
     this.router.navigate(['/login']);
   }
 
@@ -78,7 +84,9 @@ export class AuthStoreService {
   }
 
   /**
-   * Persiste token y usuario en localStorage
+   * Persiste token y usuario en localStorage con dos keys cada uno (compatibilidad)
+   * Token: 'auth_token' (nuevo) y 'access_token' (viejo)
+   * User: 'auth_user' (nuevo) y 'current_user' (viejo)
    */
   private persistToStorage(): void {
     const currentToken = this.token();
@@ -86,18 +94,24 @@ export class AuthStoreService {
 
     if (currentToken) {
       localStorage.setItem('auth_token', currentToken);
+      localStorage.setItem('access_token', currentToken); // Backwards compatibility
     }
     if (currentUser) {
-      localStorage.setItem('auth_user', JSON.stringify(currentUser));
+      const userJson = JSON.stringify(currentUser);
+      localStorage.setItem('auth_user', userJson);
+      localStorage.setItem('current_user', userJson); // Backwards compatibility
     }
   }
 
   /**
-   * Carga token y usuario desde localStorage
+   * Carga token y usuario desde localStorage (intenta ambas keys para compatibilidad)
    */
   private loadFromStorage(): void {
-    const token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('auth_user');
+    // Intentar cargar token desde 'auth_token' o 'access_token'
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('access_token');
+    
+    // Intentar cargar user desde 'auth_user' o 'current_user'
+    const userStr = localStorage.getItem('auth_user') || localStorage.getItem('current_user');
 
     if (token) {
       this.token.set(token);

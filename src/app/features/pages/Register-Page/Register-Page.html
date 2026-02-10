@@ -26,6 +26,29 @@
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
             
             <div class="form-control">
+                <label class="label pl-1 pt-0" for="username">
+                    <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Nombre de Usuario</span>
+                </label>
+                <div class="relative group">
+                    <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">👤</span>
+                    <input 
+                        id="username"
+                        type="text" 
+                        autocomplete="username"
+                        placeholder="mi_usuario" 
+                        formControlName="username"
+                        class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
+                        [class.input-error]="formUtils.isValidField(registerForm, 'username')" 
+                    />
+                </div>
+                @if (formUtils.isValidField(registerForm, 'username')) {
+                    <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
+                        <span>• {{ formUtils.getFieldError(registerForm, 'username') }}</span>
+                    </div>
+                }
+            </div>
+            
+            <div class="form-control">
                 <label class="label pl-1 pt-0" for="email">
                     <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Correo Electrónico</span>
                 </label>
@@ -72,24 +95,24 @@
             </div>
 
             <div class="form-control">
-                <label class="label pl-1 pt-0" for="confirmPassword">
+                <label class="label pl-1 pt-0" for="passwordConfirm">
                     <span class="label-text text-gray-300 font-bold text-xs uppercase tracking-wider">Confirmar Contraseña</span>
                 </label>
                 <div class="relative group">
                     <span aria-hidden="true" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-400 transition-colors">🔐</span>
                     <input 
-                        id="confirmPassword"
+                        id="passwordConfirm"
                         type="password" 
                         autocomplete="new-password"
                         placeholder="******" 
-                        formControlName="confirmPassword"
+                        formControlName="passwordConfirm"
                         class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-violet-500 focus:bg-[#0f172a] transition-all placeholder:text-gray-600 rounded-xl"
-                        [class.input-error]="formUtils.isValidField(registerForm, 'confirmPassword')" 
+                        [class.input-error]="formUtils.isValidField(registerForm, 'passwordConfirm')" 
                     />
                 </div>
-                @if (formUtils.isValidField(registerForm, 'confirmPassword')) {
+                @if (formUtils.isValidField(registerForm, 'passwordConfirm')) {
                     <div aria-live="polite" class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
-                        <span>• {{ formUtils.getFieldError(registerForm, 'confirmPassword') }}</span>
+                        <span>• {{ formUtils.getFieldError(registerForm, 'passwordConfirm') }}</span>
                     </div>
                 }
             </div>

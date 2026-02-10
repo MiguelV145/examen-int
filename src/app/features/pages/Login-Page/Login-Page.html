@@ -32,24 +32,24 @@
         
         <div class="form-control">
           <label class="label pl-1 pb-1">
-            <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Correo electrónico</span>
+            <span class="label-text text-gray-400 font-bold text-xs uppercase tracking-wider">Email o Usuario</span>
           </label>
           <div class="relative group">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition-colors pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
             </span>
             <input 
-              type="email" 
-              formControlName="email"
-              placeholder="nombre@ejemplo.com" 
+              type="text" 
+              formControlName="identifier"
+              placeholder="correo@ejemplo.com o usuario" 
               class="input bg-[#0f172a]/50 border-white/10 text-white w-full pl-11 focus:border-cyan-500 focus:bg-[#0f172a] focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-gray-600 rounded-xl font-medium h-12"
-              [class.input-error]="formUtils.isValidField(loginForm, 'email')"
+              [class.input-error]="formUtils.isValidField(loginForm, 'identifier')"
             />
           </div>
-          @if (formUtils.isValidField(loginForm, 'email')) {
+          @if (formUtils.isValidField(loginForm, 'identifier')) {
             <div class="text-red-400 text-xs mt-1.5 ml-1 flex items-center gap-1 font-medium animate-fade-in">
                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-               <span>{{ formUtils.getFieldError(loginForm, 'email') }}</span>
+               <span>{{ formUtils.getFieldError(loginForm, 'identifier') }}</span>
             </div>
           }
         </div>

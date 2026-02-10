@@ -3,7 +3,7 @@
  */
 
 export interface AuthLoginRequest {
-  emailOrUsername: string;
+  identifier: string;
   password: string;
 }
 
@@ -11,6 +11,7 @@ export interface AuthRegisterRequest {
   username: string;
   email: string;
   password: string;
+  passwordConfirm: string;
 }
 
 export interface AuthResponse {

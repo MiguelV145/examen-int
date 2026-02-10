@@ -3,12 +3,14 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AuthStoreService } from '../services/auth/auth-store.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 /**
  * Interceptor funcional para JWT
- * - Agrega header Authorization: Bearer <token> en todas las requests (excepto login/register)
+ * - Agrega header Authorization: Bearer <token> solo a requests a environment.apiUrl
  * - NO usa withCredentials
  * - Maneja 401 haciendo logout
+ * - Excepta URLs públicas: /api/auth/login y /api/auth/register
  */
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const authStore = inject(AuthStoreService);
@@ -18,8 +20,11 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const publicUrls = ['/api/auth/login', '/api/auth/register'];
   const isPublicUrl = publicUrls.some((url) => req.url.includes(url));
 
-  // Si es URL pública, pasar sin modificar
-  if (isPublicUrl) {
+  // Verificar si la request est hacia environment.apiUrl
+  const isApiUrl = req.url.startsWith(environment.apiUrl);
+
+  // Si es URL pública o no es hacia nuestra API, pasar sin modificar
+  if (isPublicUrl || !isApiUrl) {
     return next(req);
   }
 

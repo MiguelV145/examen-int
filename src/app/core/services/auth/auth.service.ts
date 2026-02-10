@@ -1,192 +1,106 @@
-import { Injectable, inject, signal, effect } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, Signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, BehaviorSubject } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { Observable, tap, catchError, throwError } from 'rxjs';
+import { AuthApiService } from '../api/auth-api.service';
+import { AuthStoreService } from './auth-store.service';
+import { AuthResponse, User } from '../../models/auth.models';
 
-// DTOs del backend Spring Boot
-export interface LoginDTO {
-  email: string;
-  password: string;
-}
-
-export interface RegisterDTO {
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-export interface BackendUserDto {
-  id: number;
-  email: string;
-  roles: string[]; // ADMIN | PROGRAMADOR | USER
-  profileId?: number;
-  portfolioId?: number;
-  displayName?: string;
-  photoURL?: string; // Para compatibilidad con Firebase
-  uid?: string; // Para compatibilidad: será id.toString()
-}
-
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  user: BackendUserDto;
-}
-
+/**
+ * AuthService - WRAPPER unificado para autenticación
+ * 
+ * Este servicio envuelve AuthApiService + AuthStoreService para dar
+ * compatibilidad hacia atrás con código legado que espera:
+ * - login(email, password)
+ * - currentUser signal
+ * - isAuthenticated() método
+ * - logout()
+ * - hasRole()
+ * 
+ * Internamente usa AuthStoreService para gestionar estado y AuthApiService
+ * para HTTP, sin acceso directo a access_token ni uso de email en backend.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private http = inject(HttpClient);
+  private authApi = inject(AuthApiService);
+  private authStore = inject(AuthStoreService);
   private router = inject(Router);
 
-  // Signal para el usuario actual
-  currentUser = signal<BackendUserDto | null>(null);
+  /**
+   * Signal que expone el usuario actual 
+   * (wrapper del authStore.user para compatibilidad)
+   */
+  currentUser: Signal<User | null> = computed(() => this.authStore.user());
 
-  // Observable para compatibilidad con componentes que esperan user$ (Firebase legacy)
-  private userSubject = new BehaviorSubject<{uid?: string; email?: string} | null>(null);
-  user$ = this.userSubject.asObservable();
-
-  constructor() {
-    // Cargar usuario desde localStorage al iniciar
-    this.loadUserFromStorage();
-
-    // Emitir cambios de currentUser en user$ para compatibilidad
-    effect(() => {
-      const user = this.currentUser();
-      if (user) {
-        this.userSubject.next({
-          uid: user.uid || user.id.toString(),
-          email: user.email
-        });
-      } else {
-        this.userSubject.next(null);
-      }
-    });
-  }
+  constructor() {}
 
   /**
-   * Login en el backend Spring Boot
-   * Guarda accessToken, refreshToken y usuario en localStorage
+   * Login - WRAPPER que acepta email o identifier
+   * Convierte {email, password} a {identifier, password} para el backend
+   * Guarda el token y usuario en AuthStoreService
+   * 
+   * @param emailOrIdentifier Email o username/identifier
+   * @param password Contraseña
+   * @returns Observable<AuthResponse>
    */
-  login(email: string, password: string): Observable<LoginResponse> {
-    const dto: LoginDTO = { email, password };
-    return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, dto)
-      .pipe(
-        tap((response) => {
-          this._saveAuthData(response);
-        }),
-        catchError((error) => {
-          console.error('Login error:', error);
-          return throwError(() => error);
-        })
-      );
-  }
+  login(emailOrIdentifier: string, password: string): Observable<AuthResponse> {
+    const identifier = (emailOrIdentifier || '').trim();
+    
+    if (!identifier || !password) {
+      return throwError(() => new Error('Email/Usuario y contraseña son requeridos'));
+    }
 
-  /**
-   * Registro en el backend
-   * Retorna un string con el mensaje
-   */
-  register(email: string, password: string, confirmPassword: string): Observable<string> {
-    const dto: RegisterDTO = { email, password, confirmPassword };
-    return this.http
-      .post(`${environment.apiUrl}/auth/register`, dto, { responseType: 'text' })
-      .pipe(
-        catchError((error) => {
-          console.error('Register error:', error);
-          return throwError(() => error);
-        })
-      );
+    // Llamar a AuthApiService con identifier (NO email)
+    return this.authApi.login({ identifier, password }).pipe(
+      tap((response) => {
+        // AuthStoreService maneja la persistencia automáticamente
+        this.authStore.setAuth(response);
+        console.log('✅ Login exitoso mediante AuthService wrapper');
+      }),
+      catchError((error) => {
+        console.error('❌ Error en login:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
    * Verifica si el usuario está autenticado
-   * Checa que el token exista y no haya expirado
+   * Delega al AuthStoreService
    */
   isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-
-    // Decodificar JWT sin librerías: sección payload (índice 1)
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      const exp = decoded.exp;
-
-      if (!exp) {
-        return false;
-      }
-
-      // exp está en segundos, Date.now() en milisegundos
-      const now = Date.now() / 1000;
-      return exp > now;
-    } catch (error) {
-      console.error('Error decoding JWT:', error);
-      return false;
-    }
+    return this.authStore.isAuthenticated();
   }
 
   /**
-   * Verifica si el usuario tiene un rol específico
-   */
-  hasRole(role: string): boolean {
-    const user = this.currentUser();
-    return user ? user.roles.includes(role) : false;
-  }
-
-  /**
-   * Logout: limpia localStorage y actualiza signal
-   */
-  logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('auth_user');
-    this.currentUser.set(null);
-    this.router.navigate(['/login']);
-  }
-
-  /**
-   * Obtiene el access token del localStorage
+   * Obtiene el token del store
+   * (NO accede directamente a access_token)
    */
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return this.authStore.token();
   }
 
   /**
-   * Private: Guarda tokens y usuario en localStorage y actualiza signal
+   * Logout - Limpia sesión y redirige a login
+   * Delega al AuthStoreService que limpia todas las claves
    */
-  private _saveAuthData(response: LoginResponse): void {
-    localStorage.setItem('access_token', response.accessToken);
-    localStorage.setItem('refresh_token', response.refreshToken);
-    
-    // Agregar uid como string para compatibilidad
-    const userWithCompat: BackendUserDto = {
-      ...response.user,
-      uid: response.user.id.toString()
-    };
-    
-    localStorage.setItem('auth_user', JSON.stringify(userWithCompat));
-    this.currentUser.set(userWithCompat);
+  logout(): void {
+    this.authStore.logout();
+    // AuthStoreService ya redirige a /login
   }
 
   /**
-   * Private: Carga usuario desde localStorage al iniciar la app
+   * Verifica si tiene un rol específico
    */
-  private loadUserFromStorage(): void {
-    const userStr = localStorage.getItem('auth_user');
+  hasRole(role: string): boolean {
+    return this.authStore.hasRole(role);
+  }
 
-    if (userStr && this.isAuthenticated()) {
-      try {
-        const user: BackendUserDto = JSON.parse(userStr);
-        this.currentUser.set(user);
-      } catch (error) {
-        console.error('Error parsing user from storage:', error);
-        this.logout();
-      }
-    }
+  /**
+   * Verifica si es ADMIN
+   */
+  isAdmin(): boolean {
+    return this.authStore.isAdmin();
   }
 }

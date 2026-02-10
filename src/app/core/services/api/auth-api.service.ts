@@ -13,11 +13,11 @@ import { AuthLoginRequest, AuthRegisterRequest, AuthResponse } from '../../model
 })
 export class AuthApiService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiBaseUrl}/api/auth`;
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   /**
    * POST /api/auth/login
-   * @param dto Credenciales (emailOrUsername, password)
+   * @param dto Credenciales con identifier (email o username) y password
    * @returns Observable<AuthResponse> con token, userId, username, email, roles
    */
   login(dto: AuthLoginRequest): Observable<AuthResponse> {
@@ -26,7 +26,7 @@ export class AuthApiService {
 
   /**
    * POST /api/auth/register
-   * @param dto Nuevas credenciales (username, email, password)
+   * @param dto Nuevas credenciales (username, email, password, passwordConfirm)
    * @returns Observable<AuthResponse> con token, userId, username, email, roles
    */
   register(dto: AuthRegisterRequest): Observable<AuthResponse> {

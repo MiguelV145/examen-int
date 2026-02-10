@@ -6,6 +6,7 @@ import { AuthApiService } from '../../../core/services/api/auth-api.service';
 import { AuthStoreService } from '../../../core/services/auth/auth-store.service';
 import { AuthLoginRequest } from '../../../core/models/auth.models';
 import { FormUtils } from '../../share/Formutils/Formutils';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login-page',
@@ -31,7 +32,7 @@ export class LoginPage {
 
   constructor() {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      identifier: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -53,20 +54,43 @@ export class LoginPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password } = this.loginForm.value;
+    // Obtener valores del formulario
+    const rawValues = this.loginForm.getRawValue();
+    const identifier = (rawValues.identifier || '').trim();
+    const password = rawValues.password || '';
+
+    // Validación adicional (no debería pasar si form es válido, pero por seguridad)
+    if (!identifier || !password) {
+      this.errorMessage.set('Email/Usuario y contraseña son requeridos');
+      this.isLoggingIn = false;
+      this.loading.set(false);
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    // Crear payload con identifier
     const loginRequest: AuthLoginRequest = {
-      emailOrUsername: email,
+      identifier: identifier,
       password: password
     };
 
+    // Console.log para debugging (sin mostrar password real)
+    console.log('🔐 Enviando login request:', { 
+      identifier: loginRequest.identifier, 
+      passwordLength: loginRequest.password.length,
+      url: `${environment.apiUrl}/api/auth/login`
+    });
+
     this.authApiService.login(loginRequest).subscribe({
       next: (response) => {
+        console.log('✅ Login exitoso:', { userId: response.userId, username: response.username });
         this.authStore.setAuth(response);
         this.isLoggingIn = false;
         this.loading.set(false);
         this.router.navigate(['/home']);
       },
       error: (error: any) => {
+        console.error('❌ Error en login:', error);
         this.isLoggingIn = false;
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
@@ -75,18 +99,25 @@ export class LoginPage {
   }
 
   private getErrorMessage(error: any): string {
+    // Mostrar error detallado del backend para debugging
+    if (error?.error?.message) {
+      console.error('📋 Respuesta del backend:', error.error);
+    }
+
     if (error?.status) {
       switch (error.status) {
-        case 401:
-          return 'Credenciales inválidas. Verifica tu usuario/email y contraseña.';
         case 400:
-          return error.error?.message || 'Datos inválidos. Por favor, revisa los campos.';
+          // Error de validación del backend (email vacío, formato inválido, etc.)
+          const backendMsg = error.error?.message || error.error?.details || 'Datos inválidos';
+          return `Validación: ${backendMsg}`;
+        case 401:
+          return 'Credenciales inválidas. Verifica tu email y contraseña.';
         case 404:
           return 'Usuario no encontrado. Por favor, regístrate primero.';
         case 500:
           return 'Error del servidor. Intenta más tarde.';
         default:
-          return error.error?.message || `Error: ${error.statusText || 'Error desconocido'}`;
+          return error.error?.message || `Error ${error.status}: ${error.statusText || 'Error desconocido'}`;
       }
     }
 
@@ -97,3 +128,4 @@ export class LoginPage {
     return error?.message || 'Error en el login. Intenta de nuevo.';
   }
 }
+
