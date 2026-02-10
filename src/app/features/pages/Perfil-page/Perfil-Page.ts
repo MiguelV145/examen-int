@@ -71,7 +71,7 @@ export class ProgrammerPage implements OnInit {
     });
   }
 
-  addSkill(event: KeyboardEvent) {
+  addSkill(event: Event) {
     event.preventDefault();
     const value = (this.skillInputCtrl.value ?? '').trim();
     if (!value) return;
