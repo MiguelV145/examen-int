@@ -8,7 +8,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { authTokenInterceptor } from './core/interceptors/auth-token.interceptor';
 
 
 export const appConfig: ApplicationConfig = {
@@ -25,7 +25,7 @@ export const appConfig: ApplicationConfig = {
       })),
     provideHttpClient(
       withFetch(), // habilita HttpClient usando la API Fetch
-      withInterceptors([authInterceptor]) // Agrega el interceptor de autenticación
+      withInterceptors([authTokenInterceptor]) // Agrega el interceptor JWT
     ),
     provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),

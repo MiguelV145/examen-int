@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, signal, HostListener } from
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { AuthApiService } from '../../../core/services/api/auth-api.service';
+import { AuthStoreService } from '../../../core/services/auth/auth-store.service';
+import { AuthLoginRequest } from '../../../core/models/auth.models';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
@@ -15,7 +17,8 @@ import { FormUtils } from '../../share/Formutils/Formutils';
 export class LoginPage {
   
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private authApiService = inject(AuthApiService);
+  private authStore = inject(AuthStoreService);
   private router = inject(Router);
   
   loading = signal(false);
@@ -24,7 +27,6 @@ export class LoginPage {
   loginForm: FormGroup;
   formUtils = FormUtils;
 
-  // Bandera para saber si hay un proceso crítico en curso
   private isLoggingIn = false;
 
   constructor() {
@@ -34,42 +36,37 @@ export class LoginPage {
     });
   }
 
-  /**
-   * 🛑 ESTO ES LA MAGIA:
-   * Detecta si el usuario intenta recargar (F5) o cerrar la pestaña.
-   * Si isLoggingIn es true, el navegador mostrará una alerta nativa de advertencia.
-   */
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: any) {
     if (this.isLoggingIn) {
-      // Esto dispara la alerta del navegador "Es posible que los cambios no se guarden"
       $event.returnValue = true;
     }
   }
 
-  // --- LOGIN CON BACKEND SPRING BOOT (JWT) ---
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    // 1. Activamos el bloqueo
     this.isLoggingIn = true;
     this.loading.set(true);
     this.errorMessage.set(null);
 
     const { email, password } = this.loginForm.value;
+    const loginRequest: AuthLoginRequest = {
+      emailOrUsername: email,
+      password: password
+    };
 
-    this.authService.login(email, password).subscribe({
-      next: () => {
-        // 2. Login exitoso: Desactivamos el bloqueo para poder navegar
+    this.authApiService.login(loginRequest).subscribe({
+      next: (response) => {
+        this.authStore.setAuth(response);
         this.isLoggingIn = false;
         this.loading.set(false);
         this.router.navigate(['/home']);
       },
       error: (error: any) => {
-        // 3. Error: Desactivamos el bloqueo para que el usuario pueda reintentar
         this.isLoggingIn = false;
         this.loading.set(false);
         this.errorMessage.set(this.getErrorMessage(error));
@@ -78,7 +75,6 @@ export class LoginPage {
   }
 
   private getErrorMessage(error: any): string {
-    // Si es un error HTTP del backend
     if (error?.status) {
       switch (error.status) {
         case 401:
@@ -94,12 +90,10 @@ export class LoginPage {
       }
     }
 
-    // Si es un error de red
     if (error?.message?.includes('Network')) {
       return 'Error de conexión. Verifica tu conexión a internet.';
     }
 
-    // Error genérico
-    return error?.message || 'Error desconocido. Intenta de nuevo.';
+    return error?.message || 'Error en el login. Intenta de nuevo.';
   }
 }

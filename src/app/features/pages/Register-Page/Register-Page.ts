@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { AuthApiService } from '../../../core/services/api/auth-api.service';
+import { AuthStoreService } from '../../../core/services/auth/auth-store.service';
+import { AuthRegisterRequest } from '../../../core/models/auth.models';
 import { FormUtils } from '../../share/Formutils/Formutils';
 
 @Component({
@@ -15,7 +17,8 @@ import { FormUtils } from '../../share/Formutils/Formutils';
 export class RegisterPage {
   
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private authApiService = inject(AuthApiService);
+  private authStore = inject(AuthStoreService);
   private router = inject(Router);
 
   // Estados UI
@@ -57,15 +60,23 @@ export class RegisterPage {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password, confirmPassword } = this.registerForm.value;
+    const { email, password } = this.registerForm.value;
+    
+    // Generar username a partir del email (parte antes de @)
+    const username = email.split('@')[0];
+    
+    const registerRequest: AuthRegisterRequest = {
+      username: username,
+      email: email,
+      password: password
+    };
 
-    this.authService.register(email, password, confirmPassword).subscribe({
+    this.authApiService.register(registerRequest).subscribe({
       next: (response) => {
-        // Registro exitoso: redirigir a login
+        // Registro exitoso: guardar en store y navegar
+        this.authStore.setAuth(response);
         this.loading.set(false);
-        this.router.navigate(['/login'], {
-          queryParams: { registered: 'true' }
-        });
+        this.router.navigate(['/home']);
       },
       error: (error: any) => {
         this.loading.set(false);
@@ -75,7 +86,6 @@ export class RegisterPage {
   }
 
   private getErrorMessage(error: any): string {
-    // Si es un error HTTP del backend
     if (error?.status) {
       switch (error.status) {
         case 400:
@@ -89,12 +99,10 @@ export class RegisterPage {
       }
     }
 
-    // Si es un error de red
     if (error?.message?.includes('Network')) {
       return 'Error de conexión. Verifica tu conexión a internet.';
     }
 
-    // Error genérico
     return error?.message || 'Error en el registro. Intenta de nuevo.';
   }
 }
