@@ -45,25 +45,24 @@ export class AuthService {
    * @returns Observable<AuthResponse>
    */
   login(emailOrIdentifier: string, password: string): Observable<AuthResponse> {
-    const identifier = (emailOrIdentifier || '').trim();
-    
-    if (!identifier || !password) {
-      return throwError(() => new Error('Email/Usuario y contraseña son requeridos'));
-    }
+  const email = (emailOrIdentifier || '').trim();
 
-    // Llamar a AuthApiService con identifier (NO email)
-    return this.authApi.login({ identifier, password }).pipe(
-      tap((response) => {
-        // AuthStoreService maneja la persistencia automáticamente
-        this.authStore.setAuth(response);
-        console.log('✅ Login exitoso mediante AuthService wrapper');
-      }),
-      catchError((error) => {
-        console.error('❌ Error en login:', error);
-        return throwError(() => error);
-      })
-    );
+  if (!email || !password) {
+    return throwError(() => new Error('Email y contraseña son requeridos'));
   }
+
+  return this.authApi.login({ email, password }).pipe(
+    tap((response) => {
+      this.authStore.setAuth(response);
+      console.log('✅ Login exitoso mediante AuthService');
+    }),
+    catchError((error) => {
+      console.error('❌ Error en login:', error);
+      return throwError(() => error);
+    })
+  );
+}
+
 
   /**
    * Verifica si el usuario está autenticado

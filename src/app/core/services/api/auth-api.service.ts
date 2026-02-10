@@ -1,50 +1,22 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { AuthLoginRequest, AuthRegisterRequest, AuthResponse } from '../../models/auth.models';
+import { AuthLoginRequest, AuthResponse } from '../../models/auth.models';
+import { Observable } from 'rxjs';
 
-/**
- * Servicio API para autenticación con backend Spring Boot
- * Solo se encarga de hacer HTTP calls, NO gestiona estado
- * 
- * Nota: El backend espera {email, password} pero recibimos {identifier}
- * Transformamos identifier → email para compatibilidad con backend
- */
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthApiService {
-  private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly baseUrl = environment.apiUrl.replace(/\/$/, '');
 
-  /**
-   * POST /api/auth/login
-   * 
-   * Recibe: {identifier, password}
-   * Envía al backend: {email, password} (identifier se convierte a email)
-   * 
-   * @param dto Credenciales con identifier (email o username) y password
-   * @returns Observable<AuthResponse> con token, userId, username, email, roles
-   */
-  login(dto: AuthLoginRequest): Observable<AuthResponse> {
-    // Transformar identifier → email para que el backend lo entienda
-    // El backend espera {email, password}, no {identifier, password}
-    const backendPayload = {
-      email: dto.identifier,
-      password: dto.password
-    };
-    
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, backendPayload);
+  constructor(private http: HttpClient) {}
+
+  login(body: AuthLoginRequest): Observable<AuthResponse> {
+    const url = `${this.baseUrl}/api/auth/login`; // <- un solo /api
+    return this.http.post<AuthResponse>(url, body);
   }
 
-  /**
-   * POST /api/auth/register
-   * @param dto Nuevas credenciales (username, email, password, passwordConfirm)
-   * @returns Observable<AuthResponse> con token, userId, username, email, roles
-   */
-  register(dto: AuthRegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, dto);
+  register(body: any): Observable<any> {
+    const url = `${this.baseUrl}/api/auth/register`;
+    return this.http.post(url, body);
   }
 }
-

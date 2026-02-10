@@ -3,7 +3,7 @@
  */
 
 export interface AuthLoginRequest {
-  identifier: string;
+  email: string;
   password: string;
 }
 

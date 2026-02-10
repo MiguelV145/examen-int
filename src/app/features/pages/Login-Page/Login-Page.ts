@@ -44,59 +44,52 @@ export class LoginPage {
     }
   }
 
-  onSubmit() {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
+onSubmit() {
+  if (this.loginForm.invalid) {
+    this.loginForm.markAllAsTouched();
+    return;
+  }
 
-    this.isLoggingIn = true;
-    this.loading.set(true);
-    this.errorMessage.set(null);
+  this.isLoggingIn = true;
+  this.loading.set(true);
+  this.errorMessage.set(null);
 
-    // Obtener valores del formulario
-    const rawValues = this.loginForm.getRawValue();
-    const identifier = (rawValues.identifier || '').trim();
-    const password = rawValues.password || '';
+  const rawValues = this.loginForm.getRawValue();
+  const email = (rawValues.identifier || '').trim(); // puedes mantener el input llamándose "identifier"
+  const password = rawValues.password || '';
 
-    // Validación adicional (no debería pasar si form es válido, pero por seguridad)
-    if (!identifier || !password) {
-      this.errorMessage.set('Email/Usuario y contraseña son requeridos');
+  if (!email || !password) {
+    this.errorMessage.set('Email y contraseña son requeridos');
+    this.isLoggingIn = false;
+    this.loading.set(false);
+    this.loginForm.markAllAsTouched();
+    return;
+  }
+
+  const loginRequest = { email, password };
+
+  console.log('🔐 Enviando login request:', {
+    email: loginRequest.email,
+    passwordLength: loginRequest.password.length,
+    url: `${environment.apiUrl.replace(/\/$/, '')}/api/auth/login`
+  });
+
+  this.authApiService.login(loginRequest).subscribe({
+    next: (response) => {
+      console.log('✅ Login exitoso:', { userId: response.userId, username: response.username });
+      this.authStore.setAuth(response);
       this.isLoggingIn = false;
       this.loading.set(false);
-      this.loginForm.markAllAsTouched();
-      return;
+      this.router.navigate(['/home']);
+    },
+    error: (error: any) => {
+      console.error('❌ Error en login:', error);
+      this.isLoggingIn = false;
+      this.loading.set(false);
+      this.errorMessage.set(this.getErrorMessage(error));
     }
-
-    // Crear payload con identifier
-    const loginRequest: AuthLoginRequest = {
-      identifier: identifier,
-      password: password
-    };
-
-    // Console.log para debugging (sin mostrar password real)
-    console.log('🔐 Enviando login request:', { 
-      identifier: loginRequest.identifier, 
-      passwordLength: loginRequest.password.length,
-      url: `${environment.apiUrl}/api/auth/login`
-    });
-
-    this.authApiService.login(loginRequest).subscribe({
-      next: (response) => {
-        console.log('✅ Login exitoso:', { userId: response.userId, username: response.username });
-        this.authStore.setAuth(response);
-        this.isLoggingIn = false;
-        this.loading.set(false);
-        this.router.navigate(['/home']);
-      },
-      error: (error: any) => {
-        console.error('❌ Error en login:', error);
-        this.isLoggingIn = false;
-        this.loading.set(false);
-        this.errorMessage.set(this.getErrorMessage(error));
-      }
-    });
-  }
+  });
+}
 
   private getErrorMessage(error: any): string {
     // Mostrar error detallado del backend para debugging
