@@ -5,7 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { UserProfile } from '../../share/Interfaces/Interfaces-Users';
 import { FormUtils } from '../../share/Formutils/Formutils';
-import { LinkPreviewService } from '../../../core/services/link-preview.service.ts';
+import { LinkPreviewService } from '../../../core/services/link-preview.service';
 import { Observable, of } from 'rxjs';
 
 @Component({
